@@ -22,12 +22,15 @@ export const AuthScreen: React.FC = () => {
   const { setAuth } = useAuthStore();
   const { showToast } = useToast();
 
-  const [step, setStep] = useState<'phone' | 'otp' | 'onboarding'>('phone');
+  const [step, setStep] = useState<'phone' | 'otp' | 'two_step_pin' | 'onboarding'>('phone');
 
   // Phone form state
   const [countryCode, setCountryCode] = useState('+998');
   const [phoneNumber, setPhoneNumber] = useState('88 900 80 81');
   const [isLoading, setIsLoading] = useState(false);
+
+  // 2-Step PIN state
+  const [twoStepPinInput, setTwoStepPinInput] = useState('');
 
   // Challenge state
   const [challengeId, setChallengeId] = useState('');
@@ -153,42 +156,68 @@ export const AuthScreen: React.FC = () => {
       localStorage.setItem('becugram_token', res.accessToken);
       setAuthToken(res.accessToken);
 
-      // Check if user profile is already completed (name + username >= 5 chars)
       const user = res.user;
-      const isComplete = Boolean(
-        user &&
-        user.isProfileComplete &&
-        user.displayName &&
-        user.displayName.trim().length >= 2 &&
-        user.username &&
-        user.username.trim().length >= 5
-      );
+      setPendingUser(user);
 
-      if (!isComplete || res.isNewUser) {
-        // Needs onboarding: Prompt user for Name & Username (min 5 chars)
-        setPendingUser(user);
-        setDisplayName(user?.displayName || '');
-        setUsername(user?.username || '');
-        setBio(user?.bio || '');
-        setAvatarUrl(user?.avatar || '');
-        setStep('onboarding');
-        showToast('Iltimos, ismingiz va foydalanuvchi nomingizni kiriting.', 'info');
-      } else {
-        // Existing user with complete profile -> enter app directly
-        confetti({
-          particleCount: 80,
-          spread: 60,
-          origin: { y: 0.6 },
-        });
-        showToast('BecuGram tizimiga xush kelibsiz!', 'success');
-        setAuth(user, res.accessToken);
+      // Check if 2-Step PIN verification is enabled for this phone number
+      const savedPin = localStorage.getItem(`becugram_2step_pin_${fullPhone}`) || (user as any)?.twoStepPin;
+      if (savedPin) {
+        setStep('two_step_pin');
+        setTwoStepPinInput('');
+        showToast('Ikki bosqichli autentifikatsiya: Maxfiy PIN kodni kiriting.', 'info');
+        return;
       }
+
+      finishAuthFlow(user, res.isNewUser);
     } catch (err: any) {
       showToast(err.message || 'Kiritilgan tasdiqlash kodi noto\'g\'ri.', 'error');
       setOtpDigits(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Complete Auth Flow
+  const finishAuthFlow = (user: User, isNewUser?: boolean) => {
+    const isComplete = Boolean(
+      user &&
+      user.isProfileComplete &&
+      user.displayName &&
+      user.displayName.trim().length >= 2 &&
+      user.username &&
+      user.username.trim().length >= 5
+    );
+
+    if (!isComplete || isNewUser) {
+      setPendingUser(user);
+      setDisplayName(user?.displayName || '');
+      setUsername(user?.username || '');
+      setBio(user?.bio || '');
+      setAvatarUrl(user?.avatar || '');
+      setStep('onboarding');
+      showToast('Iltimos, ismingiz va foydalanuvchi nomingizni kiriting.', 'info');
+    } else {
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.6 },
+      });
+      showToast('BecuGram tizimiga xush kelibsiz!', 'success');
+      setAuth(user, authToken || localStorage.getItem('becugram_token') || '');
+    }
+  };
+
+  // Verify 2-Step PIN
+  const handleVerifyPin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const savedPin = localStorage.getItem(`becugram_2step_pin_${fullPhone}`) || (pendingUser as any)?.twoStepPin;
+    if (twoStepPinInput.trim() === savedPin) {
+      if (pendingUser) {
+        finishAuthFlow(pendingUser);
+      }
+    } else {
+      showToast('Kiritilgan PIN kod noto‘g‘ri. Qaytadan urinib ko‘ring.', 'error');
     }
   };
 
@@ -428,6 +457,58 @@ export const AuthScreen: React.FC = () => {
               )}
             </div>
           </div>
+        )}
+
+        {/* STEP 2.5: TWO-STEP VERIFICATION PIN INPUT */}
+        {step === 'two_step_pin' && (
+          <form onSubmit={handleVerifyPin} className="space-y-6 animate-fade-in">
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setStep('otp')}
+                className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-[#8DA39A] hover:text-zinc-900 dark:hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Orqaga</span>
+              </button>
+              <span className="text-xs font-bold text-emerald-600 dark:text-cyan-400 font-mono">
+                {fullPhone}
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3">
+                <ShieldCheck className="w-8 h-8 stroke-[2.2]" />
+              </div>
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white mb-1">
+                Ikki bosqichli autentifikatsiya
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-[#8DA39A] max-w-xs">
+                Hisobingiz himoyalangan. Kirish uchun maxfiy PIN kodingizni kiriting.
+              </p>
+            </div>
+
+            <div>
+              <input
+                type="password"
+                maxLength={6}
+                value={twoStepPinInput}
+                onChange={(e) => setTwoStepPinInput(e.target.value.replace(/\D/g, ''))}
+                placeholder="••••"
+                className="w-full h-14 rounded-2xl text-center text-2xl font-black tracking-[0.5em] bg-zinc-100 dark:bg-[#14231E] border border-zinc-200 dark:border-[#20362E] focus:border-amber-500 dark:focus:border-amber-400 text-zinc-900 dark:text-white outline-none transition-all"
+                autoFocus
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading || twoStepPinInput.length < 4}
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-bold text-sm shadow-lg shadow-amber-500/25 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <span>Tasdiqlash va Kirish</span>
+            </button>
+          </form>
         )}
 
         {/* STEP 3: ONBOARDING — PROFILE SETUP (MANDATORY NAME & MIN 5-CHAR USERNAME) */}

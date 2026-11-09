@@ -25,6 +25,7 @@ import {
 import { Avatar } from '../../components/Avatar';
 import { VoicePlayer } from '../../components/VoicePlayer';
 import { CallModal } from '../../components/CallModal';
+import { ForwardMessageModal } from '../../components/ForwardMessageModal';
 import { LottieAnimation } from '../../components/LottieAnimation';
 import { TELEGRAM_REACTIONS, getReactionPath } from '../../utils/reactions';
 import { useChatStore } from '../../stores/chatStore';
@@ -67,6 +68,7 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
   const [contextMenuMessage, setContextMenuMessage] = useState<Message | null>(null);
   const [contextMenuCoords, setContextMenuCoords] = useState<{ x: number; y: number } | null>(null);
   const [animatingHeartMsgId, setAnimatingHeartMsgId] = useState<string | null>(null);
+  const [forwardingMessage, setForwardingMessage] = useState<Message | null>(null);
 
   // Scroll to bottom indicator (Image 2: "Oxirlariga")
   const [showScrollBottom, setShowScrollBottom] = useState(false);
@@ -327,8 +329,28 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
 
   const handleForwardMessage = (msg: Message) => {
     setContextMenuMessage(null);
-    navigator.clipboard.writeText(msg.content);
-    showToast('Xabar nusxalandi (Uzatish uchun tayyor)', 'info');
+    setForwardingMessage(msg);
+  };
+
+  const handleCompleteForward = async (targetConv: Conversation) => {
+    if (!forwardingMessage) return;
+    const msgToForward = forwardingMessage;
+    setForwardingMessage(null);
+    try {
+      await api.sendMessage(targetConv._id, {
+        content: msgToForward.content,
+        type: msgToForward.type,
+        media: msgToForward.media,
+      });
+      const targetName = targetConv._id.startsWith('conv_saved_')
+        ? 'Saqlanganlar'
+        : targetConv.type === 'direct'
+        ? targetConv.partner?.displayName || 'Foydalanuvchi'
+        : targetConv.group?.name || 'Guruh';
+      showToast(`Xabar "${targetName}" suhbatiga uzatildi! 🚀`, 'success');
+    } catch {
+      showToast('Xabarni uzatishda xatolik yuz berdi.', 'error');
+    }
   };
 
   const handlePinMessage = (msg: Message) => {
@@ -1073,6 +1095,15 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
             </button>
           )}
         </form>
+      )}
+
+      {/* Forward Message Selection Modal */}
+      {forwardingMessage && (
+        <ForwardMessageModal
+          message={forwardingMessage}
+          onClose={() => setForwardingMessage(null)}
+          onForward={handleCompleteForward}
+        />
       )}
     </div>
   );

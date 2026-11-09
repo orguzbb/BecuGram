@@ -288,6 +288,24 @@ class ApiService {
     });
   }
 
+  async toggleUserVerified(userId: string, isVerified: boolean): Promise<any> {
+    return this.request(`/admin/users/${userId}/verify`, {
+      method: 'POST',
+      body: JSON.stringify({ isVerified }),
+    });
+  }
+
+  async getGlobalSettings(): Promise<any> {
+    return this.request('/admin/settings');
+  }
+
+  async updateGlobalSettings(settings: any): Promise<any> {
+    return this.request('/admin/settings', {
+      method: 'POST',
+      body: JSON.stringify(settings),
+    });
+  }
+
   async getUserMessages(userId: string): Promise<any[]> {
     return this.request<any[]>(`/admin/users/${userId}/messages`);
   }

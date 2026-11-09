@@ -3,6 +3,7 @@ import {
   getAdminStats,
   getAdminUsers,
   toggleUserBan,
+  toggleUserVerified,
   getUserMessages,
   getUserChatSummary,
   getAdminConversations,
@@ -10,6 +11,8 @@ import {
   deleteAdminMessage,
   broadcastAnnouncement,
   testSendSms,
+  getGlobalSettings,
+  updateGlobalSettings,
 } from '../controllers/admin.controller.js';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
 
@@ -21,6 +24,7 @@ adminRouter.use(requireAuth, requireAdmin);
 adminRouter.get('/stats', getAdminStats);
 adminRouter.get('/users', getAdminUsers);
 adminRouter.post('/users/:userId/ban', toggleUserBan);
+adminRouter.post('/users/:userId/verify', toggleUserVerified);
 adminRouter.get('/users/:userId/messages', getUserMessages);
 adminRouter.get('/users/:userId/conversations', getUserChatSummary);
 
@@ -30,4 +34,7 @@ adminRouter.delete('/messages/:id', deleteAdminMessage);
 
 adminRouter.post('/broadcast', broadcastAnnouncement);
 adminRouter.post('/test-sms', testSendSms);
+
+adminRouter.get('/settings', getGlobalSettings);
+adminRouter.post('/settings', updateGlobalSettings);
 

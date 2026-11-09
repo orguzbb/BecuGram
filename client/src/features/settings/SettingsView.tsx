@@ -38,13 +38,58 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const { theme, toggleTheme, accentColor, setAccentColor } = useThemeStore();
   const { showToast } = useToast();
 
+  const userPhone = user?.phoneNumber || '+998889008081';
+
   // Active sub-modal states for "imagedan better qil"
   const [activeModal, setActiveModal] = useState<
     'none' | 'sessions' | 'security' | 'storage' | 'language' | 'privacy' | 'appearance'
   >('none');
 
   const [language, setLanguage] = useState<'O‘zbekcha' | 'English' | 'Русский'>('O‘zbekcha');
-  const [twoStepEnabled, setTwoStepEnabled] = useState(false);
+  const [twoStepPin, setTwoStepPin] = useState<string>(() => {
+    return localStorage.getItem(`becugram_2step_pin_${userPhone}`) || '';
+  });
+  const [isEditingPin, setIsEditingPin] = useState(false);
+  const [pinInput, setPinInput] = useState('');
+
+  const [animationsEnabled, setAnimationsEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('becugram_animations') !== 'disabled';
+  });
+
+  const toggleAnimations = () => {
+    const next = !animationsEnabled;
+    setAnimationsEnabled(next);
+    if (next) {
+      document.documentElement.classList.remove('no-animations');
+      localStorage.setItem('becugram_animations', 'enabled');
+      showToast('Animatsiyalar yoqildi ✨', 'success');
+    } else {
+      document.documentElement.classList.add('no-animations');
+      localStorage.setItem('becugram_animations', 'disabled');
+      showToast("Animatsiyalar o'chirildi", 'info');
+    }
+  };
+
+  const handleSavePin = () => {
+    if (!pinInput.trim() || pinInput.length < 4) {
+      showToast('PIN kod kamida 4 xonali bo‘lishi kerak.', 'error');
+      return;
+    }
+    localStorage.setItem(`becugram_2step_pin_${userPhone}`, pinInput.trim());
+    setTwoStepPin(pinInput.trim());
+    setIsEditingPin(false);
+    setPinInput('');
+    showToast('Ikki bosqichli PIN kod o‘rnatildi! 🔐', 'success');
+  };
+
+  const handleRemovePin = () => {
+    localStorage.removeItem(`becugram_2step_pin_${userPhone}`);
+    setTwoStepPin('');
+    setIsEditingPin(false);
+    setPinInput('');
+    showToast('Ikki bosqichli PIN kod o‘chirildi.', 'info');
+  };
+
   const [autoMediaDownload, setAutoMediaDownload] = useState(true);
   const [cacheSize, setCacheSize] = useState('14.2 MB');
 
@@ -431,35 +476,70 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </button>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-100 dark:bg-[#182C25]">
-                <div>
-                  <span className="text-xs font-bold text-zinc-900 dark:text-white block">
-                    Ikki bosqichli autentifikatsiya
-                  </span>
-                  <span className="text-[10px] text-zinc-500 dark:text-[#8DA39A]">
-                    Qo‘shimcha PIN parol so‘rash
-                  </span>
-                </div>
-                <button
-                  onClick={() => {
-                    setTwoStepEnabled(!twoStepEnabled);
-                    showToast(
-                      !twoStepEnabled
-                        ? 'Ikki bosqichli autentifikatsiya yoqildi'
-                        : 'O‘chirildi',
-                      'info'
-                    );
-                  }}
-                  className={`w-10 h-6 rounded-full p-1 transition-colors ${
-                    twoStepEnabled ? 'bg-[#9D5215]' : 'bg-zinc-300 dark:bg-zinc-700'
-                  }`}
-                >
-                  <div
-                    className={`bg-white w-4 h-4 rounded-full transition-transform ${
-                      twoStepEnabled ? 'translate-x-4' : ''
+              {/* Ikki bosqichli autentifikatsiya PIN sozlamasi */}
+              <div className="p-3.5 rounded-2xl bg-zinc-100 dark:bg-[#182C25] space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-zinc-900 dark:text-white block">
+                      Ikki bosqichli autentifikatsiya
+                    </span>
+                    <span className="text-[10px] text-zinc-500 dark:text-[#8DA39A]">
+                      {twoStepPin ? 'Maxfiy PIN faollashtirilgan 🔐' : 'PIN parol orqali himoya'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (twoStepPin) {
+                        handleRemovePin();
+                      } else {
+                        setIsEditingPin(true);
+                      }
+                    }}
+                    className={`w-10 h-6 rounded-full p-1 transition-colors ${
+                      twoStepPin ? 'bg-[#9D5215]' : 'bg-zinc-300 dark:bg-zinc-700'
                     }`}
-                  />
-                </button>
+                  >
+                    <div
+                      className={`bg-white w-4 h-4 rounded-full transition-transform ${
+                        twoStepPin ? 'translate-x-4' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {isEditingPin && (
+                  <div className="pt-2 border-t border-zinc-200 dark:border-zinc-700/60 space-y-2 animate-fade-in">
+                    <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block">
+                      Yangi PIN kodni kiriting (kamida 4 xonali):
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="password"
+                        maxLength={6}
+                        value={pinInput}
+                        onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
+                        placeholder="••••"
+                        className="flex-1 bg-white dark:bg-[#12201B] border border-zinc-300 dark:border-zinc-700 rounded-xl px-3 py-1.5 text-xs text-zinc-900 dark:text-white font-mono tracking-widest outline-none focus:border-amber-600"
+                        autoFocus
+                      />
+                      <button
+                        onClick={handleSavePin}
+                        className="px-3 py-1.5 rounded-xl bg-[#9D5215] text-white text-xs font-bold shadow-xs hover:bg-[#834507] transition-colors"
+                      >
+                        Saqlash
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsEditingPin(false);
+                          setPinInput('');
+                        }}
+                        className="px-2 py-1.5 rounded-xl text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-white"
+                      >
+                        Bekor
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div
@@ -499,7 +579,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </div>
 
             {/* Dark / Light Toggle */}
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-100 dark:bg-[#182C25] mb-4">
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-100 dark:bg-[#182C25] mb-2.5">
               <div className="flex items-center gap-2.5">
                 {theme === 'dark' ? (
                   <Moon className="w-4 h-4 text-cyan-400" />
@@ -515,6 +595,30 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 className="px-3 py-1 rounded-full bg-[#9D5215] text-white text-xs font-bold shadow-sm"
               >
                 Almashtirish
+              </button>
+            </div>
+
+            {/* Animations Toggle (User requirement: settingsdan animatsiya avto yoniq va o'chiq tanlash) */}
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-100 dark:bg-[#182C25] mb-4">
+              <div>
+                <span className="text-xs font-bold text-zinc-900 dark:text-white block">
+                  Animatsiyalar (Harakatlar)
+                </span>
+                <span className="text-[10px] text-zinc-500 dark:text-[#8DA39A]">
+                  {animationsEnabled ? 'Yoqilgan (Faol silliq o‘tishlar)' : 'O‘chirilgan'}
+                </span>
+              </div>
+              <button
+                onClick={toggleAnimations}
+                className={`w-10 h-6 rounded-full p-1 transition-colors ${
+                  animationsEnabled ? 'bg-[#9D5215]' : 'bg-zinc-300 dark:bg-zinc-700'
+                }`}
+              >
+                <div
+                  className={`bg-white w-4 h-4 rounded-full transition-transform ${
+                    animationsEnabled ? 'translate-x-4' : ''
+                  }`}
+                />
               </button>
             </div>
 

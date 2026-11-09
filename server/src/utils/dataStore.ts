@@ -105,6 +105,32 @@ export interface StoredGroup {
   createdAt: string;
 }
 
+export interface GlobalSettings {
+  accentColor: string;
+  announcementBanner: {
+    enabled: boolean;
+    text: string;
+  };
+  theme: 'dark' | 'light';
+  maintenanceMode: boolean;
+}
+
+export function getStoredGlobalSettings(): GlobalSettings {
+  return loadJson<GlobalSettings>('settings.json', {
+    accentColor: '#2563EB',
+    announcementBanner: {
+      enabled: false,
+      text: 'BecuGram yangi versiyasi ishga tushdi!',
+    },
+    theme: 'dark',
+    maintenanceMode: false,
+  });
+}
+
+export function saveStoredGlobalSettings(settings: GlobalSettings): void {
+  saveJson('settings.json', settings);
+}
+
 // User methods
 export function getStoredUser(userIdOrPhone: string): StoredUser | null {
   const users = loadJson<Record<string, StoredUser>>('users.json', {});

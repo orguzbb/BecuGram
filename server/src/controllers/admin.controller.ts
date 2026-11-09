@@ -4,6 +4,7 @@ import { eskizService } from '../services/eskiz.service.js';
 import {
   getAllStoredUsers,
   banStoredUser,
+  saveStoredUser,
   getAllStoredConversations,
   getAllStoredMessages,
   deleteStoredMessageAdmin,
@@ -12,6 +13,8 @@ import {
   saveMessage,
   StoredMessage,
   getUserChatActivity,
+  getStoredGlobalSettings,
+  saveStoredGlobalSettings,
 } from '../utils/dataStore.js';
 import { getSocketIO } from '../sockets/index.js';
 
@@ -214,6 +217,67 @@ export async function testSendSms(req: AuthenticatedRequest, res: Response): Pro
     message: result.simulated
       ? 'SMS simulyatsiya qilindi (Eskiz hisobi ulanmagan, konsolda ko\'rishingiz mumkin).'
       : 'SMS Eskiz.uz orqali haqiqiy raqamga yuborildi!',
+  });
+}
+
+export async function toggleUserVerified(req: AuthenticatedRequest, res: Response): Promise<void> {
+  const rawId = req.params.userId;
+  const userId = Array.isArray(rawId) ? rawId[0] : rawId;
+  const { isVerified } = req.body;
+
+  const users = getAllStoredUsers();
+  const user = users.find((u) => u._id === userId);
+  if (!user) {
+    res.status(404).json({ success: false, error: { message: 'Foydalanuvchi topilmadi' } });
+    return;
+  }
+
+  user.isVerified = Boolean(isVerified);
+  saveStoredUser(user);
+
+  try {
+    const io = getSocketIO();
+    if (io) {
+      io.emit('user:verified_updated', { userId, isVerified: user.isVerified });
+    }
+  } catch {}
+
+  res.status(200).json({
+    success: true,
+    data: user,
+    message: user.isVerified
+      ? 'Foydalanuvchiga tasdiq (moviy galochka) berildi! 🔹'
+      : 'Tasdiq belgisi olib tashlandi.',
+  });
+}
+
+export async function getGlobalSettings(req: AuthenticatedRequest, res: Response): Promise<void> {
+  const settings = getStoredGlobalSettings();
+  res.status(200).json({
+    success: true,
+    data: settings,
+  });
+}
+
+export async function updateGlobalSettings(req: AuthenticatedRequest, res: Response): Promise<void> {
+  const current = getStoredGlobalSettings();
+  const updated = {
+    ...current,
+    ...req.body,
+  };
+  saveStoredGlobalSettings(updated);
+
+  try {
+    const io = getSocketIO();
+    if (io) {
+      io.emit('settings:updated', updated);
+    }
+  } catch {}
+
+  res.status(200).json({
+    success: true,
+    data: updated,
+    message: 'Global UI sozlamalari muvaffaqiyatli saqlandi! ✨',
   });
 }
 

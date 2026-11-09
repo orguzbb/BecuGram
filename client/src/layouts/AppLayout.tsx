@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DesktopSidebar } from '../components/DesktopSidebar';
 import { BottomNav, NavTab } from '../components/BottomNav';
 import { ChatList } from '../features/chats/ChatList';
@@ -16,6 +16,7 @@ import { useChatStore } from '../stores/chatStore';
 import { useAuthStore } from '../stores/authStore';
 import { useThemeStore } from '../stores/themeStore';
 import { api } from '../services/api';
+import { socketService } from '../services/socket';
 import { Conversation, User, Contact } from '../types';
 
 export const AppLayout: React.FC = () => {
@@ -37,6 +38,37 @@ export const AppLayout: React.FC = () => {
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [announcement, setAnnouncement] = useState<{
+    enabled: boolean;
+    text: string;
+  } | null>(null);
+  const [dismissedBanner, setDismissedBanner] = useState(false);
+
+  // Sync Global Settings & Announcement live
+  useEffect(() => {
+    api
+      .getGlobalSettings()
+      .then((s) => {
+        if (s?.announcementBanner) {
+          setAnnouncement(s.announcementBanner);
+        }
+      })
+      .catch(() => {});
+
+    const socket = socketService.getSocket();
+    if (socket) {
+      const handleSettingsUpdated = (settings: any) => {
+        if (settings?.announcementBanner) {
+          setAnnouncement(settings.announcementBanner);
+          setDismissedBanner(false);
+        }
+      };
+      socket.on('settings:updated', handleSettingsUpdated);
+      return () => {
+        socket.off('settings:updated', handleSettingsUpdated);
+      };
+    }
+  }, []);
 
   const totalUnread = conversations.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
 
@@ -94,7 +126,7 @@ export const AppLayout: React.FC = () => {
 
   return (
     <div
-      className="flex h-screen w-screen overflow-hidden bg-[#ECE8F7] dark:bg-[#070D0B] text-zinc-900 dark:text-white transition-colors duration-200"
+      className="flex flex-col h-screen w-screen overflow-hidden bg-[#ECE8F7] dark:bg-[#070D0B] text-zinc-900 dark:text-white transition-colors duration-200"
       style={{
         backgroundImage:
           theme === 'dark'
@@ -102,12 +134,29 @@ export const AppLayout: React.FC = () => {
             : 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.7) 0%, rgba(234,228,248,0.95) 100%)',
       }}
     >
+      {/* Global Announcement Banner from Admin Panel */}
+      {announcement?.enabled && announcement.text && !dismissedBanner && (
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white px-4 py-2 text-xs font-semibold flex items-center justify-between shadow-md z-50 animate-fade-in shrink-0">
+          <div className="flex items-center gap-2 max-w-4xl mx-auto truncate">
+            <span className="text-sm">📢</span>
+            <span className="truncate">{announcement.text}</span>
+          </div>
+          <button
+            onClick={() => setDismissedBanner(true)}
+            className="p-1 hover:bg-white/20 rounded-full transition-colors ml-2 text-white/80 hover:text-white"
+            title="Yopish"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Main Content Area (Tablet/Desktop Floating Cards layout matching Image 2 & 5) */}
       <div className="flex-1 flex overflow-hidden sm:p-3 sm:gap-3">
         {/* Left List Pane (Floating rounded card on tablets & desktop, full on mobile) */}
         <div
-          className={`w-full sm:w-[380px] lg:w-[420px] h-full flex flex-col shrink-0 sm:rounded-3xl sm:border sm:border-white/80 dark:sm:border-white/10 sm:shadow-2xl overflow-hidden bg-white dark:bg-[#0E1715] z-10 ${
-            activeConversation ? 'hidden sm:flex' : 'flex'
+          className={`w-full md:w-[380px] lg:w-[420px] h-full flex flex-col shrink-0 md:rounded-3xl md:border md:border-white/80 dark:md:border-white/10 md:shadow-2xl overflow-hidden bg-white dark:bg-[#0E1715] z-10 ${
+            activeConversation ? 'hidden md:flex' : 'flex'
           }`}
         >
           {activeTab === 'inbox' && (
@@ -139,8 +188,8 @@ export const AppLayout: React.FC = () => {
 
         {/* Right Chat Area (Floating rounded card on tablets & desktop) */}
         <div
-          className={`flex-1 h-full flex flex-col sm:rounded-3xl sm:border sm:border-white/80 dark:sm:border-white/10 sm:shadow-2xl overflow-hidden ${
-            !activeConversation ? 'hidden sm:flex' : 'flex'
+          className={`flex-1 h-full flex flex-col md:rounded-3xl md:border md:border-white/80 dark:md:border-white/10 md:shadow-2xl overflow-hidden ${
+            !activeConversation ? 'hidden md:flex' : 'flex'
           }`}
         >
           {activeConversation ? (
@@ -151,7 +200,7 @@ export const AppLayout: React.FC = () => {
             />
           ) : (
             // Tablet & Desktop Empty State with official BecuGram logo
-            <div className="hidden sm:flex flex-col items-center justify-center h-full select-none text-center p-8 transition-colors">
+            <div className="hidden md:flex flex-col items-center justify-center h-full select-none text-center p-8 transition-colors">
               {/* BecuGram Official Logo */}
               <div className="mb-4 hover:scale-110 transition-transform cursor-pointer">
                 <BecuLogo size={72} />
@@ -166,9 +215,9 @@ export const AppLayout: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation Bar: SIMPLE CIRCULAR BUTTONS (Image 2 Paxta style) */}
+      {/* Mobile & Tablet Bottom Navigation Bar: Strictly hidden when chatting (Image 5) */}
       {!activeConversation && (
-        <div className="sm:hidden">
+        <div className="md:hidden">
           <BottomNav
             activeTab={activeTab}
             onTabChange={(tab) => setActiveTab(tab)}

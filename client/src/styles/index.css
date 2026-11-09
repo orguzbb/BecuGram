@@ -57,3 +57,13 @@
   scrollbar-width: none;
 }
 
+/* Global Animations Toggle */
+.no-animations,
+.no-animations *,
+.no-animations *::before,
+.no-animations *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+

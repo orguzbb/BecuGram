@@ -525,27 +525,25 @@ export const ChatList: React.FC<ChatListProps> = ({
           </div>
         </div>
 
-        {/* STORIES AVATAR ROW (Matching Image 2: "Mening hi..." Circular Dumaloq) */}
+        {/* STORIES AVATAR ROW (Matching Image 4: "Mening h..." Capsule/Stadium Shape) */}
         <div className="flex items-center gap-4 pt-3 pb-1 overflow-x-auto scrollbar-none">
-          {/* User's Own Story Button (Dumaloq) */}
+          {/* User's Own Story Capsule (Upright Pill with Gradient Border and Overlapping Plus) */}
           <div
             onClick={() => setShowCreateStory(true)}
             className="flex flex-col items-center cursor-pointer group shrink-0"
           >
             <div className="relative">
-              <div className="w-13 h-13 rounded-full bg-gradient-to-tr from-[#2563EB] via-indigo-500 to-cyan-400 p-0.5 shadow-sm group-hover:scale-105 transition-transform">
-                <div className="w-full h-full rounded-full bg-white dark:bg-[#14231E] p-0.5 flex items-center justify-center">
-                  <div className="w-full h-full rounded-full bg-[#2563EB] text-white font-extrabold text-lg flex items-center justify-center select-none">
-                    {initial}
-                  </div>
+              <div className="w-11 h-[70px] rounded-[22px] bg-gradient-to-b from-[#00D2FF] to-[#0066FF] p-[2.5px] shadow-sm group-hover:scale-105 transition-transform flex items-center justify-center">
+                <div className="w-full h-full rounded-[19.5px] bg-[#2563EB] text-white font-extrabold text-xl flex items-center justify-center select-none shadow-inner">
+                  {initial}
                 </div>
               </div>
-              <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-[#2563EB] text-white flex items-center justify-center border-2 border-white dark:border-[#0E1715] shadow-xs">
-                <Plus className="w-3 h-3 stroke-[3]" />
+              <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#2563EB] text-white flex items-center justify-center ring-2 ring-white dark:ring-[#0E1715] shadow-xs">
+                <Plus className="w-3.5 h-3.5 stroke-[3]" />
               </span>
             </div>
-            <span className="text-[11px] font-semibold mt-1 text-zinc-700 dark:text-zinc-300 truncate max-w-[60px]">
-              Mening hi...
+            <span className="text-[11px] font-semibold mt-1 text-zinc-700 dark:text-zinc-300 truncate max-w-[62px]">
+              Mening h...
             </span>
           </div>
 
@@ -612,6 +610,33 @@ export const ChatList: React.FC<ChatListProps> = ({
 
       {/* CHAT LIST SCROLL AREA */}
       <div className="flex-1 overflow-y-auto divide-y divide-zinc-50 dark:divide-zinc-800/40">
+        {/* ARXIV ROW AT TOP (Matching Image 2: PaxtaGram style Arxiv) */}
+        {!showArchivedView && !searchQuery.trim() && (
+          <div
+            onClick={() => setShowArchivedView(true)}
+            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 dark:hover:bg-[#14231E]/60 transition-colors select-none border-b border-zinc-100/60 dark:border-zinc-800/40"
+          >
+            <div className="relative shrink-0">
+              <div className="w-12 h-12 rounded-full bg-[#525C76] dark:bg-[#3D4860] text-white flex items-center justify-center shadow-xs">
+                <Archive className="w-5 h-5 stroke-[2.2]" />
+              </div>
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="font-bold text-sm text-zinc-900 dark:text-white">Arxiv</span>
+                {archivedIds.length > 0 && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+                    {archivedIds.length}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                BecuGram
+              </p>
+            </div>
+          </div>
+        )}
+
         {filteredConversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center text-zinc-400 dark:text-zinc-500">
             {searchQuery.trim() ? (
