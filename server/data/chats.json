@@ -7,9 +7,9 @@
     ],
     "partner": {
       "_id": "6af0a01a7d27b76a8fee65f8",
-      "displayName": "Saved Messages 📌",
+      "displayName": "Saqlanganlar 📌",
       "username": "saved",
-      "avatar": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&auto=format&fit=crop&q=80",
+      "avatar": "",
       "isOnline": true,
       "isVerified": true
     },
@@ -35,37 +35,5 @@
     "isPinned": true,
     "isMuted": false,
     "createdAt": "2026-11-08T16:15:22.972Z"
-  },
-  {
-    "_id": "conv_official_6af0a01a7d27b76a8fee65f8",
-    "type": "channel",
-    "participants": [
-      "6af0a01a7d27b76a8fee65f8"
-    ],
-    "group": {
-      "_id": "group_official",
-      "name": "BecuGram Official ✨",
-      "avatar": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&auto=format&fit=crop&q=80",
-      "memberCount": 1,
-      "description": "Official announcements, tips and security updates."
-    },
-    "unreadCount": 1,
-    "isPinned": false,
-    "isMuted": false,
-    "createdAt": "2026-11-08T16:14:22.972Z",
-    "lastMessage": {
-      "_id": "msg_welcome_1794223286136",
-      "conversationId": "conv_official_6af0a01a7d27b76a8fee65f8",
-      "senderId": {
-        "_id": "system_becugram",
-        "displayName": "BecuGram Official",
-        "username": "becugram",
-        "avatar": ""
-      },
-      "type": "text",
-      "content": "👋 Xush kelibsiz! BecuGram — xavfsiz va zamonaviy xabar almashish platformasi.\n\nBu yerda siz do'stlaringizni taklif qilishingiz, guruhlar ochishingiz, ovozli xabarlar va fotosuratlar yuborishingiz mumkin.",
-      "createdAt": "2026-11-09T11:21:26.136Z"
-    },
-    "lastMessageAt": "2026-11-09T11:21:26.136Z"
   }
 ]

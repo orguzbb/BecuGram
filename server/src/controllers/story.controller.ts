@@ -18,16 +18,7 @@ interface StoryItem {
 function getStories(): StoryItem[] {
   try {
     if (!fs.existsSync(storiesFile)) {
-      const initial: StoryItem[] = [
-        {
-          id: 'story_official',
-          userId: 'admin_official',
-          userName: 'BecuGram Rasmiy',
-          caption: 'BecuGram platformasiga xush kelibsiz! 🚀',
-          bgColor: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-          createdAt: new Date().toISOString(),
-        },
-      ];
+      const initial: StoryItem[] = [];
       fs.mkdirSync(path.dirname(storiesFile), { recursive: true });
       fs.writeFileSync(storiesFile, JSON.stringify(initial, null, 2));
       return initial;

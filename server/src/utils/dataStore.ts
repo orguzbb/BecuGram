@@ -175,30 +175,7 @@ export function getUserConversations(userId: string): StoredConversation[] {
       createdAt: new Date().toISOString(),
     };
 
-    const officialChannelChat: StoredConversation = {
-      _id: `conv_official_${userId}`,
-      type: 'channel',
-      participants: [userId],
-      group: {
-        _id: 'group_official',
-        name: 'BecuGram Rasmiy Kanal',
-        avatar: '',
-        memberCount: 1250,
-        description: 'Rasmiy yangiliklar, xavfsizlik va yangi imkoniyatlar.',
-      },
-      lastMessage: {
-        type: 'text',
-        content: "BecuGram yangilanishlari va xavfsizlik yangiliklari",
-        createdAt: new Date(Date.now() - 60000).toISOString(),
-      },
-      lastMessageAt: new Date(Date.now() - 60000).toISOString(),
-      unreadCount: 0,
-      isPinned: false,
-      isMuted: false,
-      createdAt: new Date(Date.now() - 60000).toISOString(),
-    };
-
-    const initial = [savedMessagesChat, officialChannelChat];
+    const initial = [savedMessagesChat];
     saveUserConversations([...allChats, ...initial]);
     return initial;
   }
@@ -225,28 +202,6 @@ export function addOrUpdateConversation(conv: StoredConversation): void {
 export function getConversationMessages(conversationId: string): StoredMessage[] {
   const allMessages = loadJson<StoredMessage[]>('messages.json', []);
   const list = allMessages.filter((m) => m.conversationId === conversationId);
-
-  if (list.length === 0) {
-    // If it's the official channel, add default welcome
-    if (conversationId.startsWith('conv_official_')) {
-      const welcomeMsg: StoredMessage = {
-        _id: `msg_welcome_${Date.now()}`,
-        conversationId,
-        senderId: {
-          _id: 'system_becugram',
-          displayName: 'BecuGram Official',
-          username: 'becugram',
-          avatar: '',
-        },
-        type: 'text',
-        content: '👋 Xush kelibsiz! BecuGram — xavfsiz va zamonaviy xabar almashish platformasi.\n\nBu yerda siz do\'stlaringizni taklif qilishingiz, guruhlar ochishingiz, ovozli xabarlar va fotosuratlar yuborishingiz mumkin.',
-        createdAt: new Date().toISOString(),
-      };
-      saveMessage(welcomeMsg);
-      return [welcomeMsg];
-    }
-  }
-
   return list;
 }
 

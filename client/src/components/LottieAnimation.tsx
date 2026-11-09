@@ -2,8 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import lottie, { AnimationItem } from 'lottie-web';
 
 interface LottieAnimationProps {
-  src: string;
-  size?: number;
+  src?: string;
+  animationData?: any;
+  size?: number | string;
   loop?: boolean;
   autoplay?: boolean;
   className?: string;
@@ -12,6 +13,7 @@ interface LottieAnimationProps {
 
 export const LottieAnimation: React.FC<LottieAnimationProps> = ({
   src,
+  animationData,
   size = 28,
   loop = true,
   autoplay = true,
@@ -23,6 +25,7 @@ export const LottieAnimation: React.FC<LottieAnimationProps> = ({
 
   useEffect(() => {
     if (!containerRef.current) return;
+    if (!src && !animationData) return;
 
     // Destroy existing animation if any
     if (animRef.current) {
@@ -30,15 +33,22 @@ export const LottieAnimation: React.FC<LottieAnimationProps> = ({
     }
 
     try {
-      animRef.current = lottie.loadAnimation({
+      const animParams: any = {
         container: containerRef.current,
         renderer: 'svg',
         loop,
         autoplay,
-        path: src,
-      });
+      };
+
+      if (animationData) {
+        animParams.animationData = animationData;
+      } else if (src) {
+        animParams.path = src;
+      }
+
+      animRef.current = lottie.loadAnimation(animParams);
     } catch (err) {
-      console.warn('Failed to load lottie animation from:', src, err);
+      console.warn('Failed to load lottie animation:', src || 'data', err);
     }
 
     return () => {
@@ -47,7 +57,7 @@ export const LottieAnimation: React.FC<LottieAnimationProps> = ({
         animRef.current = null;
       }
     };
-  }, [src, loop, autoplay]);
+  }, [src, animationData, loop, autoplay]);
 
   return (
     <div
