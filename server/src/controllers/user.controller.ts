@@ -5,6 +5,7 @@ import { User } from '../models/User.js';
 import { Message } from '../models/Message.js';
 import { Conversation } from '../models/Conversation.js';
 import { getStoredUser, saveStoredUser, StoredUser } from '../utils/dataStore.js';
+import { validateUsername } from '../utils/validators.js';
 
 function getMemoryDefaultUser(userId: string, username?: string, phoneNumber?: string): StoredUser {
   const existing = getStoredUser(userId);
@@ -60,7 +61,15 @@ export async function updateMe(req: AuthenticatedRequest, res: Response): Promis
       const user = await User.findById(userId);
       if (user) {
         if (username && username.toLowerCase() !== user.username) {
-          const cleanUsername = username.toLowerCase().trim();
+          const cleanUsername = username.toLowerCase().trim().replace(/^@/, '');
+          const check = validateUsername(cleanUsername);
+          if (!check.isValid) {
+            res.status(400).json({
+              success: false,
+              error: { code: 'INVALID_USERNAME', message: check.error || 'Noto‘g‘ri foydalanuvchi nomi' },
+            });
+            return;
+          }
           const existing = await User.findOne({ username: cleanUsername });
           if (existing) {
             res.status(409).json({

@@ -656,7 +656,9 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
             return (
               <div
                 key={msg._id}
-                className={`flex flex-col relative group ${isMe ? 'items-end' : 'items-start'}`}
+                className={`flex flex-col relative group ${isMe ? 'items-end' : 'items-start'} ${
+                  msg.reactions && msg.reactions.length > 0 ? 'mb-4' : ''
+                }`}
               >
                 {/* Animated Lottie Heart Pop Animation on double-click */}
                 {isHeartAnimating && (
@@ -746,7 +748,7 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
                     return (
                       <div
                         onClick={(e) => e.stopPropagation()}
-                        className="absolute -bottom-3 left-2.5 flex items-center gap-1.5 bg-[#EAE5F8] dark:bg-[#1E293B] border border-[#DDD5F5] dark:border-white/10 px-2 py-0.5 rounded-full shadow-xs cursor-pointer select-none z-10 hover:scale-105 transition-transform"
+                        className="absolute -bottom-4 left-2.5 flex items-center gap-2 bg-[#EDE8FA] dark:bg-[#1E293B] border border-[#DDD5F5] dark:border-white/15 px-3 py-1 rounded-full shadow-md cursor-pointer select-none z-10 hover:scale-105 active:scale-95 transition-all"
                       >
                         {Array.from(new Set(activeReactions.map((r) => r.emoji))).map((reactionKey, i) => {
                           const count = activeReactions.filter((r) => r.emoji === reactionKey).length;
@@ -760,18 +762,18 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
                               key={i}
                               type="button"
                               onClick={() => handleReaction(msg._id, reactionKey)}
-                              className={`flex items-center gap-1.5 rounded-full transition-transform hover:scale-110 active:scale-95 ${
+                              className={`flex items-center gap-2 rounded-full transition-transform hover:scale-110 active:scale-95 ${
                                 hasMyReact ? 'font-bold' : ''
                               }`}
                               title="Reaksiya"
                             >
-                              <LottieAnimation src={lottieSrc} size={18} loop={true} />
-                              {/* Small round user initial circle matching Image 2 [ 👍 (A) ] */}
-                              <div className="w-4 h-4 rounded-full bg-[#5D5FEF] text-white flex items-center justify-center text-[9px] font-black shrink-0 shadow-xs">
+                              <LottieAnimation src={lottieSrc} size={28} loop={true} />
+                              {/* Round user initial circle matching Image 2 & 3 [ 👍 (A) ] */}
+                              <div className="w-5 h-5 rounded-full bg-[#5D5FEF] text-white flex items-center justify-center text-[10px] font-black shrink-0 shadow-xs">
                                 {reactorInitial}
                               </div>
                               {count > 1 && (
-                                <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-200">
+                                <span className="text-xs font-bold text-zinc-800 dark:text-zinc-100">
                                   {count}
                                 </span>
                               )}

@@ -16,6 +16,7 @@ import { AuthenticatedRequest } from '../middleware/auth.js';
 
 import { eskizService } from '../services/eskiz.service.js';
 import { getStoredUser, saveStoredUser, getAllStoredUsers } from '../utils/dataStore.js';
+import { validateUsername } from '../utils/validators.js';
 
 // In-memory fallback stores when MongoDB is not connected
 export const memoryChallenges = new Map<string, any>();
@@ -387,18 +388,11 @@ export async function completeProfile(req: AuthenticatedRequest, res: Response):
   }
 
   const cleanUsername = (username || '').trim().toLowerCase().replace(/^@/, '');
-  if (!cleanUsername || cleanUsername.length < 5) {
+  const usernameCheck = validateUsername(cleanUsername);
+  if (!usernameCheck.isValid) {
     res.status(400).json({
       success: false,
-      error: { code: 'INVALID_USERNAME', message: 'Foydalanuvchi nomi kamida 5 ta belgidan iborat bo\'lishi shart.' },
-    });
-    return;
-  }
-
-  if (!/^[a-z0-9_]{5,30}$/.test(cleanUsername)) {
-    res.status(400).json({
-      success: false,
-      error: { code: 'INVALID_USERNAME_FORMAT', message: 'Foydalanuvchi nomida faqat kichik lotin harflari, raqamlar va pastki chiziq (_) ruxsat etiladi.' },
+      error: { code: 'INVALID_USERNAME', message: usernameCheck.error || 'Foydalanuvchi nomi noto‘g‘ri formatda.' },
     });
     return;
   }

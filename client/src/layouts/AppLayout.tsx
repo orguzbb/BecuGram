@@ -155,8 +155,8 @@ export const AppLayout: React.FC = () => {
       <div className="flex-1 flex overflow-hidden sm:p-3 sm:gap-3">
         {/* Left List Pane (Floating rounded card on tablets & desktop, full on mobile) */}
         <div
-          className={`w-full md:w-[380px] lg:w-[420px] h-full flex flex-col shrink-0 md:rounded-3xl md:border md:border-white/80 dark:md:border-white/10 md:shadow-2xl overflow-hidden bg-white dark:bg-[#0E1715] z-10 ${
-            activeConversation ? 'hidden md:flex' : 'flex'
+          className={`w-full md:w-[380px] lg:w-[420px] h-full flex-col shrink-0 md:rounded-3xl md:border md:border-white/80 dark:md:border-white/10 md:shadow-2xl overflow-hidden bg-white dark:bg-[#0E1715] z-10 ${
+            activeConversation ? 'hidden' : 'flex'
           }`}
         >
           {activeTab === 'inbox' && (
@@ -189,7 +189,7 @@ export const AppLayout: React.FC = () => {
         {/* Right Chat Area (Floating rounded card on tablets & desktop) */}
         <div
           className={`flex-1 h-full flex flex-col md:rounded-3xl md:border md:border-white/80 dark:md:border-white/10 md:shadow-2xl overflow-hidden ${
-            !activeConversation ? 'hidden md:flex' : 'flex'
+            !activeConversation ? 'hidden' : 'flex'
           }`}
         >
           {activeConversation ? (

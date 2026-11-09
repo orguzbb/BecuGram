@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { User } from '../../types';
+import { validateUsername } from '../../utils/validators';
 
 export const AuthScreen: React.FC = () => {
   const { setAuth } = useAuthStore();
@@ -244,9 +245,10 @@ export const AuthScreen: React.FC = () => {
     }
   };
 
-  // Clean username helper
+  // Clean username helper with strict rules
   const cleanUsername = username.trim().toLowerCase().replace(/^@/, '');
-  const isUsernameValid = cleanUsername.length >= 5 && /^[a-z0-9_]{5,30}$/.test(cleanUsername);
+  const usernameValidation = validateUsername(cleanUsername);
+  const isUsernameValid = usernameValidation.isValid;
   const isNameValid = displayName.trim().length >= 2;
 
   // Submit Profile Onboarding
@@ -256,8 +258,8 @@ export const AuthScreen: React.FC = () => {
       showToast('Ism va familiyangizni kiriting (kamida 2 ta belgi).', 'error');
       return;
     }
-    if (!isUsernameValid) {
-      showToast('Foydalanuvchi nomi kamida 5 ta harf yoki raqamdan iborat bo\'lishi shart!', 'error');
+    if (!usernameValidation.isValid) {
+      showToast(usernameValidation.error || "Foydalanuvchi nomi noto'g'ri.", 'error');
       return;
     }
 
@@ -605,8 +607,12 @@ export const AuthScreen: React.FC = () => {
                   <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
                 ) : null}
               </div>
-              <p className="text-[11px] text-zinc-500 dark:text-[#8DA39A] mt-1 pl-1">
-                Lotin harflari (a-z), raqamlar va pastki chiziq (_) ruxsat etiladi.
+              <p className={`text-[11px] mt-1 pl-1 ${
+                cleanUsername.length > 0 && !isUsernameValid ? 'text-rose-500 font-medium' : 'text-zinc-500 dark:text-[#8DA39A]'
+              }`}>
+                {cleanUsername.length > 0 && !isUsernameValid
+                  ? usernameValidation.error
+                  : "Kamida 5 ta belgi (a-z, 0-9 va o‘rtasida '_'). Boshida va oxirida '_' bo‘lmasin."}
               </p>
             </div>
 

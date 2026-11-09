@@ -525,24 +525,26 @@ export const ChatList: React.FC<ChatListProps> = ({
           </div>
         </div>
 
-        {/* STORIES AVATAR ROW (Matching Image 4: "Mening h..." Capsule/Stadium Shape) */}
+        {/* STORIES AVATAR ROW (Matching Image 2: Dumaloq Hikoyalar) */}
         <div className="flex items-center gap-4 pt-3 pb-1 overflow-x-auto scrollbar-none">
-          {/* User's Own Story Capsule (Upright Pill with Gradient Border and Overlapping Plus) */}
+          {/* User's Own Story Button (Dumaloq - Circular) */}
           <div
             onClick={() => setShowCreateStory(true)}
             className="flex flex-col items-center cursor-pointer group shrink-0"
           >
             <div className="relative">
-              <div className="w-11 h-[70px] rounded-[22px] bg-gradient-to-b from-[#00D2FF] to-[#0066FF] p-[2.5px] shadow-sm group-hover:scale-105 transition-transform flex items-center justify-center">
-                <div className="w-full h-full rounded-[19.5px] bg-[#2563EB] text-white font-extrabold text-xl flex items-center justify-center select-none shadow-inner">
-                  {initial}
+              <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#00D2FF] via-[#2563EB] to-[#7C3AED] p-[2.5px] shadow-sm group-hover:scale-105 transition-transform flex items-center justify-center">
+                <div className="w-full h-full rounded-full bg-white dark:bg-[#14231E] p-0.5 flex items-center justify-center">
+                  <div className="w-full h-full rounded-full bg-[#2563EB] text-white font-black text-xl flex items-center justify-center select-none shadow-inner">
+                    {initial}
+                  </div>
                 </div>
               </div>
-              <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#2563EB] text-white flex items-center justify-center ring-2 ring-white dark:ring-[#0E1715] shadow-xs">
+              <span className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-[#2563EB] text-white flex items-center justify-center ring-2 ring-white dark:ring-[#0E1715] shadow-sm">
                 <Plus className="w-3.5 h-3.5 stroke-[3]" />
               </span>
             </div>
-            <span className="text-[11px] font-semibold mt-1 text-zinc-700 dark:text-zinc-300 truncate max-w-[62px]">
+            <span className="text-[11px] font-semibold mt-1 text-zinc-700 dark:text-zinc-300 truncate max-w-[65px]">
               Mening h...
             </span>
           </div>

@@ -1,0 +1,9 @@
+{
+  "accentColor": "#7C3AED",
+  "announcementBanner": {
+    "enabled": false,
+    "text": "BecuGram yangi versiyasi ishga tushdi!"
+  },
+  "theme": "dark",
+  "maintenanceMode": false
+}

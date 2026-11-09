@@ -122,5 +122,39 @@
       "6af0a01a7d27b76a8fee65f8"
     ],
     "createdAt": "2026-11-09T10:21:21.712Z"
+  },
+  {
+    "_id": "msg_1794220598352_gaewm",
+    "conversationId": "conv_saved_6af0a01a7d27b76a8fee65f8",
+    "senderId": {
+      "_id": "6af0a01a7d27b76a8fee65f8",
+      "displayName": "Abdurahim",
+      "username": "admin",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Abdurahmonov.Uz",
+    "reactions": [],
+    "readBy": [
+      "6af0a01a7d27b76a8fee65f8"
+    ],
+    "createdAt": "2026-11-09T10:36:38.352Z"
+  },
+  {
+    "_id": "msg_1794220604112_pf23g",
+    "conversationId": "conv_saved_6af0a01a7d27b76a8fee65f8",
+    "senderId": {
+      "_id": "6af0a01a7d27b76a8fee65f8",
+      "displayName": "Abdurahim",
+      "username": "admin",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "https://abdurahmonov.uz/",
+    "reactions": [],
+    "readBy": [
+      "6af0a01a7d27b76a8fee65f8"
+    ],
+    "createdAt": "2026-11-09T10:36:44.113Z"
   }
 ]

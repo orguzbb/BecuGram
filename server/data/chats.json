@@ -14,7 +14,7 @@
       "isVerified": true
     },
     "lastMessage": {
-      "_id": "msg_1794219681712_zb6hr",
+      "_id": "msg_1794220604112_pf23g",
       "conversationId": "conv_saved_6af0a01a7d27b76a8fee65f8",
       "senderId": {
         "_id": "6af0a01a7d27b76a8fee65f8",
@@ -23,14 +23,14 @@
         "avatar": ""
       },
       "type": "text",
-      "content": "salom",
+      "content": "https://abdurahmonov.uz/",
       "reactions": [],
       "readBy": [
         "6af0a01a7d27b76a8fee65f8"
       ],
-      "createdAt": "2026-11-09T10:21:21.712Z"
+      "createdAt": "2026-11-09T10:36:44.113Z"
     },
-    "lastMessageAt": "2026-11-09T10:21:21.712Z",
+    "lastMessageAt": "2026-11-09T10:36:44.113Z",
     "unreadCount": 0,
     "isPinned": true,
     "isMuted": false,

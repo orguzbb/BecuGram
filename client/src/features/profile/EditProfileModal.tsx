@@ -4,6 +4,7 @@ import { useAuthStore } from '../../stores/authStore';
 import { useToast } from '../../components/Toast';
 import { api } from '../../services/api';
 import { Avatar } from '../../components/Avatar';
+import { validateUsername } from '../../utils/validators';
 
 interface EditProfileModalProps {
   onClose: () => void;
@@ -34,6 +35,13 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ onClose }) =
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanUsername = username.trim().toLowerCase().replace(/^@/, '');
+    const validation = validateUsername(cleanUsername);
+    if (!validation.isValid) {
+      showToast(validation.error || "Foydalanuvchi nomi noto'g'ri", 'error');
+      return;
+    }
+
     setIsLoading(true);
 
     try {

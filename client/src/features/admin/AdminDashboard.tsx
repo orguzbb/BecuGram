@@ -284,8 +284,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-[#F4F5F8] dark:bg-[#0B0F19] text-zinc-900 dark:text-zinc-100 flex overflow-hidden animate-fade-in select-none">
-      {/* 1. LEFT SIDEBAR (Matching Image 1) */}
-      <aside className="w-56 lg:w-64 bg-white dark:bg-[#111827] border-r border-zinc-200/80 dark:border-zinc-800 flex flex-col justify-between shrink-0 shadow-xs z-20">
+      {/* 1. LEFT SIDEBAR (Desktop >= lg) */}
+      <aside className="hidden lg:flex w-56 lg:w-64 bg-white dark:bg-[#111827] border-r border-zinc-200/80 dark:border-zinc-800 flex-col justify-between shrink-0 shadow-xs z-20">
         <div>
           {/* Logo Brand at Top */}
           <div className="h-16 px-6 flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800/80">
@@ -373,32 +373,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
         </div>
       </aside>
 
-      {/* 2. RIGHT MAIN BODY (Matching Image 1) */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
+      {/* 2. RIGHT MAIN BODY (Full width on Mobile) */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden w-full">
         {/* Top Header Bar */}
-        <header className="h-16 px-6 bg-white dark:bg-[#111827] border-b border-zinc-200/80 dark:border-zinc-800 flex items-center justify-between shrink-0 shadow-xs">
+        <header className="h-16 px-4 sm:px-6 bg-white dark:bg-[#111827] border-b border-zinc-200/80 dark:border-zinc-800 flex items-center justify-between shrink-0 shadow-xs gap-3">
           {/* Title + Online Pill */}
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <h1 className="text-base sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
               BecuGram Admin
             </h1>
-            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Online
             </span>
           </div>
 
           {/* Search Bar + Header Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Search Input matching Image 1 */}
-            <div className="relative">
+            <div className="relative hidden md:block">
               <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={globalSearch}
                 onChange={(e) => setGlobalSearch(e.target.value)}
                 placeholder="Search users, logs, settings..."
-                className="w-64 lg:w-80 bg-zinc-100/90 dark:bg-zinc-800 border border-transparent dark:border-zinc-700/60 rounded-xl pl-9 pr-3.5 py-1.5 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 outline-none focus:bg-white dark:focus:bg-zinc-900 focus:border-zinc-300 transition-all"
+                className="w-48 lg:w-80 bg-zinc-100/90 dark:bg-zinc-800 border border-transparent dark:border-zinc-700/60 rounded-xl pl-9 pr-3.5 py-1.5 text-xs text-zinc-900 dark:text-white placeholder-zinc-400 outline-none focus:bg-white dark:focus:bg-zinc-900 focus:border-zinc-300 transition-all"
               />
             </div>
 
@@ -413,20 +413,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
             </button>
 
             {/* Notifications Bell */}
-            <button className="p-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white hover:bg-zinc-50 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300 transition-colors">
+            <button className="hidden sm:flex p-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white hover:bg-zinc-50 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300 transition-colors">
               <Bell className="w-4 h-4" />
             </button>
 
-            {/* Settings Gear */}
-            <button
-              onClick={() => setActiveTab('ui')}
-              className="p-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white hover:bg-zinc-50 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300 transition-colors"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
-
             {/* Super Admin Avatar with Blue Verified Badge */}
-            <div className="flex items-center gap-2 pl-2 border-l border-zinc-200 dark:border-zinc-700">
+            <div className="flex items-center gap-2 pl-1 sm:pl-2 border-l border-zinc-200 dark:border-zinc-700">
               <div className="relative">
                 <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
                   A
@@ -436,41 +428,77 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                 </span>
               </div>
             </div>
+
+            {/* Close Button: Explicit and prominent */}
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 transition-colors ml-1"
+              title="Chiqish"
+            >
+              <X className="w-4 h-4 stroke-[2.5]" />
+            </button>
           </div>
         </header>
 
+        {/* Mobile Horizontal Tabs for Tablets & Phones (< lg) */}
+        <div className="lg:hidden flex items-center gap-1.5 px-3 py-2 border-b border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-[#111827] overflow-x-auto scrollbar-none shrink-0">
+          {[
+            { id: 'users', label: 'Users', icon: Users },
+            { id: 'chats', label: 'Live Chats', icon: MessageSquare },
+            { id: 'ui', label: 'UI Customizer', icon: Sliders },
+            { id: 'broadcast', label: 'Broadcast', icon: Megaphone },
+            { id: 'sms', label: 'SMS Gateway', icon: Smartphone },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-xs'
+                    : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white bg-zinc-50 dark:bg-zinc-800/60'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Scrollable Dashboard Workspace */}
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        <main className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-4 sm:space-y-6">
           {/* 4 KPI METRIC CARDS ROW (Exact match to Image 1) */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Card 1: Total Users */}
-            <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 border border-zinc-200/80 dark:border-zinc-800 shadow-xs">
-              <span className="text-xs font-semibold text-zinc-400 block mb-1">Total Users:</span>
-              <span className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 sm:p-5 border border-zinc-200/80 dark:border-zinc-800 shadow-xs">
+              <span className="text-[11px] sm:text-xs font-semibold text-zinc-400 block mb-1">Total Users:</span>
+              <span className="text-xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
                 {stats?.totalUsers?.toLocaleString() || (users.length > 0 ? users.length.toLocaleString() : '24,852')}
               </span>
             </div>
 
             {/* Card 2: Messages */}
-            <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 border border-zinc-200/80 dark:border-zinc-800 shadow-xs">
-              <span className="text-xs font-semibold text-zinc-400 block mb-1">Messages:</span>
-              <span className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 sm:p-5 border border-zinc-200/80 dark:border-zinc-800 shadow-xs">
+              <span className="text-[11px] sm:text-xs font-semibold text-zinc-400 block mb-1">Messages:</span>
+              <span className="text-xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
                 {stats?.totalMessages?.toLocaleString() || '142,891'}
               </span>
             </div>
 
             {/* Card 3: Active Chats */}
-            <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 border border-zinc-200/80 dark:border-zinc-800 shadow-xs">
-              <span className="text-xs font-semibold text-zinc-400 block mb-1">Active Chats:</span>
-              <span className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 sm:p-5 border border-zinc-200/80 dark:border-zinc-800 shadow-xs">
+              <span className="text-[11px] sm:text-xs font-semibold text-zinc-400 block mb-1">Active Chats:</span>
+              <span className="text-xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
                 {stats?.totalChats?.toLocaleString() || conversations.length || '384'}
               </span>
             </div>
 
             {/* Card 4: SMS Balance */}
-            <div className="bg-white dark:bg-[#111827] rounded-2xl p-5 border border-zinc-200/80 dark:border-zinc-800 shadow-xs">
-              <span className="text-xs font-semibold text-zinc-400 block mb-1">SMS Balance:</span>
-              <span className="text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
+            <div className="bg-white dark:bg-[#111827] rounded-2xl p-4 sm:p-5 border border-zinc-200/80 dark:border-zinc-800 shadow-xs">
+              <span className="text-[11px] sm:text-xs font-semibold text-zinc-400 block mb-1">SMS Balance:</span>
+              <span className="text-xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
                 {stats?.smsProvider?.isConfigured && stats.smsProvider.details?.balance
                   ? `${stats.smsProvider.details.balance} SMS`
                   : '$1,245.50'}
@@ -479,9 +507,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           </div>
 
           {/* MAIN TWO-COLUMN DASHBOARD GRID (Exact match to Image 1) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
             {/* LEFT / CENTER: USER MANAGEMENT TABLE (Cols 8) */}
-            <div className="lg:col-span-8 bg-white dark:bg-[#111827] rounded-2xl border border-zinc-200/80 dark:border-zinc-800 p-5 shadow-xs">
+            <div className="lg:col-span-8 bg-white dark:bg-[#111827] rounded-2xl border border-zinc-200/80 dark:border-zinc-800 p-4 sm:p-5 shadow-xs overflow-hidden">
               {/* Card Header */}
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-bold text-zinc-900 dark:text-white tracking-tight">
@@ -494,14 +522,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
                     placeholder="Qidirish..."
-                    className="w-48 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg pl-8 pr-3 py-1 text-xs outline-none focus:border-blue-500"
+                    className="w-36 sm:w-48 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg pl-8 pr-3 py-1 text-xs outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
 
-              {/* Table */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+              {/* Table with horizontal scroll */}
+              <div className="overflow-x-auto scrollbar-thin">
+                <table className="w-full text-left text-xs min-w-[540px]">
                   <thead>
                     <tr className="border-b border-zinc-100 dark:border-zinc-800 text-zinc-400 font-semibold uppercase text-[10px] tracking-wider">
                       <th className="py-2.5 px-3">User</th>
