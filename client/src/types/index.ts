@@ -11,6 +11,7 @@ export interface User {
   isBanned?: boolean;
   isProfileComplete?: boolean;
   lastSeen?: string;
+  blockedUsers?: string[];
   privacySettings?: {
     lastSeenVisibility: 'everyone' | 'contacts' | 'nobody';
     phoneVisibility: 'everyone' | 'contacts' | 'nobody';
@@ -46,14 +47,20 @@ export interface Message {
   _id: string;
   conversationId: string;
   senderId: User | string;
-  type: 'text' | 'image' | 'video' | 'audio' | 'voice' | 'document' | 'system';
+  type: 'text' | 'image' | 'video' | 'audio' | 'voice' | 'document' | 'system' | 'sticker';
   content: string;
   media?: MessageMedia;
   replyTo?: Message;
+  forwardedFrom?: {
+    _id?: string;
+    displayName: string;
+    username?: string;
+  };
   reactions?: MessageReaction[];
   deliveredTo?: string[];
   readBy?: string[];
   isRead?: boolean;
+  isPinned?: boolean;
   isEdited?: boolean;
   editedAt?: string;
   isDeleted?: boolean;
@@ -81,6 +88,8 @@ export interface Conversation {
   lastMessage?: Message;
   lastMessageAt: string;
   isPinned?: boolean;
+  pinnedMessageId?: string;
+  pinnedMessage?: Message;
   isMuted?: boolean;
   unreadCount: number;
   createdAt: string;

@@ -234,3 +234,18 @@ export async function deleteChat(req: AuthenticatedRequest, res: Response): Prom
 
   res.status(200).json({ success: true, message: 'Chat deleted successfully.' });
 }
+
+export async function pinChatMessage(req: AuthenticatedRequest, res: Response): Promise<void> {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const messageId = Array.isArray(req.params.messageId) ? req.params.messageId[0] : req.params.messageId;
+  const { pinConversationMessage } = await import('../utils/dataStore.js');
+  const updated = pinConversationMessage(id, messageId);
+  res.status(200).json({ success: true, data: updated });
+}
+
+export async function unpinChatMessage(req: AuthenticatedRequest, res: Response): Promise<void> {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const { unpinConversationMessage } = await import('../utils/dataStore.js');
+  const updated = unpinConversationMessage(id);
+  res.status(200).json({ success: true, data: updated });
+}

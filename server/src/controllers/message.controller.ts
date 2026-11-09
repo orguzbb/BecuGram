@@ -65,14 +65,41 @@ export async function sendMessage(req: AuthenticatedRequest, res: Response): Pro
   const currentUserId = req.user?.userId || 'user_default';
   const rawId = req.params.id;
   const conversationId = Array.isArray(rawId) ? rawId[0] : rawId;
-  const { content, type = 'text', media, replyToId } = req.body;
+  const { content, type = 'text', media, replyToId, forwardedFrom } = req.body;
 
-  if (!content && !media) {
+  if (!content && !media && type !== 'sticker') {
     res.status(400).json({
       success: false,
       error: { code: 'EMPTY_MESSAGE', message: 'Message content or media is required.' },
     });
     return;
+  }
+
+  // Check if conversation is blocked
+  const { getStoredUser, getUserConversations } = await import('../utils/dataStore.js');
+  const senderUser = getStoredUser(currentUserId);
+  const userChats = getUserConversations(currentUserId);
+  const currentChat = userChats.find((c) => c._id === conversationId);
+
+  if (currentChat && currentChat.type === 'direct') {
+    const partnerId = currentChat.participants.find((p) => p !== currentUserId);
+    if (partnerId) {
+      const partnerUser = getStoredUser(partnerId);
+      if (partnerUser?.blockedUsers?.includes(currentUserId)) {
+        res.status(403).json({
+          success: false,
+          error: { code: 'USER_BLOCKED', message: "Siz ushbu foydalanuvchi tomonidan bloklangansiz." },
+        });
+        return;
+      }
+      if (senderUser?.blockedUsers?.includes(partnerId)) {
+        res.status(403).json({
+          success: false,
+          error: { code: 'YOU_BLOCKED_USER', message: "Siz bu foydalanuvchini bloklagansiz. Xabar yuborish uchun avval blokdan chiqaring." },
+        });
+        return;
+      }
+    }
   }
 
   // Get current user display details
@@ -105,6 +132,7 @@ export async function sendMessage(req: AuthenticatedRequest, res: Response): Pro
     content: content || '',
     media,
     replyTo: replyObj,
+    forwardedFrom,
     reactions: [],
     readBy: [currentUserId],
     createdAt: new Date().toISOString(),

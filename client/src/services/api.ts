@@ -177,11 +177,34 @@ class ApiService {
     content: string;
     media?: any;
     replyToId?: string;
+    forwardedFrom?: { _id?: string; displayName: string; username?: string };
   }): Promise<Message> {
     return this.request<Message>(`/chats/${conversationId}/messages`, {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  }
+
+  async pinMessage(chatId: string, messageId: string): Promise<Conversation> {
+    return this.request<Conversation>(`/chats/${chatId}/pin-message/${messageId}`, {
+      method: 'POST',
+    });
+  }
+
+  async unpinMessage(chatId: string): Promise<Conversation> {
+    return this.request<Conversation>(`/chats/${chatId}/pin-message`, {
+      method: 'DELETE',
+    });
+  }
+
+  async toggleBlockUser(userId: string): Promise<{ isBlocked: boolean; blockedUsers: string[] }> {
+    return this.request<{ isBlocked: boolean; blockedUsers: string[] }>(`/users/toggle-block/${userId}`, {
+      method: 'POST',
+    });
+  }
+
+  async getBlockedUsers(): Promise<User[]> {
+    return this.request<User[]>('/users/blocked');
   }
 
   async markChatRead(conversationId: string): Promise<void> {

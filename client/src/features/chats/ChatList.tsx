@@ -111,7 +111,7 @@ export const ChatList: React.FC<ChatListProps> = ({
       id: 'story_default_1',
       userId: 'official',
       userName: 'BecuGram News',
-      caption: 'Yangi animatsiyali reaksiyalar va Paxta dizayni qo‘shildi! 🌸',
+      caption: 'Yangi BecuGram 2.0 yangilanishi va animatsiyali reaksiyalar! 🚀',
       bgColor: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)',
       createdAt: new Date().toISOString(),
     },
@@ -612,7 +612,7 @@ export const ChatList: React.FC<ChatListProps> = ({
 
       {/* CHAT LIST SCROLL AREA */}
       <div className="flex-1 overflow-y-auto divide-y divide-zinc-50 dark:divide-zinc-800/40">
-        {/* ARXIV ROW AT TOP (Matching Image 2: PaxtaGram style Arxiv) */}
+        {/* ARXIV ROW AT TOP (Matching Image 2: BecuGram style Arxiv) */}
         {!showArchivedView && !searchQuery.trim() && (
           <div
             onClick={() => setShowArchivedView(true)}

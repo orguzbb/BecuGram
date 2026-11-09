@@ -15,12 +15,15 @@ import {
   Paperclip,
   Search,
   ChevronDown,
+  ChevronUp,
   CornerUpLeft,
   Edit2,
   Copy,
   Share2,
   Pin,
   Check,
+  Ban,
+  Sparkles,
 } from 'lucide-react';
 import { Avatar } from '../../components/Avatar';
 import { VoicePlayer } from '../../components/VoicePlayer';
@@ -83,6 +86,19 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
   // Call Modal state
   const [activeCall, setActiveCall] = useState<'audio' | 'video' | null>(null);
 
+  // In-Chat Search State
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentMatchIdx, setCurrentMatchIdx] = useState(0);
+
+  // Pinned Message State
+  const [pinnedMessage, setPinnedMessage] = useState<Message | null>(
+    conversation.pinnedMessage || null
+  );
+
+  // Picker Tab ('emoji' | 'stickers')
+  const [pickerTab, setPickerTab] = useState<'emoji' | 'stickers'>('emoji');
+
   // Emoji picker & header menu states
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
@@ -110,6 +126,61 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
     : isOnline
     ? 'onlayn'
     : 'oxirgi faollik yaqinda';
+
+  const isPartnerBlocked = Boolean(partner && user?.blockedUsers?.includes(partner._id));
+
+  // Compute matched message ids for in-chat search
+  const matchedMessageIds = messages
+    .filter(
+      (m) =>
+        searchQuery.trim() &&
+        m.content &&
+        m.content.toLowerCase().includes(searchQuery.toLowerCase().trim())
+    )
+    .map((m) => m._id);
+
+  const scrollToMessage = (msgId: string) => {
+    const el = document.getElementById(`msg-${msgId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('ring-2', 'ring-amber-400', 'ring-offset-2', 'rounded-2xl');
+      setTimeout(() => {
+        el.classList.remove('ring-2', 'ring-amber-400', 'ring-offset-2', 'rounded-2xl');
+      }, 2000);
+    }
+  };
+
+  const handleToggleBlockPartner = async () => {
+    if (!partner) return;
+    try {
+      const res = await api.toggleBlockUser(partner._id);
+      if (user) {
+        user.blockedUsers = res.blockedUsers;
+      }
+      showToast(
+        res.isBlocked
+          ? `${partner.displayName} bloklandi 🚫`
+          : `${partner.displayName} blokdan chiqarildi ✅`,
+        res.isBlocked ? 'warning' : 'success'
+      );
+    } catch {
+      showToast('Xatolik yuz berdi', 'error');
+    }
+  };
+
+  const handleSendSticker = async (stickerEmoji: string, _label: string) => {
+    setShowEmojiPicker(false);
+    try {
+      const newMsg = await api.sendMessage(conversation._id, {
+        content: stickerEmoji,
+        type: 'sticker',
+      });
+      setMessages((prev) => [...prev, newMsg]);
+      scrollToBottom(true);
+    } catch {
+      showToast('Stiker yuborishda xatolik', 'error');
+    }
+  };
 
   // Load message history
   useEffect(() => {
@@ -345,10 +416,18 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
     const msgToForward = forwardingMessage;
     setForwardingMessage(null);
     try {
+      const senderName =
+        typeof msgToForward.senderId === 'object' && msgToForward.senderId
+          ? msgToForward.senderId.displayName
+          : 'Foydalanuvchi';
+
       await api.sendMessage(targetConv._id, {
         content: msgToForward.content,
         type: msgToForward.type,
         media: msgToForward.media,
+        forwardedFrom: {
+          displayName: senderName,
+        },
       });
       const targetName = targetConv._id.startsWith('conv_saved_')
         ? 'Saqlanganlar'
@@ -361,9 +440,26 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
     }
   };
 
-  const handlePinMessage = (msg: Message) => {
+  const handlePinMessage = async (msg: Message) => {
     setContextMenuMessage(null);
-    showToast('Xabar suhbat tepasiga qadaldi 📌', 'success');
+    try {
+      await api.pinMessage(conversation._id, msg._id);
+      setPinnedMessage(msg);
+      showToast('Xabar suhbat tepasiga qadaldi 📌', 'success');
+    } catch {
+      setPinnedMessage(msg);
+      showToast('Xabar qadab qo‘yildi 📌', 'success');
+    }
+  };
+
+  const handleUnpinMessage = async () => {
+    try {
+      await api.unpinMessage(conversation._id);
+      setPinnedMessage(null);
+      showToast('Qadash bekor qilindi', 'info');
+    } catch {
+      setPinnedMessage(null);
+    }
   };
 
   const handleDeleteMessage = async (msg: Message) => {
@@ -567,8 +663,15 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
           )}
 
           <button
-            onClick={() => showToast('Qidiruv paneli', 'info')}
-            className="w-9 h-9 rounded-full hover:bg-zinc-100 text-zinc-600 dark:text-zinc-300 dark:hover:bg-[#15231F] flex items-center justify-center transition-colors"
+            onClick={() => {
+              setIsSearching(!isSearching);
+              if (isSearching) setSearchQuery('');
+            }}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
+              isSearching
+                ? 'bg-[#2563EB] text-white shadow-sm'
+                : 'hover:bg-zinc-100 text-zinc-600 dark:text-zinc-300 dark:hover:bg-[#15231F]'
+            }`}
             title="Qidirish"
           >
             <Search className="w-4 h-4" />
@@ -588,7 +691,7 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
             {showHeaderMenu && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="absolute right-0 top-11 w-48 rounded-2xl bg-white dark:bg-[#14231E] border border-zinc-200 dark:border-[#233C33] shadow-2xl py-1.5 z-30 animate-fade-in text-xs"
+                className="absolute right-0 top-11 w-52 rounded-2xl bg-white dark:bg-[#14231E] border border-zinc-200 dark:border-[#233C33] shadow-2xl py-1.5 z-30 animate-fade-in text-xs"
               >
                 {partner && (
                   <button
@@ -600,6 +703,20 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
                   >
                     <UserIcon className="w-4 h-4 text-indigo-500" />
                     Profilni ko'rish
+                  </button>
+                )}
+                {partner && (
+                  <button
+                    onClick={() => {
+                      setShowHeaderMenu(false);
+                      handleToggleBlockPartner();
+                    }}
+                    className={`w-full px-3.5 py-2 text-left hover:bg-zinc-100 dark:hover:bg-[#1A2E26] flex items-center gap-2.5 ${
+                      isPartnerBlocked ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+                    }`}
+                  >
+                    <Ban className="w-4 h-4" />
+                    {isPartnerBlocked ? 'Blokdan chiqarish' : 'Foydalanuvchini bloklash'}
                   </button>
                 )}
                 <button
@@ -628,6 +745,100 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Pinned Message Banner */}
+      {pinnedMessage && (
+        <div
+          onClick={() => scrollToMessage(pinnedMessage._id)}
+          className="px-4 py-2 bg-white/95 dark:bg-[#14231E]/95 border-b border-zinc-200/60 dark:border-[#1F352E] flex items-center justify-between cursor-pointer hover:bg-zinc-50 dark:hover:bg-[#1C2C27] transition-colors z-10 shrink-0 shadow-xs"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Pin className="w-4 h-4 text-[#2563EB] shrink-0" />
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold text-[#2563EB] block uppercase tracking-wider">
+                Qadalgan xabar
+              </span>
+              <p className="text-xs text-zinc-600 dark:text-zinc-300 truncate max-w-xs sm:max-w-md">
+                {pinnedMessage.content || (pinnedMessage.type === 'voice' ? 'Ovozli xabar' : 'Media fayl')}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleUnpinMessage();
+            }}
+            className="w-6 h-6 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-400 flex items-center justify-center shrink-0"
+            title="Qadashdan chiqarish"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* In-Chat Search Bar */}
+      {isSearching && (
+        <div className="px-4 py-2 bg-white dark:bg-[#0E1715] border-b border-zinc-200 dark:border-[#1F352E] flex items-center gap-2 z-20 shrink-0 animate-fade-in shadow-xs">
+          <Search className="w-4 h-4 text-zinc-400 shrink-0" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentMatchIdx(0);
+            }}
+            placeholder="Xabarlardan qidirish..."
+            className="flex-1 bg-transparent text-sm text-zinc-900 dark:text-white placeholder-zinc-400 outline-none"
+            autoFocus
+          />
+          {searchQuery && (
+            <span className="text-xs text-zinc-400 font-mono shrink-0">
+              {matchedMessageIds.length > 0
+                ? `${currentMatchIdx + 1} / ${matchedMessageIds.length}`
+                : '0 / 0'}
+            </span>
+          )}
+          <div className="flex items-center gap-0.5 shrink-0">
+            <button
+              disabled={matchedMessageIds.length === 0}
+              onClick={() => {
+                if (matchedMessageIds.length === 0) return;
+                const nextIdx =
+                  (currentMatchIdx - 1 + matchedMessageIds.length) % matchedMessageIds.length;
+                setCurrentMatchIdx(nextIdx);
+                scrollToMessage(matchedMessageIds[nextIdx]);
+              }}
+              className="p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 disabled:opacity-30"
+              title="Oldingi"
+            >
+              <ChevronUp className="w-4 h-4" />
+            </button>
+            <button
+              disabled={matchedMessageIds.length === 0}
+              onClick={() => {
+                if (matchedMessageIds.length === 0) return;
+                const nextIdx = (currentMatchIdx + 1) % matchedMessageIds.length;
+                setCurrentMatchIdx(nextIdx);
+                scrollToMessage(matchedMessageIds[nextIdx]);
+              }}
+              className="p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 disabled:opacity-30"
+              title="Keyingi"
+            >
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
+                setIsSearching(false);
+                setSearchQuery('');
+              }}
+              className="p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 ml-1"
+              title="Yopish"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Messages Scroll Area */}
       <div
@@ -664,7 +875,8 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
             return (
               <div
                 key={msg._id}
-                className={`flex flex-col relative group ${isMe ? 'items-end' : 'items-start'} ${
+                id={`msg-${msg._id}`}
+                className={`flex flex-col relative group transition-all duration-300 ${isMe ? 'items-end' : 'items-start'} ${
                   msg.reactions && msg.reactions.length > 0 ? 'mb-4' : ''
                 }`}
               >
@@ -689,11 +901,21 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
                     setContextMenuMessage(msg);
                   }}
                   className={`relative max-w-[85%] sm:max-w-[70%] px-3.5 py-2.5 rounded-2xl text-[14px] shadow-sm cursor-pointer select-none transition-all active:scale-[0.98] ${
-                    isMe
+                    msg.type === 'sticker'
+                      ? 'bg-transparent border-0 shadow-none !p-1'
+                      : isMe
                       ? 'bg-[#2563EB] text-white rounded-tr-sm shadow-blue-500/10'
                       : 'bg-white dark:bg-[#15231F] text-zinc-900 dark:text-zinc-100 border border-zinc-200/70 dark:border-[#21372F] rounded-tl-sm'
                   }`}
                 >
+                  {/* Forwarded Reference Header */}
+                  {msg.forwardedFrom && (
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-300 dark:text-blue-400 mb-1 opacity-95">
+                      <Share2 className="w-3 h-3 stroke-[2.2]" />
+                      <span>Uzatilgan xabar: {msg.forwardedFrom.displayName}</span>
+                    </div>
+                  )}
+
                   {/* Quoted Reply reference block */}
                   {msg.replyTo && (
                     <div
@@ -719,8 +941,14 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
                     </div>
                   )}
 
-                  {/* Voice message rendering */}
-                  {msg.type === 'voice' ? (
+                  {/* Sticker / Voice / Text message rendering */}
+                  {msg.type === 'sticker' ? (
+                    <div className="p-1 select-none flex items-center justify-center">
+                      <span className="text-6xl p-2 select-none filter drop-shadow-md hover:scale-110 active:scale-95 transition-transform">
+                        {msg.content}
+                      </span>
+                    </div>
+                  ) : msg.type === 'voice' ? (
                     <VoicePlayer
                       url={msg.media?.url || ''}
                       duration={msg.media?.duration || 45}
@@ -728,7 +956,24 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
                     />
                   ) : (
                     <p className="whitespace-pre-wrap leading-relaxed break-words">
-                      {msg.content}
+                      {searchQuery.trim() && msg.content ? (
+                        (() => {
+                          const query = searchQuery.trim();
+                          const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                          const parts = msg.content.split(regex);
+                          return parts.map((part, i) =>
+                            part.toLowerCase() === query.toLowerCase() ? (
+                              <mark key={i} className="bg-amber-300 text-black px-0.5 rounded font-bold">
+                                {part}
+                              </mark>
+                            ) : (
+                              part
+                            )
+                          );
+                        })()
+                      ) : (
+                        msg.content
+                      )}
                     </p>
                   )}
 
@@ -1034,6 +1279,20 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
             </button>
           </div>
         </div>
+      ) : isPartnerBlocked ? (
+        /* Blocked Banner in Composer area */
+        <div className="p-4 bg-zinc-100 dark:bg-[#0E1715] border-t border-zinc-200 dark:border-[#1C2C27] flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left animate-fade-in">
+          <div className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
+            <Ban className="w-4 h-4 text-red-500 shrink-0" />
+            <span>Siz bu foydalanuvchini bloklagansiz. Xabar almashish cheklangan.</span>
+          </div>
+          <button
+            onClick={handleToggleBlockPartner}
+            className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all active:scale-95 shadow-sm"
+          >
+            Blokdan chiqarish
+          </button>
+        </div>
       ) : (
         /* Message Composer matching Image 2 & 5 */
         <form
@@ -1058,7 +1317,7 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
                 setShowEmojiPicker(!showEmojiPicker);
               }}
               className="text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white transition-colors mr-2"
-              title="Reaksiyalar"
+              title="Reaksiyalar va stikerlar"
             >
               <Smile className="w-5 h-5 stroke-[2]" />
             </button>
@@ -1105,6 +1364,97 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
             </button>
           )}
         </form>
+      )}
+
+      {/* Emoji & Animated Stickers Picker Popup */}
+      {showEmojiPicker && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="absolute bottom-20 left-4 z-40 w-80 max-w-[calc(100vw-32px)] bg-white dark:bg-[#121E1B] border border-zinc-200 dark:border-[#233830] rounded-2xl shadow-2xl p-3 animate-scale-in"
+        >
+          {/* Tabs: Emojilar | Stikerlar */}
+          <div className="flex items-center gap-1 p-1 bg-zinc-100 dark:bg-[#0E1715] rounded-xl mb-2.5">
+            <button
+              type="button"
+              onClick={() => setPickerTab('emoji')}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                pickerTab === 'emoji'
+                  ? 'bg-white dark:bg-[#1A2E26] text-zinc-900 dark:text-white shadow-xs'
+                  : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400'
+              }`}
+            >
+              😊 Emojilar
+            </button>
+            <button
+              type="button"
+              onClick={() => setPickerTab('stickers')}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                pickerTab === 'stickers'
+                  ? 'bg-white dark:bg-[#1A2E26] text-zinc-900 dark:text-white shadow-xs'
+                  : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400'
+              }`}
+            >
+              ⚡ Stikerlar
+            </button>
+          </div>
+
+          {/* EMOJIS GRID */}
+          {pickerTab === 'emoji' ? (
+            <div className="grid grid-cols-8 gap-1.5 max-h-48 overflow-y-auto p-1">
+              {[
+                '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣',
+                '😊', '😇', '🙂', '😉', '😌', '😍', '🥰', '😘',
+                '😋', '😛', '😜', '🤪', '😎', '🥳', '😏', '😒',
+                '🤔', '🤫', '🤭', '🫡', '🤐', '🤨', '😐', '😑',
+                '👍', '👎', '👏', '🙌', '🫶', '🤝', '🔥', '✨',
+                '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍',
+                '💯', '🎉', '🚀', '⭐', '⚡', '🏆', '☕', '💎',
+              ].map((emoji, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setInputText((prev) => prev + emoji);
+                    inputRef.current?.focus();
+                  }}
+                  className="w-8 h-8 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-center text-lg active:scale-90 transition-transform"
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          ) : (
+            /* STICKERS GRID */
+            <div className="grid grid-cols-3 gap-2 max-h-56 overflow-y-auto p-1">
+              {[
+                { emoji: '🚀', label: 'Uchdik!' },
+                { emoji: '🔥', label: 'Qaynoq' },
+                { emoji: '❤️', label: 'Muhabbat' },
+                { emoji: '🎉', label: 'Tabrik!' },
+                { emoji: '😂', label: 'Haha' },
+                { emoji: '👍', label: 'Zo‘r' },
+                { emoji: '😎', label: 'Salqin' },
+                { emoji: '🫡', label: 'Xizmatda' },
+                { emoji: '💯', label: 'Aniq 100' },
+                { emoji: '✨', label: 'Sehrli' },
+                { emoji: '🤝', label: 'Kelishdik' },
+                { emoji: '👋', label: 'Salom!' },
+              ].map((st, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSendSticker(st.emoji, st.label)}
+                  className="p-2.5 rounded-xl bg-zinc-50 dark:bg-[#0E1715] hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-zinc-100 dark:border-zinc-800 flex flex-col items-center justify-center gap-1 active:scale-95 transition-all group"
+                >
+                  <span className="text-3xl group-hover:scale-110 transition-transform">{st.emoji}</span>
+                  <span className="text-[10px] font-semibold text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500">
+                    {st.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Forward Message Selection Modal */}

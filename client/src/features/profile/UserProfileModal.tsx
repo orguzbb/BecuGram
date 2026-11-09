@@ -12,12 +12,14 @@ import {
   Film,
   Link2,
   X,
+  Ban,
 } from 'lucide-react';
 import { Avatar } from '../../components/Avatar';
 import { CallModal } from '../../components/CallModal';
 import { User, Message } from '../../types';
 import { formatPhoneDisplay } from '../../utils/phone';
 import { useToast } from '../../components/Toast';
+import { useAuthStore } from '../../stores/authStore';
 import { api } from '../../services/api';
 
 interface UserProfileModalProps {
@@ -34,10 +36,32 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onStartChat,
 }) => {
   const { showToast } = useToast();
+  const { user: currentUser } = useAuthStore();
+  const [isBlocked, setIsBlocked] = useState(() => {
+    return Boolean(currentUser?.blockedUsers?.includes(user._id));
+  });
   const [activeTab, setActiveTab] = useState<'photos' | 'videos' | 'files' | 'links'>('photos');
   const [activeCall, setActiveCall] = useState<'audio' | 'video' | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isLoadingMedia, setIsLoadingMedia] = useState(false);
+
+  const handleToggleBlock = async () => {
+    try {
+      const res = await api.toggleBlockUser(user._id);
+      setIsBlocked(res.isBlocked);
+      if (currentUser) {
+        currentUser.blockedUsers = res.blockedUsers;
+      }
+      showToast(
+        res.isBlocked
+          ? `${user.displayName} bloklandi 🚫`
+          : `${user.displayName} blokdan chiqarildi ✅`,
+        res.isBlocked ? 'warning' : 'success'
+      );
+    } catch {
+      showToast('Xatolik yuz berdi', 'error');
+    }
+  };
 
   // Real shared media extracted from actual conversation messages
   const [realMedia, setRealMedia] = useState<{
@@ -434,6 +458,21 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 </>
               )}
             </div>
+          </div>
+
+          {/* Block / Unblock User Action */}
+          <div className="p-4 border-t border-zinc-200 dark:border-[#1C2C27] bg-zinc-50/50 dark:bg-[#0E1715]/50">
+            <button
+              onClick={handleToggleBlock}
+              className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-98 shadow-xs ${
+                isBlocked
+                  ? 'bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200'
+                  : 'bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 border border-red-200/60 dark:border-red-900/40'
+              }`}
+            >
+              <Ban className="w-4 h-4" />
+              <span>{isBlocked ? 'Foydalanuvchini blokdan chiqarish' : 'Foydalanuvchini bloklash'}</span>
+            </button>
           </div>
         </div>
       </div>

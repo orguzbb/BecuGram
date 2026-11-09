@@ -46,6 +46,7 @@ export interface StoredUser {
   bannedAt?: string;
   bannedReason?: string;
   isProfileComplete?: boolean;
+  blockedUsers?: string[];
   createdAt: string;
 }
 
@@ -59,6 +60,8 @@ export interface StoredConversation {
   lastMessageAt?: string;
   unreadCount?: number;
   isPinned?: boolean;
+  pinnedMessageId?: string;
+  pinnedMessage?: any;
   isMuted?: boolean;
   createdAt: string;
 }
@@ -67,12 +70,18 @@ export interface StoredMessage {
   _id: string;
   conversationId: string;
   senderId: any;
-  type: 'text' | 'image' | 'video' | 'audio' | 'voice' | 'file';
+  type: 'text' | 'image' | 'video' | 'audio' | 'voice' | 'file' | 'sticker';
   content?: string;
   media?: any;
   replyTo?: any;
+  forwardedFrom?: {
+    _id?: string;
+    displayName: string;
+    username?: string;
+  };
   reactions?: { userId: string; emoji: string }[];
   readBy?: string[];
+  isPinned?: boolean;
   isDeleted?: boolean;
   createdAt: string;
 }
@@ -436,4 +445,48 @@ export function getStoredStats() {
     bannedUsers: banned,
   };
 }
+
+export function pinConversationMessage(conversationId: string, messageId: string): StoredConversation | null {
+  const allChats = getAllStoredConversations();
+  const allMessages = getAllStoredMessages();
+  const chatIndex = allChats.findIndex((c) => c._id === conversationId);
+  if (chatIndex < 0) return null;
+
+  const targetMsg = allMessages.find((m) => m._id === messageId);
+  allChats[chatIndex].pinnedMessageId = messageId;
+  allChats[chatIndex].pinnedMessage = targetMsg || null;
+  saveUserConversations(allChats);
+  return allChats[chatIndex];
+}
+
+export function unpinConversationMessage(conversationId: string): StoredConversation | null {
+  const allChats = getAllStoredConversations();
+  const chatIndex = allChats.findIndex((c) => c._id === conversationId);
+  if (chatIndex < 0) return null;
+
+  delete allChats[chatIndex].pinnedMessageId;
+  delete allChats[chatIndex].pinnedMessage;
+  saveUserConversations(allChats);
+  return allChats[chatIndex];
+}
+
+export function toggleBlockUser(userId: string, targetUserId: string): { isBlocked: boolean; blockedUsers: string[] } {
+  const user = getStoredUser(userId);
+  if (!user) return { isBlocked: false, blockedUsers: [] };
+
+  const currentBlocked = user.blockedUsers || [];
+  const exists = currentBlocked.includes(targetUserId);
+  let updated: string[];
+
+  if (exists) {
+    updated = currentBlocked.filter((id) => id !== targetUserId);
+  } else {
+    updated = [...currentBlocked, targetUserId];
+  }
+
+  user.blockedUsers = updated;
+  saveStoredUser(user);
+  return { isBlocked: !exists, blockedUsers: updated };
+}
+
 

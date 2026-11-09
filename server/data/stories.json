@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "id": "story_1794230404749",
+    "userId": "user_default",
+    "userName": "Foydalanuvchi",
+    "caption": "TEST",
+    "bgColor": "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
+    "createdAt": "2026-11-09T13:20:04.749Z"
+  }
+]

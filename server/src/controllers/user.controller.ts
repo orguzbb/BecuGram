@@ -220,3 +220,30 @@ export async function getUserByUsername(req: AuthenticatedRequest, res: Response
     },
   });
 }
+
+export async function toggleBlockUserHandler(req: AuthenticatedRequest, res: Response): Promise<void> {
+  const currentUserId = req.user?.userId || 'user_default';
+  const targetUserId = Array.isArray(req.params.userId) ? req.params.userId[0] : req.params.userId;
+
+  const { toggleBlockUser } = await import('../utils/dataStore.js');
+  const result = toggleBlockUser(currentUserId, targetUserId);
+
+  res.status(200).json({
+    success: true,
+    data: result,
+  });
+}
+
+export async function getBlockedUsersHandler(req: AuthenticatedRequest, res: Response): Promise<void> {
+  const currentUserId = req.user?.userId || 'user_default';
+  const { getStoredUser, getAllStoredUsers } = await import('../utils/dataStore.js');
+  const user = getStoredUser(currentUserId);
+  const blockedIds = user?.blockedUsers || [];
+  const all = getAllStoredUsers();
+  const blockedList = all.filter((u) => blockedIds.includes(u._id));
+
+  res.status(200).json({
+    success: true,
+    data: blockedList,
+  });
+}

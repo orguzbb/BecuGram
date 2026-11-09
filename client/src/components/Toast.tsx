@@ -1,14 +1,16 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react';
+
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 interface Toast {
   id: string;
-  type: 'success' | 'error' | 'info';
+  type: ToastType;
   message: string;
 }
 
 interface ToastContextType {
-  showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+  showToast: (message: string, type?: ToastType) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -16,7 +18,7 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const showToast = useCallback((message: string, type: ToastType = 'info') => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, type, message }]);
 
@@ -41,12 +43,15 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 ? 'bg-[#122b22]/95 border-[#35CBA0]/40 text-[#EDF4F1]'
                 : toast.type === 'error'
                 ? 'bg-[#2d1217]/95 border-[#F43F5E]/40 text-[#EDF4F1]'
+                : toast.type === 'warning'
+                ? 'bg-[#2d2212]/95 border-[#F59E0B]/40 text-[#EDF4F1]'
                 : 'bg-[#162420]/95 border-[#233832] text-[#EDF4F1]'
             }`}
           >
             <div className="flex items-center gap-3">
               {toast.type === 'success' && <CheckCircle2 className="w-5 h-5 text-[#35CBA0] shrink-0" />}
               {toast.type === 'error' && <AlertCircle className="w-5 h-5 text-[#F43F5E] shrink-0" />}
+              {toast.type === 'warning' && <AlertTriangle className="w-5 h-5 text-[#F59E0B] shrink-0" />}
               {toast.type === 'info' && <Info className="w-5 h-5 text-cyan-400 shrink-0" />}
               <span className="text-sm font-medium">{toast.message}</span>
             </div>
