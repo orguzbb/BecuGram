@@ -118,7 +118,7 @@ export async function sendMessage(req: AuthenticatedRequest, res: Response): Pro
     if (io) {
       io.to(conversationId).emit('message:new', messageDoc);
     }
-  } catch {}
+  } catch { }
 
   res.status(201).json({
     success: true,
@@ -148,7 +148,7 @@ export async function reactToMessage(req: AuthenticatedRequest, res: Response): 
           reactions: updated.reactions,
         });
       }
-    } catch {}
+    } catch { }
   }
 
   res.status(200).json({
@@ -169,7 +169,7 @@ export async function editMessage(req: AuthenticatedRequest, res: Response): Pro
   if (mongoose.connection.readyState === 1) {
     try {
       await Message.findByIdAndUpdate(messageId, { content, isEdited: true });
-    } catch {}
+    } catch { }
   }
 
   res.status(200).json({
@@ -203,7 +203,7 @@ export async function deleteMessage(req: AuthenticatedRequest, res: Response): P
         conversationId: deleted.conversationId,
       });
     }
-  } catch {}
+  } catch { }
 
   res.status(200).json({
     success: true,

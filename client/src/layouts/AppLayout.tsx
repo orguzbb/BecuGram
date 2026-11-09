@@ -262,6 +262,7 @@ export const AppLayout: React.FC = () => {
       {viewingProfileUser && (
         <UserProfileModal
           user={viewingProfileUser}
+          conversationId={activeConversation?._id}
           onClose={() => setViewingProfileUser(null)}
           onStartChat={(uid) => {
             setViewingProfileUser(null);

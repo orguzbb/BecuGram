@@ -49,27 +49,23 @@
       "memberCount": 1,
       "description": "Official announcements, tips and security updates."
     },
-    "lastMessage": {
-      "_id": "msg_1794221613599_s5x3b",
-      "conversationId": "conv_official_6af0a01a7d27b76a8fee65f8",
-      "senderId": {
-        "_id": "6af0a01a7d27b76a8fee65f8",
-        "displayName": "Abdurahim",
-        "username": "admin",
-        "avatar": ""
-      },
-      "type": "text",
-      "content": "baba",
-      "reactions": [],
-      "readBy": [
-        "6af0a01a7d27b76a8fee65f8"
-      ],
-      "createdAt": "2026-11-09T10:53:33.599Z"
-    },
-    "lastMessageAt": "2026-11-09T10:53:33.599Z",
     "unreadCount": 1,
     "isPinned": false,
     "isMuted": false,
-    "createdAt": "2026-11-08T16:14:22.972Z"
+    "createdAt": "2026-11-08T16:14:22.972Z",
+    "lastMessage": {
+      "_id": "msg_welcome_1794223286136",
+      "conversationId": "conv_official_6af0a01a7d27b76a8fee65f8",
+      "senderId": {
+        "_id": "system_becugram",
+        "displayName": "BecuGram Official",
+        "username": "becugram",
+        "avatar": ""
+      },
+      "type": "text",
+      "content": "👋 Xush kelibsiz! BecuGram — xavfsiz va zamonaviy xabar almashish platformasi.\n\nBu yerda siz do'stlaringizni taklif qilishingiz, guruhlar ochishingiz, ovozli xabarlar va fotosuratlar yuborishingiz mumkin.",
+      "createdAt": "2026-11-09T11:21:26.136Z"
+    },
+    "lastMessageAt": "2026-11-09T11:21:26.136Z"
   }
 ]

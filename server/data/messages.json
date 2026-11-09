@@ -1,35 +1,5 @@
 [
   {
-    "_id": "msg_welcome_1794154580044",
-    "conversationId": "conv_official_6af0a01a7d27b76a8fee65f8",
-    "senderId": {
-      "_id": "system_becugram",
-      "displayName": "BecuGram Official",
-      "username": "becugram",
-      "avatar": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&auto=format&fit=crop&q=80"
-    },
-    "type": "text",
-    "content": "👋 Xush kelibsiz! BecuGram — xavfsiz va zamonaviy xabar almashish platformasi.\n\nBu yerda siz do'stlaringizni taklif qilishingiz, guruhlar ochishingiz, ovozli xabarlar va fotosuratlar yuborishingiz mumkin.",
-    "createdAt": "2026-11-08T16:16:20.044Z"
-  },
-  {
-    "_id": "msg_1794154581870_fxc4e",
-    "conversationId": "conv_official_6af0a01a7d27b76a8fee65f8",
-    "senderId": {
-      "_id": "6af0a01a7d27b76a8fee65f8",
-      "displayName": "Abdurahim",
-      "username": "user_008081",
-      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80"
-    },
-    "type": "text",
-    "content": "hi",
-    "reactions": [],
-    "readBy": [
-      "6af0a01a7d27b76a8fee65f8"
-    ],
-    "createdAt": "2026-11-08T16:16:21.870Z"
-  },
-  {
     "_id": "msg_broadcast_1794154625918_8ja4",
     "conversationId": "conv_saved_6af0a01a7d27b76a8fee65f8",
     "senderId": {
@@ -41,19 +11,6 @@
     "type": "text",
     "content": "📢 [salom]:\nsalom",
     "createdAt": "2026-11-08T16:17:05.918Z"
-  },
-  {
-    "_id": "msg_broadcast_1794154625932_cang",
-    "conversationId": "conv_official_6af0a01a7d27b76a8fee65f8",
-    "senderId": {
-      "_id": "system_admin",
-      "displayName": "BecuGram Admin ✨",
-      "username": "admin",
-      "avatar": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&auto=format&fit=crop&q=80"
-    },
-    "type": "text",
-    "content": "📢 [salom]:\nsalom",
-    "createdAt": "2026-11-08T16:17:05.932Z"
   },
   {
     "_id": "msg_welcome_1794156307440",
@@ -158,20 +115,16 @@
     "createdAt": "2026-11-09T10:36:44.113Z"
   },
   {
-    "_id": "msg_1794221613599_s5x3b",
+    "_id": "msg_welcome_1794223286136",
     "conversationId": "conv_official_6af0a01a7d27b76a8fee65f8",
     "senderId": {
-      "_id": "6af0a01a7d27b76a8fee65f8",
-      "displayName": "Abdurahim",
-      "username": "admin",
+      "_id": "system_becugram",
+      "displayName": "BecuGram Official",
+      "username": "becugram",
       "avatar": ""
     },
     "type": "text",
-    "content": "baba",
-    "reactions": [],
-    "readBy": [
-      "6af0a01a7d27b76a8fee65f8"
-    ],
-    "createdAt": "2026-11-09T10:53:33.599Z"
+    "content": "👋 Xush kelibsiz! BecuGram — xavfsiz va zamonaviy xabar almashish platformasi.\n\nBu yerda siz do'stlaringizni taklif qilishingiz, guruhlar ochishingiz, ovozli xabarlar va fotosuratlar yuborishingiz mumkin.",
+    "createdAt": "2026-11-09T11:21:26.136Z"
   }
 ]

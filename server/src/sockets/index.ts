@@ -125,6 +125,38 @@ export function initSocketIO(httpServer: HttpServer, clientUrl: string): SocketI
       });
     });
 
+    // Real Call Signaling
+    socket.on('call:start', ({ targetUserId, type }: { targetUserId: string; type: 'audio' | 'video' }) => {
+      socket.to(`user:${targetUserId}`).emit('call:incoming', {
+        callerId: userId,
+        type,
+      });
+    });
+
+    socket.on('call:accepted', ({ targetUserId }: { targetUserId: string }) => {
+      socket.to(`user:${targetUserId}`).emit('call:accepted', {
+        acceptedBy: userId,
+      });
+    });
+
+    socket.on('call:rejected', ({ targetUserId }: { targetUserId: string }) => {
+      socket.to(`user:${targetUserId}`).emit('call:rejected', {
+        rejectedBy: userId,
+      });
+    });
+
+    socket.on('call:cancel', ({ targetUserId }: { targetUserId: string }) => {
+      socket.to(`user:${targetUserId}`).emit('call:cancelled', {
+        cancelledBy: userId,
+      });
+    });
+
+    socket.on('call:end', ({ targetUserId }: { targetUserId: string }) => {
+      socket.to(`user:${targetUserId}`).emit('call:ended', {
+        endedBy: userId,
+      });
+    });
+
     // Handle Disconnect
     socket.on('disconnect', async () => {
       logger.info(`Socket disconnected: ${socket.id} (User: ${userId})`);

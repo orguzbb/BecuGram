@@ -1,13 +1,5 @@
 [
   {
-    "id": "story_1794221674694",
-    "userId": "user_default",
-    "userName": "Foydalanuvchi",
-    "caption": "test",
-    "bgColor": "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)",
-    "createdAt": "2026-11-09T10:54:34.694Z"
-  },
-  {
     "id": "story_official",
     "userId": "admin_official",
     "userName": "BecuGram Rasmiy",

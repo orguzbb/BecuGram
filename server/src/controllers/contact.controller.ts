@@ -10,6 +10,7 @@ import {
   deleteStoredContact,
   StoredContact,
   addOrUpdateConversation,
+  getAllStoredUsers,
 } from '../utils/dataStore.js';
 
 export async function getContacts(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -68,34 +69,126 @@ export async function addContact(req: AuthenticatedRequest, res: Response): Prom
     return;
   }
 
-  const cleanIdentifier = identifier.trim();
-  const contactName = customName?.trim() || cleanIdentifier;
-  const newUserId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+  const raw = String(identifier).trim();
+  const digitsOnly = raw.replace(/\D/g, '');
+  let normalizedPhone = '';
+  if (digitsOnly.length === 9) {
+    normalizedPhone = '+998' + digitsOnly;
+  } else if (digitsOnly.length === 12 && digitsOnly.startsWith('998')) {
+    normalizedPhone = '+' + digitsOnly;
+  } else if (digitsOnly.length > 5) {
+    normalizedPhone = '+' + digitsOnly;
+  }
+
+  const cleanUsername = raw.replace(/^@/, '').toLowerCase();
+
+  let foundUser: any = null;
+
+  // 1. Search in MongoDB if active
+  if (mongoose.connection.readyState === 1) {
+    try {
+      foundUser = await User.findOne({
+        $or: [
+          ...(normalizedPhone ? [{ phoneNumber: normalizedPhone }] : []),
+          { username: cleanUsername },
+          { _id: mongoose.isValidObjectId(raw) ? raw : undefined },
+        ],
+      });
+    } catch (err) {
+      console.error('Mongo search contact user error:', err);
+    }
+  }
+
+  // 2. Search in file storage (users.json)
+  if (!foundUser) {
+    const allUsers = getAllStoredUsers();
+    foundUser = allUsers.find(
+      (u) =>
+        (normalizedPhone && u.phoneNumber === normalizedPhone) ||
+        (u.username && u.username.toLowerCase() === cleanUsername) ||
+        u._id === raw ||
+        u.phoneNumber === raw
+    );
+  }
+
+  // CRITICAL: If the user is NOT registered in BecuGram, reject with 404!
+  if (!foundUser) {
+    res.status(404).json({
+      success: false,
+      error: {
+        code: 'USER_NOT_FOUND',
+        message: "Bunday foydalanuvchi BecuGram platformasida ro'yxatdan o'tmagan.",
+      },
+    });
+    return;
+  }
+
+  // Cannot add oneself as contact
+  if (foundUser._id === currentUserId) {
+    res.status(400).json({
+      success: false,
+      error: {
+        code: 'CANNOT_ADD_SELF',
+        message: "O'zingizni kontakt sifatida qo'sha olmaysiz.",
+      },
+    });
+    return;
+  }
+
+  // Check if contact already exists
+  const existingContacts = getUserContacts(currentUserId);
+  const alreadyAdded = existingContacts.find(
+    (c) => c.user._id === foundUser._id || (c.user.phoneNumber && c.user.phoneNumber === foundUser.phoneNumber)
+  );
+  if (alreadyAdded) {
+    res.status(400).json({
+      success: false,
+      error: {
+        code: 'CONTACT_ALREADY_EXISTS',
+        message: "Bu kontakt allaqachon ro'yxatingizda mavjud.",
+      },
+    });
+    return;
+  }
+
+  const contactName = customName?.trim() || foundUser.displayName || foundUser.username;
 
   const newContact: StoredContact = {
     _id: `contact_${Date.now()}`,
     userId: currentUserId,
     customName: contactName,
     user: {
-      _id: newUserId,
-      displayName: contactName,
-      username: cleanIdentifier.replace(/[@+]/g, '').toLowerCase(),
-      phoneNumber: cleanIdentifier.startsWith('+') ? cleanIdentifier : `+${cleanIdentifier}`,
-      avatar: '',
-      isOnline: true,
-      isVerified: false,
-      bio: 'BecuGram foydalanuvchisi',
+      _id: foundUser._id,
+      displayName: foundUser.displayName || contactName,
+      username: foundUser.username || '',
+      phoneNumber: foundUser.phoneNumber || '',
+      avatar: foundUser.avatar || '',
+      isOnline: Boolean(foundUser.isOnline),
+      isVerified: Boolean(foundUser.isVerified),
+      bio: foundUser.bio || '',
     },
     createdAt: new Date().toISOString(),
   };
 
   addStoredContact(newContact);
 
-  // Automatically create a ready direct conversation so user can chat immediately!
+  // If in MongoDB, also save to Contact collection
+  if (mongoose.connection.readyState === 1) {
+    try {
+      await Contact.create({
+        userId: currentUserId,
+        contactUserId: foundUser._id,
+        customName: contactName,
+      });
+    } catch {}
+  }
+
+  // Create direct conversation with real user
+  const convId = [currentUserId, foundUser._id].sort().join('_');
   addOrUpdateConversation({
-    _id: `conv_${currentUserId}_${newUserId}`,
+    _id: `conv_${convId}`,
     type: 'direct',
-    participants: [currentUserId, newUserId],
+    participants: [currentUserId, foundUser._id],
     partner: newContact.user,
     lastMessage: {
       type: 'text',

@@ -4,7 +4,7 @@ import { AuthenticatedRequest } from '../middleware/auth.js';
 import { User } from '../models/User.js';
 import { Message } from '../models/Message.js';
 import { Conversation } from '../models/Conversation.js';
-import { getStoredUser, saveStoredUser, StoredUser } from '../utils/dataStore.js';
+import { getStoredUser, saveStoredUser, getAllStoredUsers, StoredUser } from '../utils/dataStore.js';
 import { validateUsername } from '../utils/validators.js';
 
 function getMemoryDefaultUser(userId: string, username?: string, phoneNumber?: string): StoredUser {
@@ -17,7 +17,7 @@ function getMemoryDefaultUser(userId: string, username?: string, phoneNumber?: s
     username: username || 'abdurahim',
     phoneNumber: phoneNumber || '+998889008081',
     avatar: '',
-    bio: 'BecuGram foydalanuvchisi',
+    bio: 'BecuGram a\'zosi 🚀',
     isVerified: true,
     isOnline: true,
     createdAt: new Date().toISOString(),
@@ -154,7 +154,16 @@ export async function searchUsers(req: AuthenticatedRequest, res: Response): Pro
   }
 
   // Fallback in-memory
-  res.status(200).json({ success: true, data: [] });
+  const allUsers = getAllStoredUsers();
+  const qLower = query.toLowerCase();
+  const matched = allUsers
+    .filter((u) => u._id !== currentUserId)
+    .filter((u) =>
+      (u.username && u.username.toLowerCase().includes(qLower)) ||
+      (u.displayName && u.displayName.toLowerCase().includes(qLower)) ||
+      (u.phoneNumber && u.phoneNumber.includes(query))
+    );
+  res.status(200).json({ success: true, data: matched });
 }
 
 export async function getUserByUsername(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -183,20 +192,31 @@ export async function getUserByUsername(req: AuthenticatedRequest, res: Response
     } catch {}
   }
 
-  // Memory fallback
-  const memoryUser = getStoredUser(username) || {
-    _id: `user_${username}`,
-    displayName: username,
-    username,
-    avatar: '',
-    bio: 'BecuGram foydalanuvchisi',
-    isOnline: true,
-    isVerified: false,
-    sharedStats: { photos: 0, videos: 0, files: 0, links: 0 },
-  };
+  // Memory fallback - look up strictly registered users
+  const allUsers = getAllStoredUsers();
+  const found = allUsers.find(
+    (u) =>
+      u.username.toLowerCase() === username.toLowerCase() ||
+      u._id === username ||
+      u.phoneNumber === username
+  );
 
-  res.status(200).json({
-    success: true,
-    data: memoryUser,
+  if (found) {
+    res.status(200).json({
+      success: true,
+      data: {
+        ...found,
+        sharedStats: { photos: 0, videos: 0, files: 0, links: 0 },
+      },
+    });
+    return;
+  }
+
+  res.status(404).json({
+    success: false,
+    error: {
+      code: 'USER_NOT_FOUND',
+      message: "Bunday foydalanuvchi topilmadi.",
+    },
   });
 }
