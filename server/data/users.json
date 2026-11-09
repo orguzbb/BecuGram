@@ -1,0 +1,56 @@
+{
+  "6af0a01a7d27b76a8fee65f8": {
+    "_id": "6af0a01a7d27b76a8fee65f8",
+    "phoneNumber": "+998889008081",
+    "displayName": "Admin",
+    "username": "admin",
+    "avatar": "/uploads/images/1794157660529_b161afc1f3c88198d553a8425bced12a.jpg",
+    "bio": "BecuGram a'zosi 🚀",
+    "isOnline": true,
+    "isVerified": true,
+    "role": "admin",
+    "isBanned": false,
+    "isProfileComplete": true,
+    "createdAt": "2026-11-08T16:15:22.907Z"
+  },
+  "+998889008081": {
+    "_id": "6af0a01a7d27b76a8fee65f8",
+    "phoneNumber": "+998889008081",
+    "displayName": "Admin",
+    "username": "admin",
+    "avatar": "/uploads/images/1794157660529_b161afc1f3c88198d553a8425bced12a.jpg",
+    "bio": "BecuGram a'zosi 🚀",
+    "isOnline": true,
+    "isVerified": true,
+    "role": "admin",
+    "isBanned": false,
+    "isProfileComplete": true,
+    "createdAt": "2026-11-08T16:15:22.907Z"
+  },
+  "6af0a0987d27b76a8fee65f9": {
+    "_id": "6af0a0987d27b76a8fee65f9",
+    "phoneNumber": "+998777777777",
+    "displayName": "Foydalanuvchi",
+    "username": "user_777777",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+    "bio": "BecuGram a'zosi 🚀",
+    "isOnline": true,
+    "isVerified": true,
+    "role": "user",
+    "isBanned": false,
+    "createdAt": "2026-11-08T16:17:28.678Z"
+  },
+  "+998777777777": {
+    "_id": "6af0a0987d27b76a8fee65f9",
+    "phoneNumber": "+998777777777",
+    "displayName": "Foydalanuvchi",
+    "username": "user_777777",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+    "bio": "BecuGram a'zosi 🚀",
+    "isOnline": true,
+    "isVerified": true,
+    "role": "user",
+    "isBanned": false,
+    "createdAt": "2026-11-08T16:17:28.678Z"
+  }
+}

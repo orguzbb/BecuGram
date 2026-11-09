@@ -1,0 +1,30 @@
+{
+  "6af089ec2b0128a9b6e1cff8": {
+    "_id": "6af089ec2b0128a9b6e1cff8",
+    "phoneNumber": "+998889008081",
+    "displayName": "Abdurahim",
+    "username": "abdurahim",
+    "avatar": "",
+    "bio": "BecuGram asoschisi & dasturchisi 🚀",
+    "isOnline": true,
+    "isVerified": true,
+    "role": "admin",
+    "isBanned": false,
+    "isProfileComplete": true,
+    "createdAt": "2026-11-08T15:09:16.111Z"
+  },
+  "+998889008081": {
+    "_id": "6af089ec2b0128a9b6e1cff8",
+    "phoneNumber": "+998889008081",
+    "displayName": "Abdurahim",
+    "username": "abdurahim",
+    "avatar": "",
+    "bio": "BecuGram asoschisi & dasturchisi 🚀",
+    "isOnline": true,
+    "isVerified": true,
+    "role": "admin",
+    "isBanned": false,
+    "isProfileComplete": true,
+    "createdAt": "2026-11-08T15:09:16.111Z"
+  }
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "_id": "msg_saved_1",
+    "conversationId": "conv_saved_6af089ec2b0128a9b6e1cff8",
+    "senderId": {
+      "_id": "6af089ec2b0128a9b6e1cff8",
+      "displayName": "Abdurahim",
+      "username": "abdurahim",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "O‘zingiz uchun eslatmalar, rasmlar va muhim xabarlarni saqlang.",
+    "reactions": [],
+    "readBy": [
+      "6af089ec2b0128a9b6e1cff8"
+    ],
+    "createdAt": "2026-11-08T16:17:00.000Z"
+  },
+  {
+    "_id": "msg_official_1",
+    "conversationId": "conv_official_6af089ec2b0128a9b6e1cff8",
+    "senderId": {
+      "_id": "system_becugram",
+      "displayName": "BecuGram Rasmiy Kanal",
+      "username": "becugram",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "BecuGram yangilanishlari va xavfsizlik yangiliklari",
+    "reactions": [],
+    "readBy": [],
+    "createdAt": "2026-11-08T16:17:00.000Z"
+  }
+]

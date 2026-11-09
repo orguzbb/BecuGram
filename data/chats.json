@@ -1,0 +1,67 @@
+[
+  {
+    "_id": "conv_saved_6af089ec2b0128a9b6e1cff8",
+    "type": "direct",
+    "participants": [
+      "6af089ec2b0128a9b6e1cff8"
+    ],
+    "partner": {
+      "_id": "6af089ec2b0128a9b6e1cff8",
+      "displayName": "Saqlanganlar",
+      "username": "saved",
+      "avatar": "",
+      "isOnline": true,
+      "isVerified": true
+    },
+    "lastMessage": {
+      "_id": "msg_saved_1",
+      "conversationId": "conv_saved_6af089ec2b0128a9b6e1cff8",
+      "senderId": {
+        "_id": "6af089ec2b0128a9b6e1cff8",
+        "displayName": "Abdurahim",
+        "username": "abdurahim",
+        "avatar": ""
+      },
+      "type": "text",
+      "content": "O‘zingiz uchun eslatmalar, rasmlar...",
+      "createdAt": "2026-11-08T16:17:00.000Z"
+    },
+    "lastMessageAt": "2026-11-08T16:17:00.000Z",
+    "unreadCount": 0,
+    "isPinned": true,
+    "isMuted": false,
+    "createdAt": "2026-11-08T15:00:16.319Z"
+  },
+  {
+    "_id": "conv_official_6af089ec2b0128a9b6e1cff8",
+    "type": "channel",
+    "participants": [
+      "6af089ec2b0128a9b6e1cff8"
+    ],
+    "group": {
+      "_id": "group_official",
+      "name": "BecuGram Rasmiy Kanal",
+      "avatar": "",
+      "memberCount": 1250,
+      "description": "Rasmiy yangiliklar va yangi imkoniyatlar."
+    },
+    "lastMessage": {
+      "_id": "msg_official_1",
+      "conversationId": "conv_official_6af089ec2b0128a9b6e1cff8",
+      "senderId": {
+        "_id": "system_becugram",
+        "displayName": "BecuGram Rasmiy Kanal",
+        "username": "becugram",
+        "avatar": ""
+      },
+      "type": "text",
+      "content": "BecuGram yangilanishlari va xavfsizlik yangiliklari",
+      "createdAt": "2026-11-08T16:17:00.000Z"
+    },
+    "lastMessageAt": "2026-11-08T16:17:00.000Z",
+    "unreadCount": 1,
+    "isPinned": false,
+    "isMuted": false,
+    "createdAt": "2026-11-08T14:59:16.319Z"
+  }
+]

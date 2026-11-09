@@ -1,0 +1,115 @@
+import React, { useState } from 'react';
+import { X, UserPlus, Phone, User as UserIcon } from 'lucide-react';
+import { api } from '../services/api';
+import { useToast } from './Toast';
+
+interface AddContactModalProps {
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+export const AddContactModal: React.FC<AddContactModalProps> = ({ onClose, onSuccess }) => {
+  const { showToast } = useToast();
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [name, setName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phoneNumber.trim()) {
+      showToast('Telefon raqamini kiriting', 'error');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      let cleaned = phoneNumber.trim().replace(/\s+/g, '');
+      if (!cleaned.startsWith('+')) {
+        if (cleaned.length === 9) cleaned = '+998' + cleaned;
+        else cleaned = '+' + cleaned;
+      }
+
+      await api.addContact(cleaned, name.trim() || cleaned);
+      showToast('Kontakt muvaffaqiyatli saqlandi!', 'success');
+      onSuccess();
+      onClose();
+    } catch (err: any) {
+      showToast(err.message || 'Kontakt qo\'shishda xatolik yuz berdi.', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in select-none">
+      <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-[#0E1715] border border-zinc-200 dark:border-[#20362E] shadow-2xl p-6 text-zinc-900 dark:text-white">
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <UserPlus className="w-4 h-4" />
+            </div>
+            <h3 className="text-base font-bold text-zinc-900 dark:text-white">Kontakt qo'shish</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 hover:text-zinc-900 dark:bg-[#15231F] dark:text-[#8DA39A] dark:hover:text-white flex items-center justify-center transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-[#8DA39A] block mb-1.5">
+              Ismi yoki taxallusi
+            </label>
+            <div className="flex items-center gap-2.5 bg-zinc-100 dark:bg-[#14231E] border border-zinc-200 dark:border-[#20362E] rounded-2xl px-3.5 py-2.5 focus-within:border-emerald-500 transition-colors">
+              <UserIcon className="w-4 h-4 text-zinc-400 dark:text-[#8DA39A]" />
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Masalan: Sardor"
+                className="w-full bg-transparent text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#8DA39A] outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-[#8DA39A] block mb-1.5">
+              Telefon raqami
+            </label>
+            <div className="flex items-center gap-2.5 bg-zinc-100 dark:bg-[#14231E] border border-zinc-200 dark:border-[#20362E] rounded-2xl px-3.5 py-2.5 focus-within:border-emerald-500 transition-colors">
+              <Phone className="w-4 h-4 text-zinc-400 dark:text-[#8DA39A]" />
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="+998 90 123 45 67"
+                className="w-full bg-transparent text-sm text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-[#8DA39A] outline-none"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="pt-2 flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2.5 rounded-2xl bg-zinc-100 hover:bg-zinc-200 dark:bg-[#162520] dark:hover:bg-[#1C3029] text-zinc-600 dark:text-[#8DA39A] hover:text-zinc-900 dark:hover:text-white text-sm font-semibold transition-colors"
+            >
+              Bekor qilish
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex-1 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white text-sm font-bold shadow-md shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-50"
+            >
+              {isLoading ? 'Saqlanmoqda...' : 'Saqlash'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
