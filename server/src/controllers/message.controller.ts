@@ -8,6 +8,7 @@ import {
   getConversationMessages,
   saveMessage,
   updateMessageReactions,
+  deleteStoredMessage,
   StoredMessage,
 } from '../utils/dataStore.js';
 
@@ -127,7 +128,7 @@ export async function sendMessage(req: AuthenticatedRequest, res: Response): Pro
 
 export async function reactToMessage(req: AuthenticatedRequest, res: Response): Promise<void> {
   const currentUserId = req.user?.userId || 'user_default';
-  const rawMsgId = req.params.messageId;
+  const rawMsgId = req.params.id || req.params.messageId;
   const messageId = Array.isArray(rawMsgId) ? rawMsgId[0] : rawMsgId;
   const { emoji } = req.body;
 
@@ -161,9 +162,15 @@ export async function markChatRead(_req: AuthenticatedRequest, res: Response): P
 }
 
 export async function editMessage(req: AuthenticatedRequest, res: Response): Promise<void> {
-  const rawMsgId = req.params.messageId;
+  const rawMsgId = req.params.id || req.params.messageId;
   const messageId = Array.isArray(rawMsgId) ? rawMsgId[0] : rawMsgId;
   const { content } = req.body;
+
+  if (mongoose.connection.readyState === 1) {
+    try {
+      await Message.findByIdAndUpdate(messageId, { content, isEdited: true });
+    } catch {}
+  }
 
   res.status(200).json({
     success: true,
@@ -172,8 +179,31 @@ export async function editMessage(req: AuthenticatedRequest, res: Response): Pro
 }
 
 export async function deleteMessage(req: AuthenticatedRequest, res: Response): Promise<void> {
-  const rawMsgId = req.params.messageId;
+  const rawMsgId = req.params.id || req.params.messageId;
   const messageId = Array.isArray(rawMsgId) ? rawMsgId[0] : rawMsgId;
+
+  // 1. Delete from MongoDB if active
+  if (mongoose.connection.readyState === 1) {
+    try {
+      await Message.findByIdAndDelete(messageId);
+    } catch (err) {
+      console.error('Mongo delete error:', err);
+    }
+  }
+
+  // 2. Delete from file dataStore
+  const deleted = deleteStoredMessage(messageId);
+
+  // 3. Emit real-time deletion to participants
+  try {
+    const io = getSocketIO();
+    if (io && deleted?.conversationId) {
+      io.to(deleted.conversationId).emit('message:deleted', {
+        messageId,
+        conversationId: deleted.conversationId,
+      });
+    }
+  } catch {}
 
   res.status(200).json({
     success: true,

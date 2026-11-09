@@ -50,19 +50,23 @@
       "description": "Official announcements, tips and security updates."
     },
     "lastMessage": {
-      "_id": "msg_broadcast_1794154625932_cang",
+      "_id": "msg_1794221613599_s5x3b",
       "conversationId": "conv_official_6af0a01a7d27b76a8fee65f8",
       "senderId": {
-        "_id": "system_admin",
-        "displayName": "BecuGram Admin ✨",
+        "_id": "6af0a01a7d27b76a8fee65f8",
+        "displayName": "Abdurahim",
         "username": "admin",
-        "avatar": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&auto=format&fit=crop&q=80"
+        "avatar": ""
       },
       "type": "text",
-      "content": "📢 [salom]:\nsalom",
-      "createdAt": "2026-11-08T16:17:05.932Z"
+      "content": "baba",
+      "reactions": [],
+      "readBy": [
+        "6af0a01a7d27b76a8fee65f8"
+      ],
+      "createdAt": "2026-11-09T10:53:33.599Z"
     },
-    "lastMessageAt": "2026-11-08T16:17:05.932Z",
+    "lastMessageAt": "2026-11-09T10:53:33.599Z",
     "unreadCount": 1,
     "isPinned": false,
     "isMuted": false,

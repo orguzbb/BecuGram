@@ -150,12 +150,20 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
         );
       };
 
+      const handleDeletedMessage = (payload: { messageId: string; conversationId: string }) => {
+        if (payload.conversationId === conversation._id) {
+          setMessages((prev) => prev.filter((m) => m._id !== payload.messageId));
+        }
+      };
+
       socket.on('message:new', handleNewMessage);
       socket.on('message:reaction', handleReaction);
+      socket.on('message:deleted', handleDeletedMessage);
 
       return () => {
         socket.off('message:new', handleNewMessage);
         socket.off('message:reaction', handleReaction);
+        socket.off('message:deleted', handleDeletedMessage);
         socketService.leaveChat(conversation._id);
       };
     }
@@ -908,37 +916,37 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
       {/* Telegram-style Delete Confirmation Modal */}
       {deleteConfirmMsg && (
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in select-none"
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in select-none"
           onClick={() => setDeleteConfirmMsg(null)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm bg-white dark:bg-[#15231F] border border-zinc-200 dark:border-[#233830] rounded-3xl p-5 shadow-2xl text-zinc-900 dark:text-white"
+            className="w-full max-w-sm bg-white dark:bg-[#15231F] border border-zinc-200/80 dark:border-[#233830] rounded-3xl p-6 shadow-2xl text-zinc-900 dark:text-white transition-all scale-100"
           >
-            <h3 className="font-bold text-base mb-2">Xabarni o'chirish</h3>
-            <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-4 leading-relaxed">
-              Haqiqatan ham bu xabarni o'chirmoqchimisiz?
+            <h3 className="font-bold text-lg mb-2 text-zinc-900 dark:text-white">Xabarni o‘chirish</h3>
+            <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-5 leading-relaxed">
+              Haqiqatan ham bu xabarni butunlay o‘chirmoqchimisiz?
             </p>
 
             {/* Checkbox: [Partner] uchun ham o'chirish */}
-            <label className="flex items-center gap-2.5 mb-5 cursor-pointer select-none group">
+            <label className="flex items-center gap-3 p-2.5 -mx-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800/50 mb-5 cursor-pointer select-none group transition-colors">
               <input
                 type="checkbox"
                 checked={deleteForEveryone}
                 onChange={(e) => setDeleteForEveryone(e.target.checked)}
-                className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#0E1715] cursor-pointer"
+                className="w-4 h-4 rounded-md text-blue-600 focus:ring-blue-500 border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#0E1715] cursor-pointer"
               />
               <span className="text-xs font-medium text-zinc-700 dark:text-zinc-200 group-hover:text-zinc-950 dark:group-hover:text-white transition-colors">
-                {partner?.displayName || chatTitle} uchun ham o'chirish
+                {partner?.displayName || chatTitle} uchun ham o‘chirish
               </span>
             </label>
 
             {/* Buttons: Bekor qilish & O'chirish */}
-            <div className="flex items-center justify-end gap-2.5">
+            <div className="flex items-center justify-end gap-3 pt-1 border-t border-zinc-100 dark:border-zinc-800/60">
               <button
                 type="button"
                 onClick={() => setDeleteConfirmMsg(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 Bekor qilish
               </button>
@@ -951,15 +959,15 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
                     setMessages((prev) => prev.filter((m) => m._id !== targetMsg._id));
                     try {
                       await api.deleteMessage(targetMsg._id);
-                      showToast("Xabar o'chirildi", 'info');
+                      showToast("Xabar o‘chirildi", 'info');
                     } catch (err) {
                       console.error('Delete error:', err);
                     }
                   }
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 active:scale-95 text-white shadow-sm transition-all"
+                className="px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 active:scale-95 text-white shadow-md shadow-rose-500/20 transition-all"
               >
-                O'chirish
+                O‘chirish
               </button>
             </div>
           </div>

@@ -253,20 +253,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
         </div>
 
-        {/* 7. Til -> O'zbekcha matching Image 2 */}
+        {/* 7. Til -> O'zbekcha */}
         <div
           onClick={() => setActiveModal('language')}
           className="flex items-center justify-between p-3.5 hover:bg-[#F2ECE3] dark:hover:bg-[#15241F] rounded-2xl cursor-pointer transition-colors group"
         >
           <div className="flex items-center gap-3.5">
-            <Languages className="w-5 h-5 stroke-[2] text-[#4A3D31] dark:text-[#8DA39A] group-hover:text-[#9D5215]" />
+            <Languages className="w-5 h-5 stroke-[2] text-[#4A3D31] dark:text-[#8DA39A] group-hover:text-blue-600" />
             <span className="text-[15px] font-medium text-[#1E1915] dark:text-white">
               Til
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-[#6E5D4E] dark:text-[#8DA39A]">
-              {language}
+            <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+              O‘zbekcha 🇺🇿
             </span>
             <ChevronRight className="w-4 h-4 text-[#9C8C7C]" />
           </div>
@@ -419,41 +419,40 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
       )}
 
-      {/* 3. TILNI TANLASH MODALI */}
+      {/* 3. TILNI TANLASH MODALI (Faqat O'zbekcha) */}
       {activeModal === 'language' && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in select-none">
           <div className="bg-white dark:bg-[#14231E] rounded-3xl p-6 max-w-sm w-full border border-zinc-200 dark:border-[#20362E] shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                <Languages className="w-5 h-5 text-[#9D5215]" />
+                <Languages className="w-5 h-5 text-blue-600" />
                 Ilova tili
               </h3>
               <button
                 onClick={() => setActiveModal('none')}
-                className="p-1 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                className="p-1.5 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="space-y-2">
-              {(['O‘zbekcha', 'English', 'Русский'] as const).map((lang) => (
-                <div
-                  key={lang}
-                  onClick={() => {
-                    setLanguage(lang);
-                    showToast(`Til o‘zgartirildi: ${lang}`, 'success');
-                    setActiveModal('none');
-                  }}
-                  className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer transition-colors ${
-                    language === lang
-                      ? 'bg-[#EAE1D5] dark:bg-[#1F362C] font-bold text-[#844410] dark:text-[#E8BE8E]'
-                      : 'hover:bg-zinc-100 dark:hover:bg-[#162520] text-zinc-800 dark:text-white'
-                  }`}
-                >
-                  <span className="text-sm">{lang}</span>
-                  {language === lang && <Check className="w-4 h-4 stroke-[3]" />}
+            <div className="space-y-3">
+              <div
+                className="flex items-center justify-between p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-500/30 text-blue-900 dark:text-blue-100 font-semibold"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🇺🇿</span>
+                  <div>
+                    <div className="text-sm font-bold text-zinc-900 dark:text-white">O‘zbekcha</div>
+                    <div className="text-xs text-zinc-500 dark:text-zinc-400">Asosiy tizim tili</div>
+                  </div>
                 </div>
-              ))}
+                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                </div>
+              </div>
+              <div className="p-3 bg-zinc-50 dark:bg-[#0E1715] rounded-xl border border-zinc-200/60 dark:border-zinc-800 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                ✨ BecuGram to‘liq o‘zbek tiliga moslashtirilgan. Barcha bo‘limlar, bildirishnomalar va sozlamalar ona tilimizda ishlaydi.
+              </div>
             </div>
           </div>
         </div>

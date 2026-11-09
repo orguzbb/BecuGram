@@ -265,6 +265,33 @@ export function saveMessage(msg: StoredMessage): void {
   }
 }
 
+export function deleteStoredMessage(messageId: string): StoredMessage | null {
+  const allMessages = loadJson<StoredMessage[]>('messages.json', []);
+  const index = allMessages.findIndex((m) => m._id === messageId);
+  if (index === -1) return null;
+
+  const [deletedMsg] = allMessages.splice(index, 1);
+  saveJson('messages.json', allMessages);
+
+  // Update conversation's lastMessage
+  const allChats = loadJson<StoredConversation[]>('chats.json', []);
+  const conv = allChats.find((c) => c._id === deletedMsg.conversationId);
+  if (conv) {
+    const remaining = allMessages.filter((m) => m.conversationId === deletedMsg.conversationId);
+    if (remaining.length > 0) {
+      const latest = remaining[remaining.length - 1];
+      conv.lastMessage = latest;
+      conv.lastMessageAt = latest.createdAt;
+    } else {
+      conv.lastMessage = undefined;
+      conv.lastMessageAt = undefined;
+    }
+    saveJson('chats.json', allChats);
+  }
+
+  return deletedMsg;
+}
+
 export function updateMessageReactions(messageId: string, userId: string, emoji: string): StoredMessage | null {
   const allMessages = loadJson<StoredMessage[]>('messages.json', []);
   const msg = allMessages.find((m) => m._id === messageId);

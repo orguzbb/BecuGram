@@ -9,27 +9,30 @@ interface BecuLogoProps {
 export const BecuLogo: React.FC<BecuLogoProps> = ({ className = '', size = 32, withText = false }) => {
   return (
     <div className={`flex items-center gap-2.5 select-none ${className}`}>
+      {/* Paxta/Cotton Blossom Logo matching Screenshot 1 */}
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none" className="shrink-0 drop-shadow-sm">
         <defs>
-          <linearGradient id="cyanGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#38BDF8" />
-            <stop offset="100%" stopColor="#0284C7" />
-          </linearGradient>
-          <linearGradient id="pinkGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#F43F5E" />
-            <stop offset="100%" stopColor="#EC4899" />
+          <linearGradient id="becuCottonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#2563EB" />
+            <stop offset="100%" stopColor="#1D4ED8" />
           </linearGradient>
         </defs>
-        {/* Left vertical stem: Dark in light mode, white in dark mode */}
-        <rect x="22" y="16" width="16" height="68" rx="8" className="fill-[#1E1915] dark:fill-white" />
-        {/* Top cyan lobe */}
-        <circle cx="58" cy="35" r="19" fill="url(#cyanGrad)" />
-        {/* Bottom pink lobe */}
-        <circle cx="58" cy="65" r="19" fill="url(#pinkGrad)" />
+        <g fill="url(#becuCottonGrad)">
+          {/* Top Petal */}
+          <circle cx="50" cy="38" r="18" />
+          {/* Left Petal */}
+          <circle cx="36" cy="56" r="18" />
+          {/* Right Petal */}
+          <circle cx="64" cy="56" r="18" />
+          {/* Center filling connector */}
+          <path d="M 36 50 Q 50 38 64 50 Q 64 64 50 66 Q 36 64 36 50 Z" />
+          {/* Bottom pointy stem/calyx matching Screenshot 1 */}
+          <path d="M 46 63 L 50 78 L 54 63 Z" />
+        </g>
       </svg>
       {withText && (
-        <span className="font-extrabold tracking-tight text-xl text-[#1E1915] dark:text-white">
-          Becu<span className="text-[#9D5215] dark:text-cyan-400">Gram</span>
+        <span className="font-extrabold tracking-tight text-xl text-zinc-900 dark:text-white">
+          Becu<span className="text-[#2563EB] dark:text-blue-400">Gram</span>
         </span>
       )}
     </div>

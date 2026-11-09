@@ -156,5 +156,22 @@
       "6af0a01a7d27b76a8fee65f8"
     ],
     "createdAt": "2026-11-09T10:36:44.113Z"
+  },
+  {
+    "_id": "msg_1794221613599_s5x3b",
+    "conversationId": "conv_official_6af0a01a7d27b76a8fee65f8",
+    "senderId": {
+      "_id": "6af0a01a7d27b76a8fee65f8",
+      "displayName": "Abdurahim",
+      "username": "admin",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "baba",
+    "reactions": [],
+    "readBy": [
+      "6af0a01a7d27b76a8fee65f8"
+    ],
+    "createdAt": "2026-11-09T10:53:33.599Z"
   }
 ]

@@ -156,7 +156,7 @@ export const AppLayout: React.FC = () => {
         {/* Left List Pane (Floating rounded card on tablets & desktop, full on mobile) */}
         <div
           className={`w-full md:w-[380px] lg:w-[420px] h-full flex-col shrink-0 md:rounded-3xl md:border md:border-white/80 dark:md:border-white/10 md:shadow-2xl overflow-hidden bg-white dark:bg-[#0E1715] z-10 ${
-            activeConversation ? 'hidden' : 'flex'
+            activeConversation ? 'hidden md:flex' : 'flex'
           }`}
         >
           {activeTab === 'inbox' && (
@@ -188,8 +188,8 @@ export const AppLayout: React.FC = () => {
 
         {/* Right Chat Area (Floating rounded card on tablets & desktop) */}
         <div
-          className={`flex-1 h-full flex flex-col md:rounded-3xl md:border md:border-white/80 dark:md:border-white/10 md:shadow-2xl overflow-hidden ${
-            !activeConversation ? 'hidden' : 'flex'
+          className={`flex-1 h-full flex flex-col md:rounded-3xl md:border md:border-white/80 dark:md:border-white/10 md:shadow-2xl overflow-hidden bg-white/60 dark:bg-[#0E1715]/60 backdrop-blur-md ${
+            !activeConversation ? 'hidden md:flex' : 'flex'
           }`}
         >
           {activeConversation ? (
@@ -199,15 +199,12 @@ export const AppLayout: React.FC = () => {
               onOpenProfile={(u) => setViewingProfileUser(u)}
             />
           ) : (
-            // Tablet & Desktop Empty State with official BecuGram logo
-            <div className="hidden md:flex flex-col items-center justify-center h-full select-none text-center p-8 transition-colors">
-              {/* BecuGram Official Logo */}
-              <div className="mb-4 hover:scale-110 transition-transform cursor-pointer">
-                <BecuLogo size={72} />
+            // Tablet & Desktop Empty State with official BecuGram logo (Screenshot 1)
+            <div className="hidden md:flex flex-col items-center justify-center h-full select-none text-center p-8 bg-[#F4F4FA]/60 dark:bg-[#0A1210]/60 transition-colors">
+              <div className="mb-5 p-4 rounded-3xl bg-white/80 dark:bg-zinc-800/60 shadow-lg shadow-blue-500/5 backdrop-blur-sm hover:scale-105 transition-all">
+                <BecuLogo size={80} />
               </div>
-
-              {/* Subtitle: "Chapdan chatni tanlang yoki yangisini boshlang" */}
-              <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+              <p className="text-[15px] font-medium text-zinc-600 dark:text-zinc-300 max-w-xs leading-relaxed">
                 Chapdan chatni tanlang yoki yangisini boshlang
               </p>
             </div>
