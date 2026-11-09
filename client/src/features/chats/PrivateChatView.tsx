@@ -108,7 +108,7 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const isDirect = conversation.type === 'direct';
   const partner = isDirect ? conversation.partner : null;
@@ -314,31 +314,63 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
     }
   };
 
-  // Double tap vs Single tap handler
-  const handleMessageClick = (msg: Message, e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    if (clickTimeoutRef.current) {
-      // Double tap detected!
-      clearTimeout(clickTimeoutRef.current);
-      clickTimeoutRef.current = null;
+  // Open Context Menu reliably for both own and other messages
+  const openMessageMenu = (msg: Message, targetEl: HTMLElement, clientX?: number, clientY?: number) => {
+    // If clicking the same message that is already open, toggle it off
+    if (contextMenuMessage?._id === msg._id) {
       setContextMenuMessage(null);
+      setContextMenuCoords(null);
+      return;
+    }
 
-      // Trigger instant animated Heart reaction
-      handleHeartReaction(msg._id);
-    } else {
-      // Single tap -> after 220ms open Context Menu
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      const clickCoords = {
-        x: Math.min(Math.max(rect.left + rect.width / 2, 160), window.innerWidth - 160),
-        y: Math.min(rect.top + 10, window.innerHeight - 380),
-      };
+    const rect = targetEl.getBoundingClientRect();
+    const menuWidth = 310;
+    const menuHeight = 360;
 
-      clickTimeoutRef.current = setTimeout(() => {
-        clickTimeoutRef.current = null;
-        setContextMenuCoords(clickCoords);
-        setContextMenuMessage(msg);
-      }, 220);
+    // Center horizontally around the message or click point, safely clamped inside window
+    let x = clientX ?? (rect.left + rect.width / 2);
+    x = Math.max(menuWidth / 2 + 12, Math.min(window.innerWidth - menuWidth / 2 - 12, x));
+
+    // For vertical position:
+    // If message is in lower half of the screen, place menu ABOVE the message bubble
+    let y = rect.top - menuHeight - 10;
+    if (y < 70) {
+      // If not enough room above, place BELOW the message bubble
+      y = rect.bottom + 10;
+    }
+    // Final clamp to ensure 100% visible on screen
+    if (y + menuHeight > window.innerHeight - 15) {
+      y = Math.max(70, window.innerHeight - menuHeight - 15);
+    }
+
+    setContextMenuCoords({ x, y });
+    setContextMenuMessage(msg);
+  };
+
+  // Click & Double click handler
+  const handleMessageClick = (msg: Message, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openMessageMenu(msg, e.currentTarget as HTMLElement, e.clientX, e.clientY);
+  };
+
+  // Touch long press handlers for mobile
+  const handleTouchStart = (msg: Message, e: React.TouchEvent) => {
+    const target = e.currentTarget as HTMLElement;
+    const touch = e.touches[0];
+    const clientX = touch?.clientX;
+    const clientY = touch?.clientY;
+
+    handleTouchEnd();
+    longPressTimerRef.current = setTimeout(() => {
+      openMessageMenu(msg, target, clientX, clientY);
+    }, 380);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
     }
   };
 
@@ -890,15 +922,14 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
                 {/* Bubble Container: Blue for Me, Pure White for Others (Image 2) */}
                 <div
                   onClick={(e) => handleMessageClick(msg, e)}
+                  onDoubleClick={(e) => handleMessageClick(msg, e)}
+                  onTouchStart={(e) => handleTouchStart(msg, e)}
+                  onTouchEnd={handleTouchEnd}
+                  onTouchMove={handleTouchEnd}
                   onContextMenu={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setContextMenuCoords({
-                      x: Math.min(Math.max(rect.left + rect.width / 2, 160), window.innerWidth - 160),
-                      y: Math.min(rect.top + 10, window.innerHeight - 380),
-                    });
-                    setContextMenuMessage(msg);
+                    openMessageMenu(msg, e.currentTarget, e.clientX, e.clientY);
                   }}
                   className={`relative max-w-[85%] sm:max-w-[70%] px-3.5 py-2.5 rounded-2xl text-[14px] shadow-sm cursor-pointer select-none transition-all active:scale-[0.98] ${
                     msg.type === 'sticker'
@@ -1068,94 +1099,112 @@ export const PrivateChatView: React.FC<PrivateChatViewProps> = ({
 
       {/* Telegram-style Context Menu Bubble with ANIMATED LOTTIE REACTIONS */}
       {contextMenuMessage && contextMenuCoords && (
-        <div
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            position: 'fixed',
-            top: `${contextMenuCoords.y}px`,
-            left: `${contextMenuCoords.x}px`,
-            transform: 'translate(-50%, 0)',
-          }}
-          className="z-50 w-[310px] bg-[#FAF8F5] dark:bg-[#15231F] border border-zinc-200 dark:border-[#263C34] rounded-[24px] shadow-2xl p-3 animate-fade-in text-zinc-800 dark:text-zinc-100 select-none"
-        >
-          {/* Reaction Stickers Grid: Animated Telegram Lottie Reactions! */}
-          <div className="grid grid-cols-6 gap-1.5 pb-2.5 max-h-36 overflow-y-auto scrollbar-none">
-            {TELEGRAM_REACTIONS.slice(0, 18).map((item) => (
+        <>
+          {/* Transparent Backdrop to close menu reliably when clicking outside */}
+          <div
+            className="fixed inset-0 z-40 bg-black/25 backdrop-blur-[1px] animate-fade-in"
+            onClick={(e) => {
+              e.stopPropagation();
+              setContextMenuMessage(null);
+              setContextMenuCoords(null);
+            }}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setContextMenuMessage(null);
+              setContextMenuCoords(null);
+            }}
+          />
+
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'fixed',
+              top: `${contextMenuCoords.y}px`,
+              left: `${contextMenuCoords.x}px`,
+              transform: 'translate(-50%, 0)',
+            }}
+            className="z-50 w-[310px] bg-[#FAF8F5] dark:bg-[#15231F] border border-zinc-200 dark:border-[#263C34] rounded-[24px] shadow-2xl p-3 animate-fade-in text-zinc-800 dark:text-zinc-100 select-none"
+          >
+            {/* Reaction Stickers Grid: Animated Telegram Lottie Reactions! */}
+            <div className="grid grid-cols-6 gap-1.5 pb-2.5 max-h-36 overflow-y-auto scrollbar-none">
+              {TELEGRAM_REACTIONS.slice(0, 18).map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleReaction(contextMenuMessage._id, item.id)}
+                  className="w-10 h-10 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center hover:scale-125 active:scale-95 transition-all"
+                  title={item.name}
+                >
+                  <LottieAnimation src={item.path} size={30} loop={true} />
+                </button>
+              ))}
+            </div>
+
+            <div className="h-[1px] bg-zinc-200 dark:bg-zinc-800 my-1" />
+
+            {/* Action List matching Image 1 */}
+            <div className="space-y-0.5 pt-1 text-sm font-medium">
+              {/* Javob berish */}
               <button
-                key={item.id}
-                onClick={() => handleReaction(contextMenuMessage._id, item.id)}
-                className="w-10 h-10 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center hover:scale-125 active:scale-95 transition-all"
-                title={item.name}
-              >
-                <LottieAnimation src={item.path} size={30} loop={true} />
-              </button>
-            ))}
-          </div>
-
-          <div className="h-[1px] bg-zinc-200 dark:bg-zinc-800 my-1" />
-
-          {/* Action List matching Image 1 */}
-          <div className="space-y-0.5 pt-1 text-sm font-medium">
-            {/* Javob berish */}
-            <button
-              onClick={() => handleReplyMessage(contextMenuMessage)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-left"
-            >
-              <CornerUpLeft className="w-4 h-4 text-zinc-500 dark:text-zinc-400 stroke-[2.2]" />
-              <span>Javob berish</span>
-            </button>
-
-            {/* Tahrirlash (Only for own messages) */}
-            {contextMenuMessage.senderId === user?._id || (contextMenuMessage as any).isMe ? (
-              <button
-                onClick={() => handleStartEditMessage(contextMenuMessage)}
+                onClick={() => handleReplyMessage(contextMenuMessage)}
                 className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-left"
               >
-                <Edit2 className="w-4 h-4 text-zinc-500 dark:text-zinc-400 stroke-[2.2]" />
-                <span>Tahrirlash</span>
+                <CornerUpLeft className="w-4 h-4 text-zinc-500 dark:text-zinc-400 stroke-[2.2]" />
+                <span>Javob berish</span>
               </button>
-            ) : null}
 
-            {/* Nusxa olish */}
-            <button
-              onClick={() => handleCopyMessage(contextMenuMessage)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-left"
-            >
-              <Copy className="w-4 h-4 text-zinc-500 dark:text-zinc-400 stroke-[2.2]" />
-              <span>Nusxa olish</span>
-            </button>
+              {/* Tahrirlash (Only for own messages) */}
+              {contextMenuMessage.senderId === user?._id || (contextMenuMessage as any).isMe ? (
+                <button
+                  onClick={() => handleStartEditMessage(contextMenuMessage)}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-left"
+                >
+                  <Edit2 className="w-4 h-4 text-zinc-500 dark:text-zinc-400 stroke-[2.2]" />
+                  <span>Tahrirlash</span>
+                </button>
+              ) : null}
 
-            {/* Uzatish */}
-            <button
-              onClick={() => handleForwardMessage(contextMenuMessage)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-left"
-            >
-              <Share2 className="w-4 h-4 text-zinc-500 dark:text-zinc-400 stroke-[2.2]" />
-              <span>Uzatish</span>
-            </button>
+              {/* Nusxa olish */}
+              <button
+                onClick={() => handleCopyMessage(contextMenuMessage)}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-left"
+              >
+                <Copy className="w-4 h-4 text-zinc-500 dark:text-zinc-400 stroke-[2.2]" />
+                <span>Nusxa olish</span>
+              </button>
 
-            {/* Qadash */}
-            <button
-              onClick={() => handlePinMessage(contextMenuMessage)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-left"
-            >
-              <Pin className="w-4 h-4 text-zinc-500 dark:text-zinc-400 stroke-[2.2]" />
-              <span>Qadash</span>
-            </button>
+              {/* Uzatish */}
+              <button
+                onClick={() => handleForwardMessage(contextMenuMessage)}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-left"
+              >
+                <Share2 className="w-4 h-4 text-zinc-500 dark:text-zinc-400 stroke-[2.2]" />
+                <span>Uzatish</span>
+              </button>
 
-            {/* O'chirish (Red) */}
-            <button
-              onClick={() => {
-                setDeleteConfirmMsg(contextMenuMessage);
-                setContextMenuMessage(null);
-              }}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 transition-colors text-left"
-            >
-              <Trash2 className="w-4 h-4 stroke-[2.2]" />
-              <span>O‘chirish</span>
-            </button>
+              {/* Qadash */}
+              <button
+                onClick={() => handlePinMessage(contextMenuMessage)}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-left"
+              >
+                <Pin className="w-4 h-4 text-zinc-500 dark:text-zinc-400 stroke-[2.2]" />
+                <span>Qadash</span>
+              </button>
+
+              {/* O'chirish (Red) */}
+              <button
+                onClick={() => {
+                  setDeleteConfirmMsg(contextMenuMessage);
+                  setContextMenuMessage(null);
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 transition-colors text-left"
+              >
+                <Trash2 className="w-4 h-4 stroke-[2.2]" />
+                <span>O‘chirish</span>
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Telegram-style Delete Confirmation Modal */}

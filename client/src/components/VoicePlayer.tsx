@@ -22,7 +22,8 @@ export const VoicePlayer: React.FC<VoicePlayerProps> = ({
     25, 40, 60, 30, 85, 70, 45, 90, 65, 40, 80, 50, 95, 75, 40, 60, 85, 30, 70, 50, 90, 60, 40, 75, 55, 35
   ];
 
-  const togglePlay = () => {
+  const togglePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!audioRef.current) return;
     if (isPlaying) {
       audioRef.current.pause();
