@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "BecuGram",
+    "slug": "becugram",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#0E1621",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "uz.becugram.app"
+    },
+    "android": {
+      "package": "uz.becugram.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#17212B"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

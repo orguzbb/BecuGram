@@ -1,5 +1,43 @@
 [
   {
+    "_id": "conv_6af0a01a7d27b76a8fee65f8_6af1dfd5f4df22e136280bcd",
+    "type": "direct",
+    "participants": [
+      "6af1dfd5f4df22e136280bcd",
+      "6af0a01a7d27b76a8fee65f8"
+    ],
+    "partner": {
+      "_id": "6af0a01a7d27b76a8fee65f8",
+      "displayName": "Admin",
+      "username": "admin",
+      "phoneNumber": "+998889008081",
+      "avatar": "/uploads/images/1794157660529_b161afc1f3c88198d553a8425bced12a.jpg",
+      "isOnline": true,
+      "isVerified": true,
+      "bio": "BecuGram a'zosi 🚀"
+    },
+    "lastMessage": {
+      "_id": "msg_1794236427982_jdh3t",
+      "conversationId": "conv_6af0a01a7d27b76a8fee65f8_6af1dfd5f4df22e136280bcd",
+      "senderId": {
+        "_id": "6af0a01a7d27b76a8fee65f8",
+        "displayName": "Abdurahim",
+        "username": "admin",
+        "avatar": ""
+      },
+      "type": "text",
+      "content": "alik",
+      "reactions": [],
+      "readBy": [
+        "6af0a01a7d27b76a8fee65f8"
+      ],
+      "createdAt": "2026-11-09T15:00:27.982Z"
+    },
+    "lastMessageAt": "2026-11-09T15:00:27.982Z",
+    "unreadCount": 0,
+    "createdAt": "2026-11-09T15:00:07.559Z"
+  },
+  {
     "_id": "conv_group_1794230366029_grum",
     "type": "group",
     "participants": [
@@ -76,5 +114,30 @@
     "isPinned": true,
     "isMuted": false,
     "createdAt": "2026-11-08T16:15:22.972Z"
+  },
+  {
+    "_id": "conv_saved_6af1dfd5f4df22e136280bcd",
+    "type": "direct",
+    "participants": [
+      "6af1dfd5f4df22e136280bcd"
+    ],
+    "partner": {
+      "_id": "6af1dfd5f4df22e136280bcd",
+      "displayName": "Saqlanganlar",
+      "username": "saved",
+      "avatar": "",
+      "isOnline": true,
+      "isVerified": true
+    },
+    "lastMessage": {
+      "type": "text",
+      "content": "O'zingiz uchun eslatmalar, rasmlar va xabarlar",
+      "createdAt": "2026-11-09T14:59:46.970Z"
+    },
+    "lastMessageAt": "2026-11-09T14:59:46.970Z",
+    "unreadCount": 0,
+    "isPinned": true,
+    "isMuted": false,
+    "createdAt": "2026-11-09T14:59:46.970Z"
   }
 ]

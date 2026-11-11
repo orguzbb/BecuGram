@@ -52,5 +52,33 @@
     "role": "user",
     "isBanned": false,
     "createdAt": "2026-11-08T16:17:28.678Z"
+  },
+  "6af1dfd5f4df22e136280bcd": {
+    "_id": "6af1dfd5f4df22e136280bcd",
+    "phoneNumber": "+998889888888",
+    "displayName": "Abdurahim",
+    "username": "abdurahim",
+    "avatar": "",
+    "bio": "BecuGram a'zosi 🚀",
+    "isOnline": true,
+    "isVerified": true,
+    "role": "user",
+    "isBanned": false,
+    "isProfileComplete": true,
+    "createdAt": "2026-11-09T14:59:33.286Z"
+  },
+  "+998889888888": {
+    "_id": "6af1dfd5f4df22e136280bcd",
+    "phoneNumber": "+998889888888",
+    "displayName": "Abdurahim",
+    "username": "abdurahim",
+    "avatar": "",
+    "bio": "BecuGram a'zosi 🚀",
+    "isOnline": true,
+    "isVerified": true,
+    "role": "user",
+    "isBanned": false,
+    "isProfileComplete": true,
+    "createdAt": "2026-11-09T14:59:33.286Z"
   }
 }

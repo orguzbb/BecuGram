@@ -4,12 +4,14 @@
   "private": true,
   "workspaces": [
     "server",
-    "client"
+    "client",
+    "mobile"
   ],
   "scripts": {
     "dev": "concurrently -k -n \"SERVER,CLIENT\" -c \"cyan.bold,magenta.bold\" \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
     "dev:server": "npm run dev --workspace=server",
     "dev:client": "npm run dev --workspace=client",
+    "dev:mobile": "npm run start --workspace=mobile",
     "build": "npm run build --workspace=server && npm run build --workspace=client",
     "build:server": "npm run build --workspace=server",
     "build:client": "npm run build --workspace=client",

@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "_id": "contact_1794236407557",
+    "userId": "6af1dfd5f4df22e136280bcd",
+    "customName": "admin",
+    "user": {
+      "_id": "6af0a01a7d27b76a8fee65f8",
+      "displayName": "Admin",
+      "username": "admin",
+      "phoneNumber": "+998889008081",
+      "avatar": "/uploads/images/1794157660529_b161afc1f3c88198d553a8425bced12a.jpg",
+      "isOnline": true,
+      "isVerified": true,
+      "bio": "BecuGram a'zosi 🚀"
+    },
+    "createdAt": "2026-11-09T15:00:07.557Z"
+  }
+]
