@@ -75,3 +75,4 @@ export const LightTheme: ThemeColors = {
   searchBar: '#E5E8EB',
   divider: '#E5E8EB',
 };
+

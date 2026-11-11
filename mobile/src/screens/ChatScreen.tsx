@@ -103,10 +103,10 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       type: 'text',
       replyTo: replyMessage
         ? {
-            _id: replyMessage._id,
-            content: replyMessage.content,
-            senderId: replyMessage.senderId,
-          }
+          _id: replyMessage._id,
+          content: replyMessage.content,
+          senderId: replyMessage.senderId,
+        }
         : undefined,
       createdAt: new Date().toISOString(),
       isRead: false,
@@ -261,8 +261,8 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
           onSendVideoNote={() => {
             handleSendText('📹 Dumaloq video xabar');
           }}
-          onOpenAttachment={() => {}}
-          onOpenEmojiPicker={() => {}}
+          onOpenAttachment={() => { }}
+          onOpenEmojiPicker={() => { }}
         />
       </KeyboardAvoidingView>
 

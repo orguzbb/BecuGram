@@ -75,3 +75,4 @@ export interface Story {
   bgColor?: string;
   createdAt: string;
 }
+
