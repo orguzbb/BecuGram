@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { getMediaUrl } from '../services/api';
 
 interface AvatarProps {
   name?: string;
@@ -43,7 +44,7 @@ export const Avatar: React.FC<AvatarProps> = ({
     <View style={{ width: size, height: size, position: 'relative' }}>
       {src ? (
         <Image
-          source={{ uri: src }}
+          source={{ uri: getMediaUrl(src) }}
           style={{
             width: size,
             height: size,
@@ -118,17 +119,17 @@ export const Avatar: React.FC<AvatarProps> = ({
 const styles = StyleSheet.create({
   onlineBadge: {
     position: 'absolute',
-    backgroundColor: '#4FAE4E',
+    backgroundColor: '#10B981',
     borderWidth: 2,
-    borderColor: '#17212B',
+    borderColor: '#070D0B',
   },
   verifiedBadge: {
     position: 'absolute',
-    backgroundColor: '#2AABEE',
+    backgroundColor: '#2563EB',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
-    borderColor: '#17212B',
+    borderColor: '#070D0B',
   },
 });
 

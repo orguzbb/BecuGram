@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { DesktopSidebar } from '../components/DesktopSidebar';
-import { BottomNav, NavTab } from '../components/BottomNav';
 import { ChatList } from '../features/chats/ChatList';
 import { PrivateChatView } from '../features/chats/PrivateChatView';
 import { SettingsView } from '../features/settings/SettingsView';
@@ -11,13 +9,20 @@ import { NewChatModal } from '../components/NewChatModal';
 import { AddContactModal } from '../components/AddContactModal';
 import { CreateGroupModal } from '../components/CreateGroupModal';
 import { AdminDashboard } from '../features/admin/AdminDashboard';
-import { BecuLogo } from '../components/BecuLogo';
+import { PremiumModal } from '../components/PremiumModal';
+import { BottomNav, NavTab } from '../components/BottomNav';
+import { CallsView } from '../features/calls/CallsView';
+import { CallModal } from '../components/CallModal';
 import { useChatStore } from '../stores/chatStore';
 import { useAuthStore } from '../stores/authStore';
 import { useThemeStore } from '../stores/themeStore';
+import { useAppearanceStore } from '../stores/appearanceStore';
+import { getWallpaperCssStyle, getPatternDataUri } from '../utils/wallpaperPatterns';
 import { api } from '../services/api';
 import { socketService } from '../services/socket';
-import { Conversation, User, Contact } from '../types';
+import { Contact, Message, User } from '../types';
+
+export type ActiveSidebarTab = 'chats' | 'calls' | 'settings' | 'profile';
 
 export const AppLayout: React.FC = () => {
   const { user } = useAuthStore();
@@ -27,22 +32,32 @@ export const AppLayout: React.FC = () => {
     setActiveConversation,
     conversations,
     setConversations,
+    setLastMessage,
+    incrementUnreadCount,
+    resetUnreadCount,
     viewingProfileUser,
     setViewingProfileUser,
   } = useChatStore();
+  const { getWallpaperForChat } = useAppearanceStore();
+  const currentWallpaper = getWallpaperForChat(undefined, theme);
 
-  const [activeTab, setActiveTab] = useState<NavTab>('inbox');
+  const [sidebarTab, setSidebarTab] = useState<ActiveSidebarTab>('chats');
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [showAddContactModal, setShowAddContactModal] = useState(false);
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [callingUser, setCallingUser] = useState<User | null>(null);
+  const [callingType, setCallingType] = useState<'audio' | 'video' | null>(null);
   const [announcement, setAnnouncement] = useState<{
     enabled: boolean;
     text: string;
   } | null>(null);
   const [dismissedBanner, setDismissedBanner] = useState(false);
+
+  const totalUnreadCount = conversations.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
 
   // Sync Global Settings & Announcement live
   useEffect(() => {
@@ -70,14 +85,43 @@ export const AppLayout: React.FC = () => {
     }
   }, []);
 
-  const totalUnread = conversations.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
+  // Global Real-time Message & Read Receipt Syncer
+  useEffect(() => {
+    const socket = socketService.getSocket();
+    if (!socket) return;
+
+    const handleNewMessage = (msg: Message) => {
+      if (msg?.conversationId) {
+        setLastMessage(msg.conversationId, msg);
+        const senderId =
+          typeof msg.senderId === 'object' && msg.senderId ? msg.senderId._id : msg.senderId;
+        if (msg.conversationId !== activeConversation?._id && senderId !== user?._id) {
+          incrementUnreadCount(msg.conversationId);
+        }
+      }
+    };
+
+    const handleReadReceipt = (payload: { conversationId: string; readerId: string }) => {
+      if (payload.readerId === user?._id) {
+        resetUnreadCount(payload.conversationId);
+      }
+    };
+
+    socket.on('message:new', handleNewMessage);
+    socket.on('message:read_receipt', handleReadReceipt);
+
+    return () => {
+      socket.off('message:new', handleNewMessage);
+      socket.off('message:read_receipt', handleReadReceipt);
+    };
+  }, [activeConversation?._id, user?._id, setLastMessage, incrementUnreadCount, resetUnreadCount]);
 
   // Direct chat starter
   const handleSelectUserToChat = async (targetUserId: string) => {
     try {
       const conv = await api.getOrCreateDirectChat(targetUserId);
       setActiveConversation(conv);
-      setActiveTab('inbox');
+      setSidebarTab('chats');
       const chats = await api.getChats();
       setConversations(chats);
     } catch (err) {
@@ -89,7 +133,7 @@ export const AppLayout: React.FC = () => {
     try {
       const conv = await api.getChatById(conversationId);
       setActiveConversation(conv);
-      setActiveTab('inbox');
+      setSidebarTab('chats');
       const chats = await api.getChats();
       setConversations(chats);
     } catch (err) {
@@ -108,7 +152,7 @@ export const AppLayout: React.FC = () => {
         const conv = await api.getOrCreateDirectChat(user._id);
         setActiveConversation(conv);
       }
-      setActiveTab('inbox');
+      setSidebarTab('chats');
     } catch (err) {
       console.error('Failed to open saved messages:', err);
     }
@@ -125,25 +169,17 @@ export const AppLayout: React.FC = () => {
   };
 
   return (
-    <div
-      className="flex flex-col h-screen w-screen overflow-hidden bg-[#ECE8F7] dark:bg-[#070D0B] text-zinc-900 dark:text-white transition-colors duration-200"
-      style={{
-        backgroundImage:
-          theme === 'dark'
-            ? 'radial-gradient(circle at 50% 50%, rgba(14,23,21,0.95) 0%, rgba(7,13,11,1) 100%)'
-            : 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.7) 0%, rgba(234,228,248,0.95) 100%)',
-      }}
-    >
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-white dark:bg-[#212121] text-zinc-900 dark:text-white select-none transition-colors duration-150 font-sans">
       {/* Global Announcement Banner from Admin Panel */}
       {announcement?.enabled && announcement.text && !dismissedBanner && (
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white px-4 py-2 text-xs font-semibold flex items-center justify-between shadow-md z-50 animate-fade-in shrink-0">
+        <div className="bg-[#3390EC] dark:bg-[#8774E1] text-white px-4 py-2 text-xs font-semibold flex items-center justify-between shadow-xs z-50 animate-fade-in shrink-0">
           <div className="flex items-center gap-2 max-w-4xl mx-auto truncate">
             <span className="text-sm">📢</span>
             <span className="truncate">{announcement.text}</span>
           </div>
           <button
             onClick={() => setDismissedBanner(true)}
-            className="p-1 hover:bg-white/20 rounded-full transition-colors ml-2 text-white/80 hover:text-white"
+            className="p-1 hover:bg-white/20 rounded-full transition-colors ml-2 text-white/80 hover:text-white cursor-pointer"
             title="Yopish"
           >
             ✕
@@ -151,20 +187,20 @@ export const AppLayout: React.FC = () => {
         </div>
       )}
 
-      {/* Main Content Area (Tablet/Desktop Floating Cards layout matching Image 2 & 5) */}
-      <div className="flex-1 flex overflow-hidden sm:p-3 sm:gap-3">
-        {/* Left List Pane (Floating rounded card on tablets & desktop, full on mobile) */}
+      {/* Main Content Area - Full-bleed Official Telegram Web A Split View */}
+      <div className="flex-1 flex overflow-hidden w-full h-full relative">
+        {/* Left Sidebar Pane (Docked full height with 1px Telegram divider) */}
         <div
-          className={`w-full md:w-[380px] lg:w-[420px] h-full flex-col shrink-0 md:rounded-3xl md:border md:border-white/80 dark:md:border-white/10 md:shadow-2xl overflow-hidden bg-white dark:bg-[#0E1715] z-10 ${
+          className={`w-full md:w-[380px] lg:w-[420px] h-full flex flex-col shrink-0 border-r border-[#DADCE0] dark:border-[#303030] bg-white dark:bg-[#212121] overflow-hidden z-20 ${
             activeConversation ? 'hidden md:flex' : 'flex'
           }`}
         >
-          {activeTab === 'inbox' && (
+          {sidebarTab === 'chats' && (
             <ChatList
               onSelectChat={(conv) => setActiveConversation(conv)}
               onOpenNewChatModal={handleOpenNewChat}
-              onOpenProfile={() => setActiveTab('profile')}
-              onOpenSettings={() => setActiveTab('settings')}
+              onOpenProfile={() => setSidebarTab('profile')}
+              onOpenSettings={() => setSidebarTab('settings')}
               onOpenAddContact={() => setShowAddContactModal(true)}
               onOpenCreateGroup={() => setShowCreateGroupModal(true)}
               onOpenAdmin={() => setShowAdmin(true)}
@@ -172,23 +208,36 @@ export const AppLayout: React.FC = () => {
             />
           )}
 
-          {activeTab === 'settings' && (
-            <SettingsView
-              onOpenEditProfile={() => setShowEditProfile(true)}
-              onOpenAdmin={() => setShowAdmin(true)}
+          {sidebarTab === 'calls' && (
+            <CallsView
+              onBack={() => setSidebarTab('chats')}
+              onStartCall={(targetUser, callType) => {
+                setCallingUser(targetUser);
+                setCallingType(callType);
+              }}
             />
           )}
 
-          {activeTab === 'profile' && (
+          {sidebarTab === 'settings' && (
+            <SettingsView
+              onBack={() => setSidebarTab('chats')}
+              onOpenEditProfile={() => setShowEditProfile(true)}
+              onOpenAdmin={() => setShowAdmin(true)}
+              onOpenFolders={() => setSidebarTab('chats')}
+            />
+          )}
+
+          {sidebarTab === 'profile' && (
             <ProfileView
+              onBack={() => setSidebarTab('chats')}
               onOpenEditProfile={() => setShowEditProfile(true)}
             />
           )}
         </div>
 
-        {/* Right Chat Area (Floating rounded card on tablets & desktop) */}
+        {/* Right Chat Area (Telegram Web A chat or wallpaper with centered pill) */}
         <div
-          className={`flex-1 h-full flex flex-col md:rounded-3xl md:border md:border-white/80 dark:md:border-white/10 md:shadow-2xl overflow-hidden bg-white/60 dark:bg-[#0E1715]/60 backdrop-blur-md ${
+          className={`flex-1 h-full flex flex-col overflow-hidden bg-[#F4F4F5] dark:bg-[#0F0F0F] relative ${
             !activeConversation ? 'hidden md:flex' : 'flex'
           }`}
         >
@@ -199,29 +248,32 @@ export const AppLayout: React.FC = () => {
               onOpenProfile={(u) => setViewingProfileUser(u)}
             />
           ) : (
-            // Tablet & Desktop Empty State with official BecuGram logo (Screenshot 1)
-            <div className="hidden md:flex flex-col items-center justify-center h-full select-none text-center p-8 bg-[#F4F4FA]/60 dark:bg-[#0A1210]/60 transition-colors">
-              <div className="mb-5 p-4 rounded-3xl bg-white/80 dark:bg-zinc-800/60 shadow-lg shadow-blue-500/5 backdrop-blur-sm hover:scale-105 transition-all">
-                <BecuLogo size={80} />
+            // Desktop Empty State: Responsive Wallpaper + Centered Telegram Pill
+            <div
+              className="hidden md:flex flex-col items-center justify-center h-full select-none text-center p-8 relative overflow-hidden transition-all duration-300"
+              style={getWallpaperCssStyle(currentWallpaper)}
+            >
+              {currentWallpaper.pattern && currentWallpaper.pattern !== 'none' && (
+                <div
+                  className="absolute inset-0 pointer-events-none z-0"
+                  style={{
+                    backgroundImage: `url("${getPatternDataUri(currentWallpaper.pattern)}")`,
+                    backgroundRepeat: 'repeat',
+                    backgroundSize: currentWallpaper.patternScale ? `${currentWallpaper.patternScale}px` : undefined,
+                    opacity: currentWallpaper.patternOpacity ?? 0.08,
+                    filter: `blur(${currentWallpaper.blur ?? 0}px) brightness(${currentWallpaper.brightness ?? 100}%)`,
+                  }}
+                />
+              )}
+              <div className="z-10 flex flex-col items-center">
+                <span className="px-3.5 py-1.5 rounded-full bg-black/25 dark:bg-black/40 backdrop-blur-md text-white/95 text-[13px] font-medium shadow-sm select-none">
+                  Suhbatni boshlash uchun chatni tanlang
+                </span>
               </div>
-              <p className="text-[15px] font-medium text-zinc-600 dark:text-zinc-300 max-w-xs leading-relaxed">
-                Chapdan chatni tanlang yoki yangisini boshlang
-              </p>
             </div>
           )}
         </div>
       </div>
-
-      {/* Mobile & Tablet Bottom Navigation Bar: Strictly hidden when chatting (Image 5) */}
-      {!activeConversation && (
-        <div className="md:hidden">
-          <BottomNav
-            activeTab={activeTab}
-            onTabChange={(tab) => setActiveTab(tab)}
-            unreadCount={totalUnread}
-          />
-        </div>
-      )}
 
       {/* New Chat Modal */}
       {showNewChatModal && (
@@ -279,6 +331,32 @@ export const AppLayout: React.FC = () => {
       {/* Full Admin Dashboard Modal (Strictly for Super Admin) */}
       {showAdmin && (user?.role === 'admin' || user?.phoneNumber === '+998889008081') && (
         <AdminDashboard onClose={() => setShowAdmin(false)} />
+      )}
+
+      {/* BecuGram Premium & Appearance Modal */}
+      {showPremiumModal && (
+        <PremiumModal onClose={() => setShowPremiumModal(false)} />
+      )}
+
+      {/* Global Call Modal when called from CallsView */}
+      {callingUser && callingType && (
+        <CallModal
+          type={callingType}
+          user={callingUser}
+          onEndCall={() => {
+            setCallingUser(null);
+            setCallingType(null);
+          }}
+        />
+      )}
+
+      {/* Mobile Telegram Bottom Navigation Bar */}
+      {!activeConversation && (
+        <BottomNav
+          activeTab={sidebarTab}
+          onTabChange={(tab) => setSidebarTab(tab as ActiveSidebarTab)}
+          unreadCount={totalUnreadCount}
+        />
       )}
     </div>
   );

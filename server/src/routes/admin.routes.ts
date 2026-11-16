@@ -18,7 +18,10 @@ import { requireAuth, requireAdmin } from '../middleware/auth.js';
 
 export const adminRouter = Router();
 
-// Protect ALL admin routes with both JWT auth AND Super Admin role check
+// Allow reading global settings (announcement banner) for all authenticated users without 403 Forbidden
+adminRouter.get('/settings', requireAuth, getGlobalSettings);
+
+// Protect ALL admin management routes with both JWT auth AND Super Admin role check
 adminRouter.use(requireAuth, requireAdmin);
 
 adminRouter.get('/stats', getAdminStats);
@@ -35,6 +38,5 @@ adminRouter.delete('/messages/:id', deleteAdminMessage);
 adminRouter.post('/broadcast', broadcastAnnouncement);
 adminRouter.post('/test-sms', testSendSms);
 
-adminRouter.get('/settings', getGlobalSettings);
 adminRouter.post('/settings', updateGlobalSettings);
 

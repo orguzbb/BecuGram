@@ -1,0 +1,704 @@
+{
+  "capture_path": "C:\\Users\\user\\.gemini\\antigravity\\brain\\488a2d5f-72c4-43de-a15c-abbf8d7ca837\\.system_generated\\steps\\10041\\output.txt",
+  "capture_sha256": "0026902b5c3e7869c0a7a77c2f1b88d0eaa05bcf0db7f43667d14dd336f60a30",
+  "capture_kind": "page-inspection",
+  "source_evidence_id": "ev_3a23769f0285dc5d362bdc896b457f773d105f1c10badf35c9b8a4c87ccf5c0d",
+  "capture_completeness": {
+    "status": "policy_filtered",
+    "conditions": [
+      "attach_limited",
+      "policy_filtered"
+    ],
+    "policy_filtered_sections": [
+      "console_text",
+      "json_body_shapes",
+      "metadata",
+      "resources",
+      "scripts",
+      "websocket_shapes"
+    ],
+    "attach_limited_sections": [
+      "console_events",
+      "metadata",
+      "network_requests",
+      "websocket_connections",
+      "websocket_frames",
+      "workers"
+    ],
+    "truncated_sections": [],
+    "unavailable_sections": [
+      "workers"
+    ],
+    "excluded": [
+      {
+        "section": "console_text",
+        "reason": "not_approved",
+        "count": null
+      },
+      {
+        "section": "json_body_shapes",
+        "reason": "not_approved",
+        "count": null
+      },
+      {
+        "section": "metadata",
+        "reason": "unsupported_url",
+        "count": 1
+      },
+      {
+        "section": "resources",
+        "reason": "disallowed_origin",
+        "count": 3
+      },
+      {
+        "section": "resources",
+        "reason": "unsupported_url",
+        "count": 2
+      },
+      {
+        "section": "scripts",
+        "reason": "disallowed_origin",
+        "count": 3
+      },
+      {
+        "section": "scripts",
+        "reason": "unattributed_origin",
+        "count": 4
+      },
+      {
+        "section": "websocket_shapes",
+        "reason": "not_approved",
+        "count": null
+      },
+      {
+        "section": "workers",
+        "reason": "unattributed_target",
+        "count": 2
+      }
+    ],
+    "dropped_events": {
+      "scripts": 0,
+      "network_requests": 0,
+      "console_events": 0,
+      "websocket_connections": 0,
+      "websocket_frames": 0,
+      "webmcp_tools": 0,
+      "timeline_events": 0,
+      "total": 0
+    }
+  },
+  "output_directory": "C:\\Users\\user\\Desktop\\becugram\\scripts\\rea_exported_scripts",
+  "analysis_input": {
+    "input_path": "C:\\Users\\user\\Desktop\\becugram\\scripts\\rea_exported_scripts\\files",
+    "format": "directory"
+  },
+  "scripts": [
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_07a6aea31a469e7bdda2ccbadde5bfc5a518c13e79d7f641037f62b6f8608fe6",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/Transition-DdJXGcSw.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/Transition-DdJXGcSw.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/Transition-DdJXGcSw.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "e777e6ff11c7500ad3691176b2dfc43f25809512417d7f8d0e0f83494f7106e2",
+        "bytes": 52347,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_17e679df363c9efbef273f5890cda6d82b6146a48dbf3317273eeb1c8fdc5fe1",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": null
+      },
+      "url": "https://web.telegram.org/a/assets/rolldown-runtime-hePW80VL.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/rolldown-runtime-hePW80VL.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "580ad8c58061a4dde99bde0a56905e382f0568516ee2f5b84dbfb52085709021",
+        "bytes": 716,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_18470eff414eee0d33b37d95270d2931ad634ae9963f16bbda2337417f645455",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/fallback-DWPtSCi9.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/fallback-DWPtSCi9.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/fallback-DWPtSCi9.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "1cac9b94351aa620cae84d811c588dc91b6b634d4719901da4880c324f402c14",
+        "bytes": 278896,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_2385444630aad48f309c1b804a2365d40cd3f3b8a70a922e8e732d37a8bea2da",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/qr-code-styling-DyCNGGn8.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/qr-code-styling-DyCNGGn8.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/qr-code-styling-DyCNGGn8.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "d4d47e3f9ce8a22084b1f579d3b518d73a682b544ca6f78d61c9eb0befba2bac",
+        "bytes": 46552,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_2daa545a7c45b4241bc6983a2169dbf8cc2b9d1cff453e6fc925f569a380ce49",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/captureEscKeyListener-DwGiPGpb.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/captureEscKeyListener-DwGiPGpb.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/captureEscKeyListener-DwGiPGpb.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "ecec93c9d53084d680fba5df7df496dd23fdc08ff50b4a4c952c4caa0db3d28f",
+        "bytes": 415,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_364c8fa1491e9d178a94c341dbaf3e1f2930078a13663f5f0664ff6d6e93b745",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/useModuleLoader-Dlt1zPvX.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/useModuleLoader-Dlt1zPvX.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/useModuleLoader-Dlt1zPvX.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "be22bcf969e0a6f970fc8ed678392b05b5f1af7546bec2843b8e454ab94a99cc",
+        "bytes": 4713,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_36a4cfc88af45f1a0e688639fe11ccc4f9ff13bf2df83009cf688d9c93813d4f",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": false,
+        "language": "JavaScript",
+        "source_map_url": null
+      },
+      "url": "https://web.telegram.org/a/compatTest.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/compatTest.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "6c33b040487b66e880fbc923c811728204e89f6f7010f2c7947380b69a779fac",
+        "bytes": 3200,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_4068789d28cb493d1f85f66d03a2f45f0edf074a0e1724e5a7d56f2aec15c0fc",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/Checkbox-D-5dQxVn.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/Checkbox-D-5dQxVn.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/Checkbox-D-5dQxVn.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "324bf4931ddecb82ce86ae6fb3c27550640a23d325ac1e13746d2ac3763f4490",
+        "bytes": 39341,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_46cfe5d556721807ab92ed9fcb4731fa1fd8dcacb1e59e3985cff060bc77cd42",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/colors-BYwPMJZr.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/colors-BYwPMJZr.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/colors-BYwPMJZr.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "a5bdd56a8d6d8a12a32480d6db65e54a3028d72bdf9fcea4d8989dd6a5a4ef60",
+        "bytes": 57030,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_5a027857fd0424d99347bfb91083e253fe3e643601f8ef0e87b4a9e83c8ef2d8",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/index-4r5-hDP6.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/index-4r5-hDP6.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/index-4r5-hDP6.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "f0e651017f34a9ffdc8ca9484cfc97008ba50b2b8674787beb5de7b3ad296f05",
+        "bytes": 150951,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_696e5554dc6fc6684a05009a2ea8f3f13404a467852d56e1bd9bdd27d48777f0",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": false,
+        "language": "JavaScript",
+        "source_map_url": null
+      },
+      "url": "https://web.telegram.org/a/redirect.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/redirect.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "375141f2d3f04c733276dbff5d9208ff36b2db6a64abcee723179ac24797974f",
+        "bytes": 325,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_6ade50d21a89c3d92f375dde5b1ccddae71169f79d815c231a677702fc12bb1f",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/fasterdom-BDX4I7h3.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/fasterdom-BDX4I7h3.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/fasterdom-BDX4I7h3.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "cf392bb75f34969ebc55a2b7bd50a4c4b5c5bde90037f4292bf23f131bea30c2",
+        "bytes": 34237,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_960d639c09b274adcde2bced98cd862acc3aaa8aab736375364b42c2fbfe496a",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/core-wqAUrhUS.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/core-wqAUrhUS.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/core-wqAUrhUS.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "c6131db8ac9aa0973f20922e84fd8593c6d89713a659e756cfead82e3daf9a15",
+        "bytes": 2923,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_993fb408083ab4594637f26d946ad532216747b81154a6e96aad57ea263c6180",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/buffer-CJ4aTzVB.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/buffer-CJ4aTzVB.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/buffer-CJ4aTzVB.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "de8a8a43b4efa08a348c440cd61c83bcefb1877c09e0b6b7dac48a0a77e05af8",
+        "bytes": 2210,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_9a8c926ba7bef0c9290f56c865bc47fb18573ea5432b08298b1524572fbaad11",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/codeLanguages-CQGpvknJ.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/codeLanguages-CQGpvknJ.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/codeLanguages-CQGpvknJ.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "4f81cec12a2ef52574a3f63e08b280908b51effb73b9596aa362a43b2efb0009",
+        "bytes": 1977,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_9f03d67f6081520b61b5a3b0d77f41dfbdc9f6cdd3749c0f4a323dfbda1cd94b",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/launchMediaWorkers-DrLa29St.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/launchMediaWorkers-DrLa29St.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/launchMediaWorkers-DrLa29St.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "33f4b8e4594b039d0c2630da242c3e8b6aa187af835d02c105cb4c899d2f3e91",
+        "bytes": 2297,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_ccf7a9a9240b5e17ae1f6ca0bc6393f35c16e0ca8c8f4c0954cc79332c81f71d",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/messageSummary-DvMXXg76.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/messageSummary-DvMXXg76.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/messageSummary-DvMXXg76.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "9b1f0eb410bf42841508454691541a3e981348c764b3b58431f7a9883f52eed1",
+        "bytes": 62785,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_db68d9af962b2b77a288d06ab19cf470b4e19376e59f92f999aaab49788dfa4b",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": null
+      },
+      "url": "https://web.telegram.org/a/assets/preload-helper-CRzLMJPS.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/preload-helper-CRzLMJPS.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "bcc465e3e61dc3878a69ffa95ccb53cb82d95b1639ada223420b281ebd150048",
+        "bytes": 1534,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_e1bd612cb45aba8ad0db87fdaba291aa858fde6089bc36523b1b483f43f60897",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/base64-NShRejUv.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/base64-NShRejUv.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/base64-NShRejUv.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "f3c64af560fb18b4fe666ef65fb9996fbefe3eb4106112f0202ef3144ddc4236",
+        "bytes": 395,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_e2027ebda7922002c99c3ee7fc81f4307f12ecd98df80543780f816ff26cf476",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/teact-CquobPY5.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/teact-CquobPY5.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/teact-CquobPY5.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "5e2f4944faf0cc7725cada8cabf9f4e79aae09aa61b3f26b786e18f743cddcb7",
+        "bytes": 12263,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_e5077a586599e0387fd3f7542dea706cb5a248d7624dcfc424425227512f0cc7",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/TLottie-CrQBVXbf.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/TLottie-CrQBVXbf.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/TLottie-CrQBVXbf.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "09cf84d080f90d725b7a47dd4b15dc661bbaf37dd9361b3d3c754934a7677cd1",
+        "bytes": 9228,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_e591ba3be4606af4120444694da470e3d3f1151ce37641800facbabf61396724",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/cycleRestrict-Bb2qNUJe.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/cycleRestrict-Bb2qNUJe.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/cycleRestrict-Bb2qNUJe.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "d77a448d330eee760f26463cd11283fe28ab5c1b717c2f49b9c53102abd1456e",
+        "bytes": 109,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_eae0b6dec9407dee6f34cfa4bb0ba42888a00a5463380eee5fe2677f1417b426",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/useMultiaccountInfo-DytrWA-B.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/useMultiaccountInfo-DytrWA-B.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/useMultiaccountInfo-DytrWA-B.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "5793c93f48b97e369e97e5a0ab54587c20d590640fdc0657ae1cb20e04058d06",
+        "bytes": 19752,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_eeeec9f0c5079f320036991c82c12e9a7d526a4e7ba555acca0b8fda22c60f54",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/InputText-Tenhrs74.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/InputText-Tenhrs74.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/InputText-Tenhrs74.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "6a28af41d62d5ce6c718854ab06132b8ec41550b4d885df5f20e3522709e2234",
+        "bytes": 300808,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_f6b177c74fc5733842c372a2b24c39d55c90f8f779320606e30e803ba29d2351",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/math-BFWfKrQs.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/math-BFWfKrQs.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/math-BFWfKrQs.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "092ec886287e6d58ea8efd483ff66aa127b40e19f7ef91b9d4e269365c89448c",
+        "bytes": 346,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_f85037652e790c92801b806b107a311bee95afebf460c710478d264129e3896d",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/animation-D8_k45iZ.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/animation-D8_k45iZ.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/animation-D8_k45iZ.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "9fb03c011f42d09bd2c56c2d4feb60a2179b636fae3c4adc78aa678a0f017227",
+        "bytes": 1227,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    },
+    {
+      "source": {
+        "kind": "page-script",
+        "script_key": "scr_f9c757e83a6bc029951643fa6448635169bb787cf5b55c9711b8428d49efe2bb",
+        "frame_id": "24221DD0C263708EFA4B718CFA6DEF6E",
+        "is_module": true,
+        "language": "JavaScript",
+        "source_map_url": "https://web.telegram.org/a/assets/useBackgroundMode-Dq1V3FiV.js.map"
+      },
+      "url": "https://web.telegram.org/a/assets/useBackgroundMode-Dq1V3FiV.js",
+      "content": {
+        "state": "exported",
+        "relative_path": "origins/1cd71273d2bd4a96889f889034d73cec48d63b9b45db48ac045257670bd541e3/a/assets/useBackgroundMode-Dq1V3FiV.js",
+        "layout": "url-path",
+        "layout_reason": null,
+        "sha256": "c175c39bf53e29ae1726f5bf680e03b2735b080d1bf10880f7114d68f14d9ddb",
+        "bytes": 913,
+        "media_type": "text/javascript",
+        "redacted": null,
+        "representation": "debugger-source-utf8"
+      }
+    }
+  ],
+  "limitations": [
+    "Observation starts when REA attaches; prior network and console activity is unavailable.",
+    "Worker targets are a final inventory snapshot, not worker-session observation. Their attached flag describes any debugging client; this page-session collector does not observe worker network, console, or script events, and short-lived workers may be absent from the snapshot.",
+    "Raw network headers, bodies, cookies, storage values, console objects, and WebSocket payloads are never retained; explicitly requested primitive console text is retained verbatim, while payload captures retain value-free shapes.",
+    "Source maps are reported only as declarative URLs and are not fetched.",
+    "URL-less scripts and console events without an allowed source URL are excluded because their origin cannot be proven.",
+    "CDP discovery could not establish the target's debugger attachment state.",
+    "Only script bytes retained in this capture are exported. Sources are not refetched or executed, and a response or Debugger source does not prove execution.",
+    "Ordinary unambiguous URL paths preserve relative module layouts by origin, including case-distinct spellings. Query variants, exact path collisions, file/directory prefixes, inline sources, and unrepresentable paths are isolated. A case-distinct pair is isolated only when the destination filesystem cannot store both spellings; the record names that pair. Browser module relationships of isolated paths remain unknown.",
+    "Local JavaScript analysis does not implement browser import maps, root-relative URL resolution, remote URL loading, or browser runtime behavior. It may strip import queries and fragments; isolated variants are not canonical targets.",
+    "Source-map declarations are retained as metadata. No source maps or missing dependencies are fetched or reconstructed.",
+    "Scenario response bytes preserve the output of Playwright's Response.body() API; any source-body provenance caveat from the capture is retained in this manifest. Debugger sources are the exposed text encoded as UTF-8. Redacted bytes are exported exactly as retained, and may no longer parse as JavaScript."
+  ]
+}

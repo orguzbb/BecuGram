@@ -155,6 +155,9 @@ export const AuthScreen: React.FC = () => {
     try {
       const res = await api.verifyAuth(challengeId, finalOtp);
       localStorage.setItem('becugram_token', res.accessToken);
+      if ((res as any).refreshToken) {
+        localStorage.setItem('becugram_rf', (res as any).refreshToken);
+      }
       setAuthToken(res.accessToken);
 
       const user = res.user;

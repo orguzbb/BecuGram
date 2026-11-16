@@ -17,26 +17,38 @@ import {
   CheckCircle2,
   Trash2,
   X,
+  ArrowLeft,
+  Folder,
+  Star,
+  Sparkles,
 } from 'lucide-react';
 import { Avatar } from '../../components/Avatar';
 import { useAuthStore } from '../../stores/authStore';
 import { useThemeStore } from '../../stores/themeStore';
 import { useToast } from '../../components/Toast';
+import { PremiumModal } from '../../components/PremiumModal';
+import { ChatBackgroundGalleryModal } from '../../components/chat-background/ChatBackgroundGalleryModal';
 
 interface SettingsViewProps {
+  onBack?: () => void;
   onOpenEditProfile?: () => void;
   onOpenAdmin?: () => void;
   onOpenContacts?: () => void;
+  onOpenFolders?: () => void;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
+  onBack,
   onOpenEditProfile,
   onOpenAdmin,
   onOpenContacts,
+  onOpenFolders,
 }) => {
   const { user, logout } = useAuthStore();
   const { theme, toggleTheme, accentColor, setAccentColor } = useThemeStore();
   const { showToast } = useToast();
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showWallpaperGallery, setShowWallpaperGallery] = useState(false);
 
   const userPhone = user?.phoneNumber || '+998889008081';
 
@@ -107,8 +119,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const hasValidUserAvatar = Boolean(
     user?.avatar &&
     user.avatar.trim() !== '' &&
-    !user.avatar.includes('1794151183673') &&
-    !user.avatar.includes('unsplash')
+    !user.avatar.includes('1794151183673')
   );
 
   const handleClearCache = () => {
@@ -117,214 +128,303 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#FAF6F0] dark:bg-[#0E1715] select-none text-[#1E1915] dark:text-[#EDF4F1] overflow-y-auto pb-28 transition-colors">
-      {/* Top Header matching Image 2: "Sozlamalar" */}
-      <div className="p-5 pb-3">
-        <h1 className="text-2xl font-bold tracking-tight text-[#1E1915] dark:text-white">
-          Sozlamalar
-        </h1>
+    <div className="flex flex-col h-full bg-[#F4F4F5] dark:bg-[#0F0F0F] select-none text-zinc-900 dark:text-white overflow-y-auto pb-24 transition-colors">
+      {/* 1. TELEGRAM WEB A ACTION BAR */}
+      <div className="h-14 px-3 sm:px-4 bg-white dark:bg-[#212121] text-zinc-900 dark:text-white flex items-center justify-between z-20 shrink-0 border-b border-[#DADCE0] dark:border-[#303030] sticky top-0 transition-colors">
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="w-10 h-10 rounded-full hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] text-[#707579] dark:text-[#AAAAAA] flex items-center justify-center transition-colors cursor-pointer"
+              title="Orqaga"
+            >
+              <ArrowLeft className="w-5 h-5 stroke-[2]" />
+            </button>
+          )}
+          <h1 className="text-[16px] font-medium tracking-tight text-zinc-900 dark:text-white">
+            Sozlamalar
+          </h1>
+        </div>
       </div>
 
-      {/* Profile Header Card matching Image 2: Large Avatar "A" + Name + @username */}
+      {/* 2. TELEGRAM WEB A PROFILE HERO */}
       <div
         onClick={onOpenEditProfile}
-        className="px-5 py-3 cursor-pointer group transition-colors"
+        className="px-4 py-5 bg-white dark:bg-[#212121] border-b border-[#DADCE0] dark:border-[#303030] cursor-pointer group transition-colors"
       >
         <div className="flex items-center gap-4">
-          {/* Big Avatar (Purple circle with bold white "A" or photo) */}
           <div className="relative">
             <Avatar
               name={user?.displayName || 'Abdurahim'}
               src={hasValidUserAvatar ? user?.avatar : undefined}
               size="xl"
+              className="!w-16 !h-16"
             />
           </div>
 
-          {/* Name & @username */}
           <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-bold text-[#1E1915] dark:text-white group-hover:text-[#9D5215] transition-colors truncate">
+            <h2 className="text-lg font-medium text-zinc-900 dark:text-white truncate">
               {user?.displayName || 'Abdurahim'}
             </h2>
-            <p className="text-sm font-medium text-[#7A6A5A] dark:text-[#8DA39A] truncate">
-              @{user?.username || 'Abdurahim'}
+            <p className="text-sm font-medium text-[#3390EC] dark:text-[#8774E1]">
+              {userPhone}
+            </p>
+            <p className="text-xs text-[#707579] dark:text-[#AAAAAA] truncate mt-0.5">
+              @{user?.username || 'Abdurahim'} &bull; {user?.bio || 'Bio kiritilmagan'}
             </p>
           </div>
 
-          <ChevronRight className="w-5 h-5 text-[#9C8C7C] group-hover:translate-x-0.5 transition-transform" />
+          <ChevronRight className="w-5 h-5 text-[#707579] dark:text-[#AAAAAA] group-hover:translate-x-0.5 transition-transform" />
         </div>
       </div>
 
-      {/* Thin Divider Line matching Image 2 */}
-      <div className="my-2 border-b border-[#E8DECFA0] dark:border-[#1E3028]" />
-
-      {/* SETTINGS MENU LIST matching Image 2 */}
-      <div className="px-3 divide-y divide-[#EFE5D780] dark:divide-[#192A23]">
-        {/* 1. Profil */}
-        <div
-          onClick={onOpenEditProfile}
-          className="flex items-center justify-between p-3.5 hover:bg-[#F2ECE3] dark:hover:bg-[#15241F] rounded-2xl cursor-pointer transition-colors group"
-        >
-          <div className="flex items-center gap-3.5">
-            <UserIcon className="w-5 h-5 stroke-[2] text-[#4A3D31] dark:text-[#8DA39A] group-hover:text-[#9D5215]" />
-            <span className="text-[15px] font-medium text-[#1E1915] dark:text-white">
-              Profil
-            </span>
-          </div>
-          <ChevronRight className="w-4 h-4 text-[#9C8C7C]" />
+      {/* 3. HISOB (ACCOUNT) SECTION */}
+      <div className="mt-3 bg-white dark:bg-[#212121] border-y border-[#DADCE0] dark:border-[#303030]">
+        <div className="px-4 pt-3 pb-1 text-[12px] font-semibold text-[#3390EC] dark:text-[#8774E1] uppercase tracking-wider">
+          Hisob
         </div>
-
-        {/* 2. Kontaktlar */}
-        <div
-          onClick={onOpenContacts}
-          className="flex items-center justify-between p-3.5 hover:bg-[#F2ECE3] dark:hover:bg-[#15241F] rounded-2xl cursor-pointer transition-colors group"
-        >
-          <div className="flex items-center gap-3.5">
-            <Users className="w-5 h-5 stroke-[2] text-[#4A3D31] dark:text-[#8DA39A] group-hover:text-[#9D5215]" />
-            <span className="text-[15px] font-medium text-[#1E1915] dark:text-white">
-              Kontaktlar
-            </span>
-          </div>
-          <ChevronRight className="w-4 h-4 text-[#9C8C7C]" />
-        </div>
-
-        {/* 3. Maxfiylik */}
-        <div
-          onClick={() => setActiveModal('privacy')}
-          className="flex items-center justify-between p-3.5 hover:bg-[#F2ECE3] dark:hover:bg-[#15241F] rounded-2xl cursor-pointer transition-colors group"
-        >
-          <div className="flex items-center gap-3.5">
-            <Eye className="w-5 h-5 stroke-[2] text-[#4A3D31] dark:text-[#8DA39A] group-hover:text-[#9D5215]" />
-            <span className="text-[15px] font-medium text-[#1E1915] dark:text-white">
-              Maxfiylik
-            </span>
-          </div>
-          <ChevronRight className="w-4 h-4 text-[#9C8C7C]" />
-        </div>
-
-        {/* 4. Faol seanslar */}
-        <div
-          onClick={() => setActiveModal('sessions')}
-          className="flex items-center justify-between p-3.5 hover:bg-[#F2ECE3] dark:hover:bg-[#15241F] rounded-2xl cursor-pointer transition-colors group"
-        >
-          <div className="flex items-center gap-3.5">
-            <Laptop className="w-5 h-5 stroke-[2] text-[#4A3D31] dark:text-[#8DA39A] group-hover:text-[#9D5215]" />
-            <span className="text-[15px] font-medium text-[#1E1915] dark:text-white">
-              Faol seanslar
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-              1 ta faol
-            </span>
-            <ChevronRight className="w-4 h-4 text-[#9C8C7C]" />
-          </div>
-        </div>
-
-        {/* 5. Xavfsizlik */}
-        <div
-          onClick={() => setActiveModal('security')}
-          className="flex items-center justify-between p-3.5 hover:bg-[#F2ECE3] dark:hover:bg-[#15241F] rounded-2xl cursor-pointer transition-colors group"
-        >
-          <div className="flex items-center gap-3.5">
-            <Key className="w-5 h-5 stroke-[2] text-[#4A3D31] dark:text-[#8DA39A] group-hover:text-[#9D5215]" />
-            <span className="text-[15px] font-medium text-[#1E1915] dark:text-white">
-              Xavfsizlik
-            </span>
-          </div>
-          <ChevronRight className="w-4 h-4 text-[#9C8C7C]" />
-        </div>
-
-        {/* 6. Xotira */}
-        <div
-          onClick={() => setActiveModal('storage')}
-          className="flex items-center justify-between p-3.5 hover:bg-[#F2ECE3] dark:hover:bg-[#15241F] rounded-2xl cursor-pointer transition-colors group"
-        >
-          <div className="flex items-center gap-3.5">
-            <HardDrive className="w-5 h-5 stroke-[2] text-[#4A3D31] dark:text-[#8DA39A] group-hover:text-[#9D5215]" />
-            <span className="text-[15px] font-medium text-[#1E1915] dark:text-white">
-              Xotira
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-[#7A6A5A] dark:text-[#8DA39A] font-mono">
-              {cacheSize}
-            </span>
-            <ChevronRight className="w-4 h-4 text-[#9C8C7C]" />
-          </div>
-        </div>
-
-        {/* 7. Til -> O'zbekcha */}
-        <div
-          onClick={() => setActiveModal('language')}
-          className="flex items-center justify-between p-3.5 hover:bg-[#F2ECE3] dark:hover:bg-[#15241F] rounded-2xl cursor-pointer transition-colors group"
-        >
-          <div className="flex items-center gap-3.5">
-            <Languages className="w-5 h-5 stroke-[2] text-[#4A3D31] dark:text-[#8DA39A] group-hover:text-blue-600" />
-            <span className="text-[15px] font-medium text-[#1E1915] dark:text-white">
-              Til
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-              O‘zbekcha 🇺🇿
-            </span>
-            <ChevronRight className="w-4 h-4 text-[#9C8C7C]" />
-          </div>
-        </div>
-
-        {/* 8. Ko'rinish va Ranglar (Appearance & Theme) */}
-        <div
-          onClick={() => setActiveModal('appearance')}
-          className="flex items-center justify-between p-3.5 hover:bg-[#F2ECE3] dark:hover:bg-[#15241F] rounded-2xl cursor-pointer transition-colors group"
-        >
-          <div className="flex items-center gap-3.5">
-            <Palette className="w-5 h-5 stroke-[2] text-[#4A3D31] dark:text-[#8DA39A] group-hover:text-[#9D5215]" />
-            <span className="text-[15px] font-medium text-[#1E1915] dark:text-white">
-              Ko‘rinish va Ranglar
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[#9D5215] dark:text-[#E8BE8E]">
-              {theme === 'dark' ? 'Qorong‘i' : 'Yorug‘'}
-            </span>
-            <ChevronRight className="w-4 h-4 text-[#9C8C7C]" />
-          </div>
-        </div>
-
-        {/* 9. SUPER ADMIN (Exclusive for +998889008081) */}
-        {isAdmin && onOpenAdmin && (
+        <div className="divide-y divide-[#DADCE0]/50 dark:divide-[#303030]/50">
           <div
-            onClick={onOpenAdmin}
-            className="flex items-center justify-between p-3.5 bg-gradient-to-r from-pink-500/10 via-rose-500/10 to-amber-500/10 hover:from-pink-500/20 hover:to-rose-500/20 border border-pink-500/20 rounded-2xl cursor-pointer transition-all group mt-2"
+            onClick={onOpenEditProfile}
+            className="px-4 py-3 hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] cursor-pointer transition-colors"
           >
-            <div className="flex items-center gap-3.5">
-              <ShieldCheck className="w-5 h-5 stroke-[2.2] text-rose-500" />
-              <div>
-                <span className="text-[15px] font-bold text-rose-600 dark:text-rose-400 block">
+            <span className="text-sm font-medium text-zinc-900 dark:text-white block truncate">
+              {userPhone}
+            </span>
+            <span className="text-xs text-[#707579] dark:text-[#AAAAAA]">
+              Telefon raqamini o‘zgartirish uchun bosing
+            </span>
+          </div>
+
+          <div
+            onClick={onOpenEditProfile}
+            className="px-4 py-3 hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] cursor-pointer transition-colors"
+          >
+            <span className="text-sm font-medium text-zinc-900 dark:text-white block truncate">
+              @{user?.username || 'Abdurahim'}
+            </span>
+            <span className="text-xs text-[#707579] dark:text-[#AAAAAA]">
+              Foydalanuvchi nomi
+            </span>
+          </div>
+
+          <div
+            onClick={onOpenEditProfile}
+            className="px-4 py-3 hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] cursor-pointer transition-colors"
+          >
+            <span className="text-sm font-medium text-zinc-900 dark:text-white block truncate">
+              {user?.bio || 'O‘zingiz haqingizda bir necha so‘z yozing'}
+            </span>
+            <span className="text-xs text-[#707579] dark:text-[#AAAAAA]">
+              Bio
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ⭐️ BecuGram Premium Section */}
+      <div
+        onClick={() => setShowPremiumModal(true)}
+        className="mt-3 bg-gradient-to-r from-purple-900/30 via-indigo-900/20 to-transparent border-y border-purple-500/30 p-4 flex items-center justify-between cursor-pointer hover:bg-purple-900/40 transition-colors shadow-xs"
+      >
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-purple-600 flex items-center justify-center text-white shadow-md">
+            <Star className="w-5 h-5 fill-white stroke-0" />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 font-bold text-sm text-zinc-900 dark:text-white">
+              <span>BecuGram Premium</span>
+              <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-amber-400 text-black">
+                25 000 so'm
+              </span>
+            </div>
+            <span className="text-xs text-zinc-500 dark:text-purple-300">
+              {user?.isPremium ? "Obuna faol • Sozlash uchun bosing" : "Profil foni, status ikonkalari va cheksiz tezlik"}
+            </span>
+          </div>
+        </div>
+        <ChevronRight className="w-4 h-4 text-purple-400" />
+      </div>
+
+      {/* 4. SOZLAMALAR SECTION */}
+      <div className="mt-3 bg-white dark:bg-[#212121] border-y border-[#DADCE0] dark:border-[#303030]">
+        <div className="px-4 pt-3 pb-1 text-[12px] font-semibold text-[#3390EC] dark:text-[#8774E1] uppercase tracking-wider">
+          Sozlamalar
+        </div>
+        <div className="divide-y divide-[#DADCE0]/50 dark:divide-[#303030]/50">
+          {/* Chat orqa foni va mavzular */}
+          <div
+            onClick={() => setShowWallpaperGallery(true)}
+            className="flex items-center justify-between px-4 py-3.5 hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] cursor-pointer transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <Palette className="w-5 h-5 text-[#3390EC] dark:text-[#8774E1]" />
+              <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                Chat orqa foni va mavzular
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[#3390EC] dark:text-[#8774E1] font-medium">Galereya &rsaquo;</span>
+              <ChevronRight className="w-4 h-4 text-[#707579] dark:text-[#AAAAAA]" />
+            </div>
+          </div>
+
+          {/* Chat jildlari */}
+          <div
+            onClick={onOpenFolders}
+            className="flex items-center justify-between px-4 py-3.5 hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] cursor-pointer transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <Folder className="w-5 h-5 text-[#3390EC] dark:text-[#8774E1]" />
+              <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                Chat jildlari
+              </span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#707579] dark:text-[#AAAAAA]" />
+          </div>
+
+          {/* Maxfiylik va xavfsizlik */}
+          <div
+            onClick={() => setActiveModal('privacy')}
+            className="flex items-center justify-between px-4 py-3.5 hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] cursor-pointer transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <Eye className="w-5 h-5 text-[#3390EC] dark:text-[#8774E1]" />
+              <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                Maxfiylik va xavfsizlik
+              </span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#707579] dark:text-[#AAAAAA]" />
+          </div>
+
+          {/* Qurilmalar va seanslar */}
+          <div
+            onClick={() => setActiveModal('sessions')}
+            className="flex items-center justify-between px-4 py-3.5 hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] cursor-pointer transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <Laptop className="w-5 h-5 text-[#3390EC] dark:text-[#8774E1]" />
+              <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                Qurilmalar va seanslar
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-emerald-500">1 faol</span>
+              <ChevronRight className="w-4 h-4 text-[#707579] dark:text-[#AAAAAA]" />
+            </div>
+          </div>
+
+          {/* Ikki bosqichli tasdiqlash */}
+          <div
+            onClick={() => setActiveModal('security')}
+            className="flex items-center justify-between px-4 py-3.5 hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] cursor-pointer transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <Key className="w-5 h-5 text-[#3390EC] dark:text-[#8774E1]" />
+              <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                Ikki bosqichli tasdiqlash
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[#707579] dark:text-[#AAAAAA]">
+                {twoStepPin ? 'Yoqilgan' : 'O‘chirilgan'}
+              </span>
+              <ChevronRight className="w-4 h-4 text-[#707579] dark:text-[#AAAAAA]" />
+            </div>
+          </div>
+
+          {/* Ma‘lumotlar va xotira */}
+          <div
+            onClick={() => setActiveModal('storage')}
+            className="flex items-center justify-between px-4 py-3.5 hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] cursor-pointer transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <HardDrive className="w-5 h-5 text-[#3390EC] dark:text-[#8774E1]" />
+              <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                Ma‘lumotlar va xotira
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[#707579] dark:text-[#AAAAAA] font-mono">{cacheSize}</span>
+              <ChevronRight className="w-4 h-4 text-[#707579] dark:text-[#AAAAAA]" />
+            </div>
+          </div>
+
+          {/* Til */}
+          <div
+            onClick={() => setActiveModal('language')}
+            className="flex items-center justify-between px-4 py-3.5 hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] cursor-pointer transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <Languages className="w-5 h-5 text-[#3390EC] dark:text-[#8774E1]" />
+              <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                Til
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-[#3390EC] dark:text-[#8774E1]">{language}</span>
+              <ChevronRight className="w-4 h-4 text-[#707579] dark:text-[#AAAAAA]" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. YORDAM (SUPPORT) SECTION */}
+      <div className="mt-3 bg-white dark:bg-[#212121] border-y border-[#DADCE0] dark:border-[#303030]">
+        <div className="px-4 pt-3 pb-1 text-[12px] font-semibold text-[#3390EC] dark:text-[#8774E1] uppercase tracking-wider">
+          Yordam
+        </div>
+        <div className="divide-y divide-[#DADCE0]/50 dark:divide-[#303030]/50">
+          <div
+            onClick={() => showToast('Telegram qo‘llab-quvvatlash xizmati', 'info')}
+            className="flex items-center justify-between px-4 py-3.5 hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] cursor-pointer transition-colors"
+          >
+            <span className="text-sm font-medium text-zinc-900 dark:text-white">
+              Savol berish
+            </span>
+            <ChevronRight className="w-4 h-4 text-[#707579] dark:text-[#AAAAAA]" />
+          </div>
+
+          <div
+            onClick={() => showToast('Telegram tez-tez so‘raladigan savollar', 'info')}
+            className="flex items-center justify-between px-4 py-3.5 hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] cursor-pointer transition-colors"
+          >
+            <span className="text-sm font-medium text-zinc-900 dark:text-white">
+              Telegram FAQ
+            </span>
+            <ChevronRight className="w-4 h-4 text-[#707579] dark:text-[#AAAAAA]" />
+          </div>
+
+          {/* SUPER ADMIN (Exclusive for admin) */}
+          {isAdmin && onOpenAdmin && (
+            <div
+              onClick={onOpenAdmin}
+              className="flex items-center justify-between px-4 py-3.5 hover:bg-rose-50 dark:hover:bg-rose-950/20 cursor-pointer transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                <ShieldCheck className="w-5 h-5 stroke-[2.2] text-rose-500" />
+                <span className="text-sm font-bold text-rose-600 dark:text-rose-400">
                   Super Admin Paneli
                 </span>
-                <span className="text-[11px] text-[#7A6A5A] dark:text-[#8DA39A]">
-                  Foydalanuvchilar, xabarlar va Eskiz SMS testi
-                </span>
               </div>
+              <ChevronRight className="w-4 h-4 text-rose-500" />
             </div>
-            <ChevronRight className="w-4 h-4 text-rose-500 group-hover:translate-x-1 transition-transform" />
-          </div>
-        )}
+          )}
 
-        {/* 10. Chiqish (Log out) */}
-        <div
-          onClick={() => {
-            logout();
-            showToast('Tizimdan chiqildi', 'info');
-          }}
-          className="flex items-center justify-between p-3.5 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-2xl cursor-pointer transition-colors group mt-2"
-        >
-          <div className="flex items-center gap-3.5">
-            <LogOut className="w-5 h-5 stroke-[2] text-rose-500" />
-            <span className="text-[15px] font-bold text-rose-600 dark:text-rose-400">
-              Chiqish
-            </span>
+          {/* Chiqish (Log out) */}
+          <div
+            onClick={() => {
+              logout();
+              showToast('Tizimdan chiqildi', 'info');
+            }}
+            className="flex items-center justify-between px-4 py-3.5 hover:bg-rose-50 dark:hover:bg-rose-950/20 cursor-pointer transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <LogOut className="w-5 h-5 stroke-[2] text-rose-500" />
+              <span className="text-sm font-bold text-rose-600 dark:text-rose-400">
+                Chiqish
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -658,6 +758,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             </div>
           </div>
         </div>
+      )}
+      {/* Telegram Premium & Profile Appearance Studio Modal */}
+      {showPremiumModal && (
+        <PremiumModal onClose={() => setShowPremiumModal(false)} />
+      )}
+
+      {/* Chat Background Gallery & Studio Modal */}
+      {showWallpaperGallery && (
+        <ChatBackgroundGalleryModal onClose={() => setShowWallpaperGallery(false)} />
       )}
     </div>
   );

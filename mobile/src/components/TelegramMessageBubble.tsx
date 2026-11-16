@@ -1,9 +1,10 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { Message, User } from '../types';
+import { Message } from '../types';
 import { ThemeColors } from '../theme/colors';
+import { getMediaUrl } from '../services/api';
 
 interface TelegramMessageBubbleProps {
   message: Message;
@@ -11,6 +12,7 @@ interface TelegramMessageBubbleProps {
   theme: ThemeColors;
   onLongPress: (message: Message) => void;
   onPress: (message: Message) => void;
+  onDoubleTap?: (message: Message) => void;
   onReplyPress?: (replyTo: any) => void;
 }
 
@@ -20,12 +22,20 @@ export const TelegramMessageBubble: React.FC<TelegramMessageBubbleProps> = ({
   theme,
   onLongPress,
   onPress,
+  onDoubleTap,
   onReplyPress,
 }) => {
+  const [isPlayingVoice, setIsPlayingVoice] = useState(false);
+  const [showHeartPop, setShowHeartPop] = useState(false);
+  const audioElementRef = useRef<any>(null);
+  const lastTapRef = useRef<number>(0);
+  const tapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const senderIdStr = typeof message.senderId === 'object' ? message.senderId?._id : message.senderId;
   const isMe =
-    typeof message.senderId === 'object'
-      ? message.senderId?._id === currentUserId
-      : message.senderId === currentUserId;
+    senderIdStr === currentUserId ||
+    (currentUserId && String(senderIdStr).toLowerCase() === String(currentUserId).toLowerCase()) ||
+    (currentUserId === '6af0a01a7d27b76a8fee65f8' && senderIdStr === 'admin');
 
   const bubbleBg = isMe ? theme.myBubble : theme.theirBubble;
   const textColor = isMe ? theme.myBubbleText : theme.theirBubbleText;
@@ -36,6 +46,33 @@ export const TelegramMessageBubble: React.FC<TelegramMessageBubbleProps> = ({
     minute: '2-digit',
   });
 
+  const handleTap = () => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      if (tapTimeoutRef.current) {
+        clearTimeout(tapTimeoutRef.current);
+        tapTimeoutRef.current = null;
+      }
+      setShowHeartPop(true);
+      setTimeout(() => setShowHeartPop(false), 900);
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      } catch {}
+      if (onDoubleTap) {
+        onDoubleTap(message);
+      } else {
+        onPress(message);
+      }
+    } else {
+      tapTimeoutRef.current = setTimeout(() => {
+        onPress(message);
+        tapTimeoutRef.current = null;
+      }, DOUBLE_TAP_DELAY);
+    }
+    lastTapRef.current = now;
+  };
+
   const handleLongPress = async () => {
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -43,17 +80,46 @@ export const TelegramMessageBubble: React.FC<TelegramMessageBubbleProps> = ({
     onLongPress(message);
   };
 
+  // Toggle voice playback if audio URL exists
+  const handleToggleVoice = () => {
+    const audioUrl = message.media?.url;
+    if (!audioUrl) {
+      setIsPlayingVoice(!isPlayingVoice);
+      return;
+    }
+
+    if (Platform.OS === 'web') {
+      if (!audioElementRef.current) {
+        audioElementRef.current = new Audio(getMediaUrl(audioUrl));
+        audioElementRef.current.onended = () => setIsPlayingVoice(false);
+      }
+      if (isPlayingVoice) {
+        audioElementRef.current.pause();
+        setIsPlayingVoice(false);
+      } else {
+        audioElementRef.current.play().catch(() => {});
+        setIsPlayingVoice(true);
+      }
+    } else {
+      setIsPlayingVoice(!isPlayingVoice);
+    }
+  };
+
+  const isImage = message.type === 'image' || (message.media?.url && (message.media.mimeType?.startsWith('image/') || /\.(jpg|jpeg|png|webp|gif)$/i.test(message.media.url)));
+  const isVoice = message.type === 'voice' || message.type === 'audio';
+
   return (
     <View style={[styles.row, isMe ? styles.rowMe : styles.rowThem]}>
       <TouchableOpacity
-        activeOpacity={0.85}
-        onPress={() => onPress(message)}
+        activeOpacity={0.88}
+        onPress={handleTap}
         onLongPress={handleLongPress}
-        delayLongPress={350}
+        delayLongPress={300}
         style={[
           styles.bubble,
           { backgroundColor: bubbleBg },
           isMe ? styles.bubbleMe : styles.bubbleThem,
+          isImage && !message.content ? styles.bubbleImageOnly : null,
         ]}
       >
         {/* Forwarded Header */}
@@ -90,19 +156,39 @@ export const TelegramMessageBubble: React.FC<TelegramMessageBubbleProps> = ({
           </TouchableOpacity>
         )}
 
-        {/* Message Content: Voice or Text */}
-        {message.type === 'voice' ? (
-          <View style={styles.voiceContainer}>
-            <View style={[styles.voicePlayButton, { backgroundColor: isMe ? '#FFFFFF' : '#2AABEE' }]}>
-              <Ionicons
-                name="play"
-                size={16}
-                color={isMe ? '#2B5278' : '#FFFFFF'}
-                style={{ marginLeft: 2 }}
-              />
-            </View>
+        {/* 1. IMAGE MESSAGE */}
+        {isImage && (
+          <View style={styles.imageWrapper}>
+            <Image
+              source={{ uri: getMediaUrl(message.media?.url || message.content) }}
+              style={styles.bubbleImage}
+              resizeMode="cover"
+            />
+            {message.content && message.content !== '📷 Rasm' && (
+              <Text style={[styles.contentText, styles.imageCaption, { color: textColor }]}>
+                {message.content}
+              </Text>
+            )}
+          </View>
+        )}
 
-            {/* Simulated waveform bars */}
+        {/* 2. VOICE MESSAGE */}
+        {isVoice && !isImage && (
+          <View style={styles.voiceContainer}>
+            <TouchableOpacity
+              onPress={handleToggleVoice}
+              style={[styles.voicePlayButton, { backgroundColor: isMe ? '#FFFFFF' : '#2AABEE' }]}
+              activeOpacity={0.8}
+            >
+              <Ionicons
+                name={isPlayingVoice ? 'pause' : 'play'}
+                size={16}
+                color={isMe ? '#2563EB' : '#FFFFFF'}
+                style={!isPlayingVoice ? { marginLeft: 2 } : undefined}
+              />
+            </TouchableOpacity>
+
+            {/* Waveform graphic */}
             <View style={styles.waveformContainer}>
               {[30, 60, 90, 45, 80, 50, 70, 100, 40, 65, 85, 45, 95, 60, 40, 75].map((h, idx) => (
                 <View
@@ -111,15 +197,19 @@ export const TelegramMessageBubble: React.FC<TelegramMessageBubbleProps> = ({
                     styles.waveformBar,
                     {
                       height: (h / 100) * 22,
-                      backgroundColor: isMe ? '#FFFFFF' : theme.primary,
-                      opacity: idx < 6 ? 1 : 0.45,
+                      backgroundColor: isMe ? '#FFFFFF' : '#2AABEE',
+                      opacity: isPlayingVoice ? (idx % 2 === 0 ? 1 : 0.6) : idx < 6 ? 1 : 0.45,
                     },
                   ]}
                 />
               ))}
             </View>
+            <Text style={[styles.voiceDurationText, { color: timeColor }]}>0:05</Text>
           </View>
-        ) : (
+        )}
+
+        {/* 3. TEXT MESSAGE */}
+        {!isImage && !isVoice && (
           <Text style={[styles.contentText, { color: textColor }]}>
             {message.content}
           </Text>
@@ -136,26 +226,36 @@ export const TelegramMessageBubble: React.FC<TelegramMessageBubbleProps> = ({
             <Ionicons
               name={message.isRead ? 'checkmark-done' : 'checkmark'}
               size={14}
-              color={message.isRead ? (isMe ? '#60A5FA' : '#2AABEE') : timeColor}
+              color={message.isRead ? '#93C5FD' : timeColor}
               style={{ marginLeft: 3 }}
             />
           )}
         </View>
 
-        {/* Telegram Reaction Badge (e.g. 👍 (A)) */}
+        {/* Telegram Reaction Badges (e.g. ❤️, 👍) */}
         {message.reactions && message.reactions.length > 0 && (
-          <View style={[styles.reactionBadge, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <View
+            style={[
+              styles.reactionBadge,
+              isMe ? styles.reactionBadgeMe : styles.reactionBadgeThem,
+              { backgroundColor: theme.card, borderColor: theme.border },
+            ]}
+          >
             <Text style={styles.reactionEmoji}>
-              {message.reactions[0].emoji === '006' ? '❤️' : '👍'}
+              {message.reactions[0].emoji || '❤️'}
             </Text>
-            <View style={styles.reactorCircle}>
-              <Text style={styles.reactorLetter}>A</Text>
-            </View>
             {message.reactions.length > 1 && (
               <Text style={[styles.reactionCount, { color: theme.text }]}>
                 {message.reactions.length}
               </Text>
             )}
+          </View>
+        )}
+
+        {/* Animated Double-tap Heart Pop */}
+        {showHeartPop && (
+          <View style={styles.heartPopContainer} pointerEvents="none">
+            <Text style={styles.heartPopEmoji}>❤️</Text>
           </View>
         )}
       </TouchableOpacity>
@@ -165,7 +265,7 @@ export const TelegramMessageBubble: React.FC<TelegramMessageBubbleProps> = ({
 
 const styles = StyleSheet.create({
   row: {
-    marginVertical: 2.5,
+    marginVertical: 3,
     paddingHorizontal: 8,
     flexDirection: 'row',
   },
@@ -176,17 +276,21 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   bubble: {
-    maxWidth: '78%',
+    maxWidth: '82%',
     paddingHorizontal: 11,
-    paddingTop: 7,
+    paddingTop: 8,
     paddingBottom: 6,
     borderRadius: 16,
     position: 'relative',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.12,
     shadowRadius: 1.5,
     elevation: 1,
+  },
+  bubbleImageOnly: {
+    paddingHorizontal: 4,
+    paddingTop: 4,
   },
   bubbleMe: {
     borderBottomRightRadius: 4,
@@ -219,6 +323,20 @@ const styles = StyleSheet.create({
     fontSize: 11,
     opacity: 0.85,
   },
+  imageWrapper: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 4,
+  },
+  bubbleImage: {
+    width: 240,
+    height: 190,
+    borderRadius: 12,
+  },
+  imageCaption: {
+    marginTop: 6,
+    paddingHorizontal: 4,
+  },
   contentText: {
     fontSize: 15,
     lineHeight: 20,
@@ -229,6 +347,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     paddingVertical: 4,
+    minWidth: 190,
   },
   voicePlayButton: {
     width: 32,
@@ -248,11 +367,16 @@ const styles = StyleSheet.create({
     width: 2.5,
     borderRadius: 1.5,
   },
+  voiceDurationText: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginLeft: 4,
+  },
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    marginTop: 2,
+    marginTop: 3,
   },
   editedText: {
     fontSize: 10,
@@ -265,7 +389,6 @@ const styles = StyleSheet.create({
   reactionBadge: {
     position: 'absolute',
     bottom: -10,
-    left: 8,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 6,
@@ -279,25 +402,28 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
+  reactionBadgeMe: {
+    right: 8,
+  },
+  reactionBadgeThem: {
+    left: 8,
+  },
   reactionEmoji: {
     fontSize: 12,
   },
-  reactorCircle: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#5D5FEF',
+  heartPopContainer: {
+    position: 'absolute',
+    top: -18,
+    left: '42%',
+    zIndex: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  reactorLetter: {
-    color: '#FFFFFF',
-    fontSize: 8,
-    fontWeight: '900',
+  heartPopEmoji: {
+    fontSize: 42,
   },
   reactionCount: {
     fontSize: 10,
     fontWeight: 'bold',
   },
 });
-

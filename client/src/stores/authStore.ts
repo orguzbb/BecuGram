@@ -10,16 +10,13 @@ interface AuthState {
   isLoading: boolean;
   isInitialized: boolean;
   initAuth: () => Promise<void>;
-  setAuth: (user: User, token: string) => void;
+  setAuth: (user: User, token: string, refreshToken?: string) => void;
   setUser: (user: User) => void;
   logout: () => Promise<void>;
 }
 
 const sanitizeUser = (user: User | null): User | null => {
   if (!user) return null;
-  if (user.avatar && (user.avatar.includes('1794151183673') || user.avatar.includes('unsplash'))) {
-    return { ...user, avatar: '' };
-  }
   return user;
 };
 
@@ -47,14 +44,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ user, token: savedToken, isAuthenticated: true, isLoading: false, isInitialized: true });
     } catch {
       localStorage.removeItem('becugram_token');
+      localStorage.removeItem('becugram_rf');
       localStorage.removeItem('becugram_user');
       set({ user: null, token: null, isAuthenticated: false, isLoading: false, isInitialized: true });
     }
   },
 
-  setAuth: (rawUser: User, token: string) => {
+  setAuth: (rawUser: User, token: string, refreshToken?: string) => {
     const user = sanitizeUser(rawUser) || rawUser;
     localStorage.setItem('becugram_token', token);
+    if (refreshToken) {
+      localStorage.setItem('becugram_rf', refreshToken);
+    }
     localStorage.setItem('becugram_user', JSON.stringify(user));
     socketService.connect(token);
     set({ user, token, isAuthenticated: true, isLoading: false });
@@ -72,6 +73,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } finally {
       socketService.disconnect();
       localStorage.removeItem('becugram_token');
+      localStorage.removeItem('becugram_rf');
       localStorage.removeItem('becugram_user');
       set({ user: null, token: null, isAuthenticated: false });
     }

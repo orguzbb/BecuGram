@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { X, Camera, RefreshCw } from 'lucide-react';
+import { X, Camera, RefreshCw, Star, Crown, Palette } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { useToast } from '../../components/Toast';
 import { api } from '../../services/api';
 import { Avatar } from '../../components/Avatar';
 import { validateUsername } from '../../utils/validators';
+import { PREMIUM_BADGES, PROFILE_PATTERNS } from '../../components/PremiumModal';
 
 interface EditProfileModalProps {
   onClose: () => void;
@@ -18,6 +19,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ onClose }) =
   const [username, setUsername] = useState(user?.username || '');
   const [bio, setBio] = useState(user?.bio || '');
   const [avatar, setAvatar] = useState(user?.avatar || '');
+  const [premiumBadge, setPremiumBadge] = useState(user?.premiumBadge || '⭐️');
+  const [profilePattern, setProfilePattern] = useState(user?.profilePattern || 'stars');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +55,18 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ onClose }) =
         avatar,
       });
 
-      setUser(updated);
+      const fullUpdated = {
+        ...updated,
+        premiumBadge,
+        profilePattern,
+      };
+
+      if (user?._id) {
+        localStorage.setItem(`becugram_badge_${user._id}`, premiumBadge);
+        localStorage.setItem(`becugram_pattern_${user._id}`, profilePattern);
+      }
+
+      setUser(fullUpdated);
       showToast('Profil muvaffaqiyatli yangilandi!', 'success');
       onClose();
     } catch (err: any) {
@@ -133,6 +147,57 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ onClose }) =
             className="w-full p-2.5 bg-zinc-100 dark:bg-[#172A24] border border-zinc-200 dark:border-[#263D34] rounded-xl text-sm text-zinc-900 dark:text-white outline-none focus:border-emerald-500 dark:focus:border-cyan-400 resize-none"
           />
         </div>
+
+        {/* Premium Status Badge & Pattern Selector */}
+        {user?.isPremium && (
+          <div className="p-3 rounded-2xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20">
+            <label className="text-xs text-amber-500 dark:text-amber-300 font-bold flex items-center gap-1.5 mb-2">
+              <Star className="w-3.5 h-3.5 fill-amber-400" />
+              <span>Premium status nishoni (Badge)</span>
+            </label>
+            <div className="grid grid-cols-7 gap-1.5 mb-3">
+              {PREMIUM_BADGES.map((b) => (
+                <button
+                  key={b.id}
+                  type="button"
+                  onClick={() => setPremiumBadge(b.id)}
+                  className={`h-9 rounded-xl flex items-center justify-center text-lg transition-all ${
+                    premiumBadge === b.id
+                      ? 'bg-amber-400/20 border-2 border-amber-400 scale-105 shadow-sm'
+                      : 'bg-black/5 dark:bg-white/5 border border-transparent hover:bg-black/10'
+                  }`}
+                >
+                  {b.id}
+                </button>
+              ))}
+            </div>
+
+            <label className="text-xs text-purple-600 dark:text-purple-300 font-bold flex items-center gap-1.5 mb-2">
+              <Palette className="w-3.5 h-3.5" />
+              <span>Profil fonining dekorativ naqshi</span>
+            </label>
+            <div className="grid grid-cols-3 gap-1.5">
+              {PROFILE_PATTERNS.map((p) => {
+                const IconComp = p.icon;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setProfilePattern(p.id)}
+                    className={`py-1.5 px-2 rounded-xl flex items-center justify-center gap-1.5 text-xs transition-all ${
+                      profilePattern === p.id
+                        ? 'bg-purple-600 text-white font-bold shadow-sm'
+                        : 'bg-black/5 dark:bg-white/5 text-zinc-600 dark:text-zinc-300 hover:bg-black/10'
+                    }`}
+                  >
+                    <IconComp className="w-3.5 h-3.5" />
+                    <span className="truncate">{p.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-end gap-2 pt-2">
           <button

@@ -5,12 +5,15 @@ const config: CapacitorConfig = {
   appName: 'BecuGram',
   webDir: 'dist',
   server: {
-    androidScheme: 'https',
+    androidScheme: 'http',
     cleartext: true,
   },
   plugins: {
+    CapacitorHttp: {
+      enabled: true,
+    },
     SplashScreen: {
-      launchShowDuration: 2000,
+      launchShowDuration: 1500,
       backgroundColor: '#0B1311',
       showSpinner: false,
     },

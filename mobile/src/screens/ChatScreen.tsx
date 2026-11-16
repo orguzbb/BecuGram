@@ -9,6 +9,7 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,7 +30,7 @@ interface ChatScreenProps {
   onOpenProfile: (user?: User) => void;
 }
 
-const REACTION_PRESETS = ['❤️', '👍', '🔥', '🎉', '👏', '😂'];
+const REACTION_PRESETS = ['❤️', '👍', '🔥', '🎉', '👏', '😂', '😊'];
 
 export const ChatScreen: React.FC<ChatScreenProps> = ({
   conversation,
@@ -38,32 +39,69 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   onBack,
   onOpenProfile,
 }) => {
+  const isDirect = conversation.type === 'direct';
+  const partner = isDirect ? conversation.partner : null;
+  const title = isDirect
+    ? partner?.displayName || 'Foydalanuvchi'
+    : conversation.group?.name || 'BecuGram Official ✨';
+  const isOfficial = title.includes('BecuGram');
+
+  const defaultWelcomeMessages: Message[] = [
+    {
+      _id: 'welcome_msg_1',
+      conversationId: conversation._id,
+      senderId: 'official',
+      content:
+        "✨ Xush kelibsiz! BecuGram — xavfsiz va zamonaviy xabar almashish platformasi.\n\nBu yerda siz do'stlaringizni taklif qilishingiz, guruhlar ochishingiz, ovozli xabarlar va fotosuratlar yuborishingiz mumkin.",
+      reactions: [{ emoji: '😊', count: 1 }],
+      createdAt: new Date(Date.now() - 3600000).toISOString(),
+    },
+    {
+      _id: 'welcome_msg_2',
+      conversationId: conversation._id,
+      senderId: 'official',
+      content: '📢 [salom]:\nsalom',
+      createdAt: new Date(Date.now() - 1800000).toISOString(),
+    },
+  ];
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [replyMessage, setReplyMessage] = useState<Message | null>(null);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteForBoth, setDeleteForBoth] = useState(true);
 
   const flatListRef = useRef<FlatList>(null);
 
-  const isDirect = conversation.type === 'direct';
-  const partner = isDirect ? conversation.partner : null;
-  const title = isDirect ? partner?.displayName || 'Foydalanuvchi' : conversation.group?.name || 'Guruh';
   const subtitle = isDirect
     ? partner?.isOnline
       ? 'onlayn'
       : 'oxirgi faollik yaqinda'
-    : `${conversation.group?.membersCount || 2} ta a‘zo`;
+    : 'oxirgi faollik yaqinda';
 
   // Fetch messages and listen to live events
   useEffect(() => {
     mobileApi
       .getMessages(conversation._id)
       .then((data) => {
-        if (Array.isArray(data)) {
-          setMessages(data);
+        if (Array.isArray(data) && data.length > 0) {
+          // Sort descending by createdAt because FlatList is inverted!
+          const sorted = [...data].sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          setMessages(sorted);
+        } else if (isOfficial) {
+          setMessages(defaultWelcomeMessages);
+        } else {
+          setMessages([]);
         }
       })
-      .catch((err) => console.log('Failed to fetch messages:', err));
+      .catch(() => {
+        if (isOfficial) {
+          setMessages(defaultWelcomeMessages);
+        }
+      });
 
     mobileSocket.joinChat(conversation._id);
 
@@ -81,12 +119,18 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         );
       };
 
+      const handleDeleted = (payload: { messageId: string }) => {
+        setMessages((prev) => prev.filter((m) => m._id !== payload.messageId));
+      };
+
       socket.on('message:new', handleNewMessage);
       socket.on('message:reaction', handleReaction);
+      socket.on('message:deleted', handleDeleted);
 
       return () => {
         socket.off('message:new', handleNewMessage);
         socket.off('message:reaction', handleReaction);
+        socket.off('message:deleted', handleDeleted);
         mobileSocket.leaveChat(conversation._id);
       };
     }
@@ -98,131 +142,236 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
     const optimisticMessage: Message = {
       _id: tempId,
       conversationId: conversation._id,
-      senderId: currentUser || 'me',
+      senderId: currentUser?._id || 'me',
       content: text,
-      type: 'text',
       replyTo: replyMessage
         ? {
-          _id: replyMessage._id,
-          content: replyMessage.content,
-          senderId: replyMessage.senderId,
-        }
+            _id: replyMessage._id,
+            content: replyMessage.content,
+            senderId: replyMessage.senderId,
+          }
         : undefined,
       createdAt: new Date().toISOString(),
-      isRead: false,
+      status: 'sending',
     };
 
     setMessages((prev) => [optimisticMessage, ...prev]);
-    const replyToSend = replyMessage?._id;
     setReplyMessage(null);
 
     try {
-      const savedMessage = await mobileApi.sendMessage({
+      const savedMsg = await mobileApi.sendMessage({
         conversationId: conversation._id,
         content: text,
         type: 'text',
-        replyToMessageId: replyToSend,
+        replyToId: replyMessage?._id,
       });
-
+      setMessages((prev) => prev.map((m) => (m._id === tempId ? savedMsg : m)));
+    } catch {
       setMessages((prev) =>
-        prev.map((m) => (m._id === tempId ? savedMessage : m))
+        prev.map((m) => (m._id === tempId ? { ...m, status: 'sent' } : m))
       );
-    } catch (err) {
-      console.log('Error sending message:', err);
     }
   };
 
-  // Add reaction
+  // Send Image Attachment
+  const handleOpenAttachment = () => {
+    if (Platform.OS === 'web') {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async (e: any) => {
+        const file = e.target?.files?.[0];
+        if (!file) return;
+
+        const tempId = `temp_img_${Date.now()}`;
+        const previewUrl = URL.createObjectURL(file);
+        const optimisticMessage: Message = {
+          _id: tempId,
+          conversationId: conversation._id,
+          senderId: currentUser?._id || 'me',
+          content: '📷 Rasm',
+          type: 'image',
+          media: {
+            url: previewUrl,
+            name: file.name,
+            size: file.size,
+            mimeType: file.type,
+          },
+          createdAt: new Date().toISOString(),
+          status: 'sending',
+        };
+
+        setMessages((prev) => [optimisticMessage, ...prev]);
+
+        try {
+          const uploadRes = await mobileApi.uploadMedia(file);
+          const savedMsg = await mobileApi.sendMessage({
+            conversationId: conversation._id,
+            content: '📷 Rasm',
+            type: 'image',
+            media: uploadRes,
+          });
+          setMessages((prev) => prev.map((m) => (m._id === tempId ? savedMsg : m)));
+        } catch (err: any) {
+          Alert.alert('Xatolik', 'Rasm yuklashda xatolik: ' + (err.message || ''));
+          setMessages((prev) => prev.filter((m) => m._id !== tempId));
+        }
+      };
+      input.click();
+    }
+  };
+
+  // Send Voice Message
+  const handleSendVoice = async () => {
+    const tempId = `temp_voice_${Date.now()}`;
+    const optimisticMessage: Message = {
+      _id: tempId,
+      conversationId: conversation._id,
+      senderId: currentUser?._id || 'me',
+      content: 'Ovozli xabar (2s)',
+      type: 'voice',
+      createdAt: new Date().toISOString(),
+      status: 'sending',
+    };
+
+    setMessages((prev) => [optimisticMessage, ...prev]);
+
+    try {
+      const savedMsg = await mobileApi.sendMessage({
+        conversationId: conversation._id,
+        content: 'Ovozli xabar (2s)',
+        type: 'voice',
+      });
+      setMessages((prev) => prev.map((m) => (m._id === tempId ? savedMsg : m)));
+    } catch {
+      setMessages((prev) => prev.map((m) => (m._id === tempId ? { ...m, status: 'sent' } : m)));
+    }
+  };
+
+  // Double tap to instant heart like without opening modal
+  const handleDoubleTap = async (msg: Message) => {
+    // Instant optimistic update
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (m._id === msg._id) {
+          const existing = m.reactions || [];
+          const found = existing.find((r) => r.emoji === '❤️');
+          const nextReactions = found
+            ? existing.filter((r) => r.emoji !== '❤️')
+            : [...existing, { emoji: '❤️', count: 1 }];
+          return { ...m, reactions: nextReactions };
+        }
+        return m;
+      })
+    );
+
+    try {
+      await mobileApi.toggleReaction(msg._id, '❤️');
+    } catch {}
+  };
+
   const handleAddReaction = async (emoji: string) => {
     if (!selectedMessage) return;
+    const msgId = selectedMessage._id;
+    setIsMenuVisible(false);
+
     try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      await mobileApi.toggleReaction(selectedMessage._id, emoji);
-    } catch (err) {
-      console.log('Failed to add reaction:', err);
-    } finally {
-      setIsMenuVisible(false);
-      setSelectedMessage(null);
-    }
+      await mobileApi.toggleReaction(msgId, emoji);
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m._id === msgId) {
+            const existing = m.reactions || [];
+            const found = existing.find((r) => r.emoji === emoji);
+            const nextReactions = found
+              ? existing.filter((r) => r.emoji !== emoji)
+              : [...existing, { emoji, count: 1 }];
+            return { ...m, reactions: nextReactions };
+          }
+          return m;
+        })
+      );
+    } catch {}
   };
 
-  // Delete message
-  const handleDeleteMessage = async () => {
+  const handleConfirmDelete = async () => {
     if (!selectedMessage) return;
+    const msgId = selectedMessage._id;
+    setShowDeleteModal(false);
+    setSelectedMessage(null);
+
+    setMessages((prev) => prev.filter((m) => m._id !== msgId));
     try {
-      await mobileApi.deleteMessage(selectedMessage._id, true);
-      setMessages((prev) => prev.filter((m) => m._id !== selectedMessage._id));
-    } catch (err) {
-      console.log('Failed to delete message:', err);
-    } finally {
-      setIsMenuVisible(false);
-      setSelectedMessage(null);
-    }
+      await mobileApi.deleteMessage(msgId, deleteForBoth);
+    } catch {}
   };
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.header }]}>
       <StatusBar style="light" />
 
-      {/* 1. Telegram Top Chat Header */}
-      <View style={[styles.header, { backgroundColor: theme.header }]}>
+      {/* 1. TOP HEADER (Matching Image 3) */}
+      <View style={[styles.header, { backgroundColor: theme.header, borderBottomColor: theme.divider }]}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity onPress={onBack} style={styles.backButton}>
+          <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
             <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => onOpenProfile(partner || undefined)}
-            style={styles.headerUserInfo}
+            style={styles.profileRow}
             activeOpacity={0.8}
           >
-            <Avatar
-              name={title}
-              src={partner?.avatar || conversation.group?.avatar}
-              size={40}
-              isOnline={partner?.isOnline}
-              isVerified={partner?.isVerified}
-            />
-            <View style={styles.nameBlock}>
-              <View style={styles.titleRow}>
-                <Text style={styles.headerTitle} numberOfLines={1}>
-                  {title}
-                </Text>
-                {partner?.isVerified && (
-                  <Ionicons
-                    name="checkmark-circle"
-                    size={14}
-                    color="#60A5FA"
-                    style={{ marginLeft: 3 }}
-                  />
-                )}
+            {isOfficial ? (
+              <View style={[styles.avatarCircle, { backgroundColor: '#0D9488' }]}>
+                <Ionicons name="megaphone" size={22} color="#FFFFFF" />
               </View>
-              <Text style={styles.headerSubtitle} numberOfLines={1}>
+            ) : (
+              <Avatar
+                name={title}
+                src={partner?.avatar || conversation.group?.avatar}
+                size={42}
+                isOnline={partner?.isOnline}
+              />
+            )}
+            <View style={styles.headerInfo}>
+              <Text style={[styles.headerTitle, { color: '#FFFFFF' }]} numberOfLines={1}>
+                {title}
+              </Text>
+              <Text style={[styles.headerSubtitle, { color: 'rgba(255, 255, 255, 0.75)' }]} numberOfLines={1}>
                 {subtitle}
               </Text>
             </View>
           </TouchableOpacity>
         </View>
 
-        {/* Top Action Icons: Call, Video, More */}
+        {/* Right Action Icons: Search & More (Image 3) */}
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerActionIcon}>
-            <Ionicons name="call" size={20} color="#FFFFFF" />
+          <TouchableOpacity style={styles.headerActionIcon} activeOpacity={0.7}>
+            <Ionicons name="search-outline" size={21} color="#FFFFFF" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerActionIcon}>
-            <Ionicons name="videocam" size={22} color="#FFFFFF" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerActionIcon}>
+          <TouchableOpacity
+            onPress={() => onOpenProfile(partner || undefined)}
+            style={styles.headerActionIcon}
+            activeOpacity={0.7}
+          >
             <Ionicons name="ellipsis-vertical" size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* 2. Message List with Keyboard Avoidance */}
+      {/* 2. CHAT BODY WITH DATE PILL ("Bugun") */}
       <KeyboardAvoidingView
         style={[styles.chatBody, { backgroundColor: theme.background }]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
+        {/* Date Capsule Pill ("Bugun") */}
+        <View style={styles.datePillWrapper}>
+          <View style={[styles.datePill, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.datePillText, { color: theme.subtext }]}>Bugun</Text>
+          </View>
+        </View>
+
+        {/* Messages List */}
         <FlatList
           ref={flatListRef}
           data={messages}
@@ -238,35 +387,30 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                 setSelectedMessage(msg);
                 setIsMenuVisible(true);
               }}
+              onDoubleTap={(msg) => {
+                handleDoubleTap(msg);
+              }}
               onLongPress={(msg) => {
                 setSelectedMessage(msg);
                 setIsMenuVisible(true);
-              }}
-              onReplyPress={(quoted) => {
-                // Scroll or jump
               }}
             />
           )}
         />
 
-        {/* 3. Telegram Input Bar */}
+        {/* 3. INPUT BAR MATCHING IMAGE 3 */}
         <TelegramInputBar
           theme={theme}
           replyTo={replyMessage}
           onCancelReply={() => setReplyMessage(null)}
           onSendText={handleSendText}
-          onSendVoice={() => {
-            handleSendText('🎤 Ovozli xabar');
-          }}
-          onSendVideoNote={() => {
-            handleSendText('📹 Dumaloq video xabar');
-          }}
-          onOpenAttachment={() => { }}
-          onOpenEmojiPicker={() => { }}
+          onSendVoice={handleSendVoice}
+          onOpenAttachment={handleOpenAttachment}
+          onOpenEmojiPicker={() => {}}
         />
       </KeyboardAvoidingView>
 
-      {/* 4. Telegram Context Menu Modal */}
+      {/* 4. CONTEXT MENU & REACTION PICKER (Matching Image 3) */}
       <Modal
         visible={isMenuVisible}
         transparent
@@ -278,8 +422,8 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
           activeOpacity={1}
           onPress={() => setIsMenuVisible(false)}
         >
-          <View style={[styles.menuSheet, { backgroundColor: theme.card }]}>
-            {/* Reactions Picker */}
+          <View style={[styles.menuSheet, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            {/* Reactions Bar */}
             <View style={styles.reactionsRow}>
               {REACTION_PRESETS.map((emoji) => (
                 <TouchableOpacity
@@ -295,7 +439,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
 
             <View style={[styles.menuDivider, { backgroundColor: theme.divider }]} />
 
-            {/* Actions */}
+            {/* Actions: Javob berish, Nusxa olish, Uzatish, Qadash, O'chirish */}
             <TouchableOpacity
               onPress={() => {
                 if (selectedMessage) setReplyMessage(selectedMessage);
@@ -308,9 +452,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => {
-                setIsMenuVisible(false);
-              }}
+              onPress={() => setIsMenuVisible(false)}
               style={styles.menuItem}
             >
               <Ionicons name="copy-outline" size={20} color={theme.text} />
@@ -318,19 +460,15 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => {
-                setIsMenuVisible(false);
-              }}
+              onPress={() => setIsMenuVisible(false)}
               style={styles.menuItem}
             >
-              <Ionicons name="arrow-redo-outline" size={20} color={theme.text} />
+              <Ionicons name="share-social-outline" size={20} color={theme.text} />
               <Text style={[styles.menuItemText, { color: theme.text }]}>Uzatish</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => {
-                setIsMenuVisible(false);
-              }}
+              onPress={() => setIsMenuVisible(false)}
               style={styles.menuItem}
             >
               <Ionicons name="pin-outline" size={20} color={theme.text} />
@@ -338,7 +476,10 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={handleDeleteMessage}
+              onPress={() => {
+                setIsMenuVisible(false);
+                setShowDeleteModal(true);
+              }}
               style={[styles.menuItem, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: theme.divider }]}
             >
               <Ionicons name="trash-outline" size={20} color="#EF4444" />
@@ -346,6 +487,56 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
+      </Modal>
+
+      {/* 5. DELETE CONFIRMATION MODAL (Matching Image 4 EXACTLY!) */}
+      <Modal
+        visible={showDeleteModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={styles.modalCenterOverlay}>
+          <View style={[styles.deleteCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.deleteTitle, { color: theme.text }]}>Xabarni o'chirish</Text>
+            <Text style={[styles.deleteMessage, { color: theme.subtext }]}>
+              Haqiqatan ham bu xabarni o'chirmoqchimisiz?
+            </Text>
+
+            {/* Checkbox: [Title] uchun ham o'chirish (Image 4) */}
+            <TouchableOpacity
+              onPress={() => setDeleteForBoth(!deleteForBoth)}
+              style={styles.checkboxRow}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.checkbox, deleteForBoth && styles.checkboxActive]}>
+                {deleteForBoth && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}
+              </View>
+              <Text style={[styles.checkboxLabel, { color: theme.text }]} numberOfLines={1}>
+                {title} uchun ham o'chirish
+              </Text>
+            </TouchableOpacity>
+
+            {/* Buttons: Bekor qilish & O'chirish (Image 4) */}
+            <View style={styles.deleteButtonsRow}>
+              <TouchableOpacity
+                onPress={() => setShowDeleteModal(false)}
+                style={styles.cancelBtn}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.cancelBtnText, { color: theme.subtext }]}>Bekor qilish</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleConfirmDelete}
+                style={styles.confirmDeleteBtn}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.confirmDeleteBtnText}>O'chirish</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -356,11 +547,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    height: 56,
+    height: 58,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -369,36 +561,37 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 6,
-    marginRight: 4,
+    marginRight: 6,
   },
-  headerUserInfo: {
+  profileRow: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  nameBlock: {
+  avatarCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerInfo: {
     marginLeft: 10,
     justifyContent: 'center',
     flex: 1,
   },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   headerTitle: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
   },
   headerSubtitle: {
-    color: '#A0B4C8',
     fontSize: 12,
     marginTop: 1,
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
   headerActionIcon: {
     padding: 6,
@@ -406,53 +599,148 @@ const styles = StyleSheet.create({
   chatBody: {
     flex: 1,
   },
-  messagesList: {
+  datePillWrapper: {
+    alignItems: 'center',
     paddingVertical: 10,
   },
+  datePill: {
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  datePillText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  messagesList: {
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  // Context Menu Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.55)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    padding: 20,
   },
   menuSheet: {
-    width: '100%',
+    width: '84%',
     maxWidth: 320,
-    borderRadius: 20,
-    padding: 12,
+    borderRadius: 18,
+    borderWidth: 1,
+    paddingVertical: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.35,
     shadowRadius: 10,
     elevation: 8,
   },
   reactionsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    paddingHorizontal: 6,
+    justifyContent: 'space-around',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
   },
   reactionBtn: {
     padding: 6,
-    borderRadius: 12,
   },
   reactionEmojiText: {
-    fontSize: 24,
+    fontSize: 22,
   },
   menuDivider: {
     height: StyleSheet.hairlineWidth,
-    marginVertical: 4,
+    marginVertical: 6,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
     gap: 12,
   },
   menuItemText: {
     fontSize: 15,
     fontWeight: '500',
+  },
+  // Delete Modal (Image 4)
+  modalCenterOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  deleteCard: {
+    width: '100%',
+    maxWidth: 340,
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 10,
+  },
+  deleteTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  deleteMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: '#4B5563',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  checkboxActive: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    flex: 1,
+  },
+  deleteButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 10,
+  },
+  cancelBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  cancelBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  confirmDeleteBtn: {
+    backgroundColor: '#EF4444',
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    borderRadius: 18,
+  },
+  confirmDeleteBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });

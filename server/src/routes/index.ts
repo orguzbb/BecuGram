@@ -9,6 +9,9 @@ import { mediaRouter } from './media.routes.js';
 import { settingsRouter } from './settings.routes.js';
 import { adminRouter } from './admin.routes.js';
 import { storyRouter } from './story.routes.js';
+import { paymentRouter } from './payment.routes.js';
+import { gifRouter } from './gif.routes.js';
+import { stickerRouter } from './sticker.routes.js';
 
 export const apiRouter = Router();
 
@@ -22,6 +25,9 @@ apiRouter.use('/media', mediaRouter);
 apiRouter.use('/settings', settingsRouter);
 apiRouter.use('/admin', adminRouter);
 apiRouter.use('/stories', storyRouter);
+apiRouter.use('/payments', paymentRouter);
+apiRouter.use('/gifs', gifRouter);
+apiRouter.use('/stickers', stickerRouter);
 
 // Health check endpoint
 apiRouter.get('/health', (_req, res) => {

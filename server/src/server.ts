@@ -16,7 +16,7 @@ async function bootstrap() {
     logger.info('Real-time Socket.IO engine initialized.');
 
     // 3. Start HTTP Server immediately so port 5000 is ready without delay
-    server.listen(env.PORT, () => {
+    server.listen(Number(env.PORT), '0.0.0.0', () => {
       logger.info(`🚀 BecuGram Server is running on http://localhost:${env.PORT}`);
       logger.info(`📡 Client Origin: ${env.CLIENT_URL}`);
       logger.info(`✨ Mode: ${env.NODE_ENV}`);

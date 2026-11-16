@@ -30,5 +30,857 @@
     "reactions": [],
     "readBy": [],
     "createdAt": "2026-11-08T16:17:00.000Z"
+  },
+  {
+    "_id": "msg_1794734239518_4a76n",
+    "conversationId": "test_chat_1794734239422",
+    "senderId": {
+      "_id": "test_user_alice",
+      "displayName": "Alice",
+      "username": "alice",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Salom Bob, BecuGram yaxshi ishlayaptimi?",
+    "clientTempId": "temp_1794734239514_1",
+    "reactions": [],
+    "readBy": [
+      "test_user_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:19.518Z"
+  },
+  {
+    "_id": "msg_1794734239556_i7rja",
+    "conversationId": "test_chat_1794734239422",
+    "senderId": {
+      "_id": "test_user_alice",
+      "displayName": "Alice",
+      "username": "alice",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ushbu xabar tarmoq uzilishi tufayli qayta yuborilishi mumkin",
+    "clientTempId": "unique_uuid_retry_test_1794734239552",
+    "reactions": [],
+    "readBy": [
+      "test_user_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:19.556Z"
+  },
+  {
+    "_id": "msg_1794734239570_jmug3",
+    "conversationId": "test_chat_1794734239422",
+    "senderId": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ketma-ket xabar #1",
+    "clientTempId": "seq_1794734239566_1",
+    "reactions": [],
+    "readBy": [
+      "test_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:19.570Z"
+  },
+  {
+    "_id": "msg_1794734239579_bko76",
+    "conversationId": "test_chat_1794734239422",
+    "senderId": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ketma-ket xabar #2",
+    "clientTempId": "seq_1794734239573_2",
+    "reactions": [],
+    "readBy": [
+      "test_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:19.579Z"
+  },
+  {
+    "_id": "msg_1794734239589_b83ps",
+    "conversationId": "test_chat_1794734239422",
+    "senderId": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ketma-ket xabar #3",
+    "clientTempId": "seq_1794734239583_3",
+    "reactions": [],
+    "readBy": [
+      "test_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:19.589Z"
+  },
+  {
+    "_id": "msg_1794734239598_gmu67",
+    "conversationId": "test_chat_1794734239422",
+    "senderId": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ketma-ket xabar #4",
+    "clientTempId": "seq_1794734239593_4",
+    "reactions": [],
+    "readBy": [
+      "test_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:19.598Z"
+  },
+  {
+    "_id": "msg_1794734239604_m3pbz",
+    "conversationId": "test_chat_1794734239422",
+    "senderId": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ketma-ket xabar #5",
+    "clientTempId": "seq_1794734239601_5",
+    "reactions": [],
+    "readBy": [
+      "test_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:19.604Z"
+  },
+  {
+    "_id": "msg_1794734239630_ll6wy",
+    "conversationId": "test_chat_1794734239422",
+    "senderId": {
+      "_id": "test_user_alice",
+      "displayName": "Alice",
+      "username": "alice",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Xabar o'chirildi",
+    "reactions": [],
+    "readBy": [
+      "test_user_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:19.630Z",
+    "isEdited": true,
+    "editedAt": "2026-11-15T09:17:19.651Z",
+    "updatedAt": "2026-11-15T09:17:19.661Z",
+    "isDeleted": true
+  },
+  {
+    "_id": "msg_1794734239672_17uj3",
+    "conversationId": "test_chat_1794734239422",
+    "senderId": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Bob sent a message to receive reactions",
+    "reactions": [
+      {
+        "userId": "test_user_alice",
+        "emoji": "👍"
+      }
+    ],
+    "readBy": [
+      "test_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:19.672Z"
+  },
+  {
+    "_id": "msg_1794734249545_qxna7",
+    "conversationId": "chat_actions_ab_1794734249476",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Alice P3",
+      "username": "alice_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Salom Bob, loyihani boshlaymizmi?",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:29.545Z"
+  },
+  {
+    "_id": "msg_1794734249566_xfkv1",
+    "conversationId": "chat_actions_ab_1794734249476",
+    "senderId": {
+      "_id": "test_phase3_bob",
+      "displayName": "Bob P3",
+      "username": "bob_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ha albatta, tayyorman!",
+    "replyTo": {
+      "_id": "msg_1794734249545_qxna7",
+      "content": "Salom Bob, loyihani boshlaymizmi?",
+      "senderId": {
+        "_id": "test_phase3_alice",
+        "displayName": "Alice P3",
+        "username": "alice_p3",
+        "avatar": ""
+      }
+    },
+    "reactions": [],
+    "readBy": [
+      "test_phase3_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:29.566Z"
+  },
+  {
+    "_id": "msg_1794734249591_h15kl",
+    "conversationId": "chat_actions_ab_1794734249476",
+    "senderId": {
+      "_id": "test_phase3_bob",
+      "displayName": "Bob P3",
+      "username": "bob_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ushbu muhim xabarni boshqalarga ham uzatish kerak",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:29.591Z"
+  },
+  {
+    "_id": "msg_1794734249659_1h5ni",
+    "conversationId": "chat_actions_aeve_1794734249478",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Becu User",
+      "username": "user"
+    },
+    "type": "text",
+    "content": "Ushbu muhim xabarni boshqalarga ham uzatish kerak",
+    "forwardedFrom": {
+      "_id": "test_phase3_bob",
+      "displayName": "Bob P3",
+      "username": "bob_p3"
+    },
+    "clientTempId": "324fcf05-3cd1-4fc6-b794-83f465b1cb6f",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:29.659Z"
+  },
+  {
+    "_id": "msg_1794734249712_bjxkp",
+    "conversationId": "chat_actions_ab_1794734249476",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Alice P3",
+      "username": "alice_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Tuzatilgan xabar matni (muvaffaqiyatli!)",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:29.712Z",
+    "isEdited": true,
+    "editedAt": "2026-11-15T09:17:29.780Z",
+    "updatedAt": "2026-11-15T09:17:29.780Z"
+  },
+  {
+    "_id": "msg_1794734249836_8thxk",
+    "conversationId": "chat_actions_ab_1794734249476",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Alice P3",
+      "username": "alice_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Xabar o'chirildi",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:29.836Z",
+    "isDeleted": true,
+    "updatedAt": "2026-11-15T09:17:29.876Z"
+  },
+  {
+    "_id": "msg_1794734249849_gj3t0",
+    "conversationId": "chat_actions_ab_1794734249476",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Alice P3",
+      "username": "alice_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Faqat Bob o'zi uchun o'chiradigan xabar",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:29.849Z",
+    "deletedFor": [
+      "test_phase3_bob"
+    ]
+  },
+  {
+    "_id": "msg_1794734249934_nfsma",
+    "conversationId": "chat_actions_ab_1794734249476",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Alice P3",
+      "username": "alice_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ajoyib natija! 🔥",
+    "reactions": [
+      {
+        "userId": "test_phase3_alice",
+        "emoji": "❤️"
+      },
+      {
+        "userId": "test_phase3_bob",
+        "emoji": "❤️"
+      }
+    ],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:29.934Z"
+  },
+  {
+    "_id": "msg_1794734250059_zh855",
+    "conversationId": "chat_actions_ab_1794734249476",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Alice P3",
+      "username": "alice_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Eslatma: Ertaga soat 10:00 da onlayn miting!",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:30.059Z"
+  },
+  {
+    "_id": "msg_1794734266705_13jmu",
+    "conversationId": "socket_chat_1794734266569",
+    "senderId": {
+      "_id": "socket_user_alice",
+      "displayName": "Foydalanuvchi",
+      "username": "user",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Salom Bob, WebSocket orqali xabar jo'natildi! 🚀",
+    "clientTempId": "temp_socket_ack_1794734266703",
+    "reactions": [],
+    "readBy": [
+      "socket_user_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:46.705Z"
+  },
+  {
+    "_id": "msg_1794734266752_wfweh",
+    "conversationId": "socket_chat_1794734266569",
+    "senderId": {
+      "_id": "socket_user_alice",
+      "displayName": "Foydalanuvchi",
+      "username": "user",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Takrorlanmas xabar",
+    "clientTempId": "dup_temp_1794734266751",
+    "reactions": [],
+    "readBy": [
+      "socket_user_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:46.753Z"
+  },
+  {
+    "_id": "msg_1794734266785_t7yyh",
+    "conversationId": "socket_chat_1794734266569",
+    "senderId": {
+      "_id": "socket_user_alice",
+      "displayName": "Foydalanuvchi",
+      "username": "user",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Read receipt test",
+    "reactions": [],
+    "readBy": [
+      "socket_user_alice",
+      "socket_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:46.785Z",
+    "isRead": true
+  },
+  {
+    "_id": "msg_1794734266859_67bd1",
+    "conversationId": "socket_chat_1794734266569",
+    "senderId": {
+      "_id": "socket_user_alice",
+      "displayName": "Foydalanuvchi",
+      "username": "user",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Multi-device sync check",
+    "reactions": [],
+    "readBy": [
+      "socket_user_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:46.859Z"
+  },
+  {
+    "_id": "msg_1794734275276_d6ocg",
+    "conversationId": "chat_actions_ab_1794734275231",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Alice P3",
+      "username": "alice_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Salom Bob, loyihani boshlaymizmi?",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:55.276Z"
+  },
+  {
+    "_id": "msg_1794734275290_epii1",
+    "conversationId": "chat_actions_ab_1794734275231",
+    "senderId": {
+      "_id": "test_phase3_bob",
+      "displayName": "Bob P3",
+      "username": "bob_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ha albatta, tayyorman!",
+    "replyTo": {
+      "_id": "msg_1794734275276_d6ocg",
+      "content": "Salom Bob, loyihani boshlaymizmi?",
+      "senderId": {
+        "_id": "test_phase3_alice",
+        "displayName": "Alice P3",
+        "username": "alice_p3",
+        "avatar": ""
+      }
+    },
+    "reactions": [],
+    "readBy": [
+      "test_phase3_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:55.290Z"
+  },
+  {
+    "_id": "msg_1794734275306_jzpzx",
+    "conversationId": "chat_actions_ab_1794734275231",
+    "senderId": {
+      "_id": "test_phase3_bob",
+      "displayName": "Bob P3",
+      "username": "bob_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ushbu muhim xabarni boshqalarga ham uzatish kerak",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:55.306Z"
+  },
+  {
+    "_id": "msg_1794734275319_0h52h",
+    "conversationId": "chat_actions_aeve_1794734275231",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Becu User",
+      "username": "user"
+    },
+    "type": "text",
+    "content": "Ushbu muhim xabarni boshqalarga ham uzatish kerak",
+    "forwardedFrom": {
+      "_id": "test_phase3_bob",
+      "displayName": "Bob P3",
+      "username": "bob_p3"
+    },
+    "clientTempId": "da2b144c-8e53-48b9-a927-d7a25f907c23",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:55.319Z"
+  },
+  {
+    "_id": "msg_1794734275343_0ph2z",
+    "conversationId": "chat_actions_ab_1794734275231",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Alice P3",
+      "username": "alice_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Tuzatilgan xabar matni (muvaffaqiyatli!)",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:55.343Z",
+    "isEdited": true,
+    "editedAt": "2026-11-15T09:17:55.352Z",
+    "updatedAt": "2026-11-15T09:17:55.352Z"
+  },
+  {
+    "_id": "msg_1794734275376_ns3ck",
+    "conversationId": "chat_actions_ab_1794734275231",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Alice P3",
+      "username": "alice_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Xabar o'chirildi",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:55.376Z",
+    "isDeleted": true,
+    "updatedAt": "2026-11-15T09:17:55.400Z"
+  },
+  {
+    "_id": "msg_1794734275384_3k4gj",
+    "conversationId": "chat_actions_ab_1794734275231",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Alice P3",
+      "username": "alice_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Faqat Bob o'zi uchun o'chiradigan xabar",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:55.384Z",
+    "deletedFor": [
+      "test_phase3_bob"
+    ]
+  },
+  {
+    "_id": "msg_1794734275429_qvoxt",
+    "conversationId": "chat_actions_ab_1794734275231",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Alice P3",
+      "username": "alice_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ajoyib natija! 🔥",
+    "reactions": [
+      {
+        "userId": "test_phase3_alice",
+        "emoji": "❤️"
+      },
+      {
+        "userId": "test_phase3_bob",
+        "emoji": "❤️"
+      }
+    ],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:55.429Z"
+  },
+  {
+    "_id": "msg_1794734275477_8qlqh",
+    "conversationId": "chat_actions_ab_1794734275231",
+    "senderId": {
+      "_id": "test_phase3_alice",
+      "displayName": "Alice P3",
+      "username": "alice_p3",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Eslatma: Ertaga soat 10:00 da onlayn miting!",
+    "reactions": [],
+    "readBy": [
+      "test_phase3_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:55.477Z"
+  },
+  {
+    "_id": "msg_1794734276865_95cjh",
+    "conversationId": "socket_chat_1794734276723",
+    "senderId": {
+      "_id": "socket_user_alice",
+      "displayName": "Foydalanuvchi",
+      "username": "user",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Salom Bob, WebSocket orqali xabar jo'natildi! 🚀",
+    "clientTempId": "temp_socket_ack_1794734276863",
+    "reactions": [],
+    "readBy": [
+      "socket_user_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:56.865Z"
+  },
+  {
+    "_id": "msg_1794734276874_958hj",
+    "conversationId": "socket_chat_1794734276723",
+    "senderId": {
+      "_id": "socket_user_alice",
+      "displayName": "Foydalanuvchi",
+      "username": "user",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Takrorlanmas xabar",
+    "clientTempId": "dup_temp_1794734276873",
+    "reactions": [],
+    "readBy": [
+      "socket_user_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:56.874Z"
+  },
+  {
+    "_id": "msg_1794734276893_ym8sa",
+    "conversationId": "socket_chat_1794734276723",
+    "senderId": {
+      "_id": "socket_user_alice",
+      "displayName": "Foydalanuvchi",
+      "username": "user",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Read receipt test",
+    "reactions": [],
+    "readBy": [
+      "socket_user_alice",
+      "socket_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:56.893Z",
+    "isRead": true
+  },
+  {
+    "_id": "msg_1794734276906_1j1rt",
+    "conversationId": "socket_chat_1794734276723",
+    "senderId": {
+      "_id": "socket_user_alice",
+      "displayName": "Foydalanuvchi",
+      "username": "user",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Multi-device sync check",
+    "reactions": [],
+    "readBy": [
+      "socket_user_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:56.906Z"
+  },
+  {
+    "_id": "msg_1794734278192_l3sa1",
+    "conversationId": "test_chat_1794734278109",
+    "senderId": {
+      "_id": "test_user_alice",
+      "displayName": "Alice",
+      "username": "alice",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Salom Bob, BecuGram yaxshi ishlayaptimi?",
+    "clientTempId": "temp_1794734278187_1",
+    "reactions": [],
+    "readBy": [
+      "test_user_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:58.192Z"
+  },
+  {
+    "_id": "msg_1794734278201_3yfgh",
+    "conversationId": "test_chat_1794734278109",
+    "senderId": {
+      "_id": "test_user_alice",
+      "displayName": "Alice",
+      "username": "alice",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ushbu xabar tarmoq uzilishi tufayli qayta yuborilishi mumkin",
+    "clientTempId": "unique_uuid_retry_test_1794734278196",
+    "reactions": [],
+    "readBy": [
+      "test_user_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:58.201Z"
+  },
+  {
+    "_id": "msg_1794734278216_7fnkv",
+    "conversationId": "test_chat_1794734278109",
+    "senderId": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ketma-ket xabar #1",
+    "clientTempId": "seq_1794734278212_1",
+    "reactions": [],
+    "readBy": [
+      "test_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:58.216Z"
+  },
+  {
+    "_id": "msg_1794734278226_3ks38",
+    "conversationId": "test_chat_1794734278109",
+    "senderId": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ketma-ket xabar #2",
+    "clientTempId": "seq_1794734278221_2",
+    "reactions": [],
+    "readBy": [
+      "test_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:58.226Z"
+  },
+  {
+    "_id": "msg_1794734278234_v8ntr",
+    "conversationId": "test_chat_1794734278109",
+    "senderId": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ketma-ket xabar #3",
+    "clientTempId": "seq_1794734278230_3",
+    "reactions": [],
+    "readBy": [
+      "test_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:58.235Z"
+  },
+  {
+    "_id": "msg_1794734278243_bai2u",
+    "conversationId": "test_chat_1794734278109",
+    "senderId": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ketma-ket xabar #4",
+    "clientTempId": "seq_1794734278238_4",
+    "reactions": [],
+    "readBy": [
+      "test_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:58.243Z"
+  },
+  {
+    "_id": "msg_1794734278251_v8hi6",
+    "conversationId": "test_chat_1794734278109",
+    "senderId": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Ketma-ket xabar #5",
+    "clientTempId": "seq_1794734278247_5",
+    "reactions": [],
+    "readBy": [
+      "test_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:58.251Z"
+  },
+  {
+    "_id": "msg_1794734278269_yer9n",
+    "conversationId": "test_chat_1794734278109",
+    "senderId": {
+      "_id": "test_user_alice",
+      "displayName": "Alice",
+      "username": "alice",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Xabar o'chirildi",
+    "reactions": [],
+    "readBy": [
+      "test_user_alice"
+    ],
+    "createdAt": "2026-11-15T09:17:58.269Z",
+    "isEdited": true,
+    "editedAt": "2026-11-15T09:17:58.286Z",
+    "updatedAt": "2026-11-15T09:17:58.300Z",
+    "isDeleted": true
+  },
+  {
+    "_id": "msg_1794734278308_s0u5r",
+    "conversationId": "test_chat_1794734278109",
+    "senderId": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "avatar": ""
+    },
+    "type": "text",
+    "content": "Bob sent a message to receive reactions",
+    "reactions": [
+      {
+        "userId": "test_user_alice",
+        "emoji": "👍"
+      }
+    ],
+    "readBy": [
+      "test_user_bob"
+    ],
+    "createdAt": "2026-11-15T09:17:58.308Z"
   }
 ]

@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, Settings, LogOut, ShieldCheck, User } from 'lucide-react';
+import { MessageSquare, Phone, Settings, LogOut, ShieldCheck, User } from 'lucide-react';
 import { BecuLogo } from './BecuLogo';
 import { Avatar } from './Avatar';
 import { NavTab } from './BottomNav';
@@ -21,7 +21,8 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
   const { user, logout } = useAuthStore();
 
   const navItems = [
-    { id: 'inbox' as NavTab, label: 'Chatlar', icon: MessageSquare, badge: unreadCount },
+    { id: 'chats' as NavTab, label: 'Chatlar', icon: MessageSquare, badge: unreadCount },
+    { id: 'calls' as NavTab, label: 'Qo‘ng‘iroqlar', icon: Phone },
     { id: 'settings' as NavTab, label: 'Sozlamalar', icon: Settings },
     { id: 'profile' as NavTab, label: 'Profil', icon: User },
   ];
@@ -30,7 +31,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
     <aside className="hidden sm:flex flex-col items-center justify-between w-18 lg:w-20 py-5 bg-[#FAF6F0] dark:bg-[#0A1210] border-r border-[#E8DFD3] dark:border-[#1B2A25] select-none z-30 transition-colors">
       {/* Top: Logo */}
       <div className="flex flex-col items-center gap-6">
-        <button onClick={() => onTabChange('inbox')} className="hover:scale-105 active:scale-95 transition-transform">
+        <button onClick={() => onTabChange('chats')} className="hover:scale-105 active:scale-95 transition-transform">
           <BecuLogo size={38} />
         </button>
 

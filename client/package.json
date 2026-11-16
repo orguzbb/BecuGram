@@ -7,9 +7,13 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "cap:build": "vite build && cap sync",
+    "cap:open": "cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^7.6.10",
+    "@capacitor/core": "^7.6.10",
     "@hookform/resolvers": "^3.10.0",
     "@tanstack/react-query": "^5.64.2",
     "canvas-confetti": "^1.9.4",
@@ -27,6 +31,7 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.6.10",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@types/canvas-confetti": "^1.9.0",

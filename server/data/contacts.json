@@ -14,5 +14,69 @@
       "bio": "BecuGram a'zosi 🚀"
     },
     "createdAt": "2026-11-09T15:00:07.557Z"
+  },
+  {
+    "_id": "contact_1794416883946",
+    "userId": "6af0a01a7d27b76a8fee65f8",
+    "customName": "Sardor",
+    "user": {
+      "_id": "6af0a0987d27b76a8fee65f9",
+      "displayName": "Foydalanuvchi",
+      "username": "user_777777",
+      "phoneNumber": "+998777777777",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+      "isOnline": true,
+      "isVerified": false,
+      "bio": "BecuGram a'zosi 🚀"
+    },
+    "createdAt": "2026-11-11T17:08:03.946Z"
+  },
+  {
+    "_id": "contact_1794733325221",
+    "userId": "6af4922292160f9a960a5eac",
+    "customName": "FOYDALANUVCHI",
+    "user": {
+      "_id": "6af0a0987d27b76a8fee65f9",
+      "displayName": "Foydalanuvchi",
+      "username": "user_777777",
+      "phoneNumber": "+998777777777",
+      "avatar": "/uploads/images/1794450384464_4b55784df91535c8a7328098c7ffaa95.svg",
+      "isOnline": true,
+      "isVerified": false,
+      "bio": "BecuGram a'zosi 🚀"
+    },
+    "createdAt": "2026-11-15T09:02:05.221Z"
+  },
+  {
+    "_id": "contact_1794733436794",
+    "userId": "6af0a0987d27b76a8fee65f9",
+    "customName": "foydalanavuchi",
+    "user": {
+      "_id": "6af4922292160f9a960a5eac",
+      "displayName": "TestUser",
+      "username": "testuser",
+      "phoneNumber": "+998999999999",
+      "avatar": "",
+      "isOnline": true,
+      "isVerified": true,
+      "bio": "BecuGram a'zosi 🚀"
+    },
+    "createdAt": "2026-11-15T09:03:56.794Z"
+  },
+  {
+    "_id": "contact_1794836838260",
+    "userId": "6afb0942203909f361eb3d29",
+    "customName": "ABUbu",
+    "user": {
+      "_id": "6af0a01a7d27b76a8fee65f8",
+      "displayName": "Admin",
+      "username": "admin",
+      "phoneNumber": "+998889008081",
+      "avatar": "/uploads/images/1794157660529_b161afc1f3c88198d553a8425bced12a.jpg",
+      "isOnline": true,
+      "isVerified": true,
+      "bio": "BecuGram a'zosi 🚀"
+    },
+    "createdAt": "2026-11-16T13:47:18.260Z"
   }
 ]

@@ -8,6 +8,7 @@ export interface IConversation extends Document {
   groupId?: mongoose.Types.ObjectId;
   lastMessage?: mongoose.Types.ObjectId;
   lastMessageAt: Date;
+  pinnedMessage?: mongoose.Types.ObjectId;
   pinnedFor: mongoose.Types.ObjectId[];
   mutedFor: mongoose.Types.ObjectId[];
   unreadCounts: Map<string, number>;
@@ -45,6 +46,10 @@ const ConversationSchema = new Schema<IConversation>(
       type: Date,
       default: Date.now,
       index: true,
+    },
+    pinnedMessage: {
+      type: Schema.Types.ObjectId,
+      ref: 'Message',
     },
     pinnedFor: [
       {

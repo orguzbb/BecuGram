@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bookmark, Megaphone } from 'lucide-react';
+import { getMediaUrl } from '../services/api';
 
 interface AvatarProps {
   src?: string;
@@ -60,8 +61,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   const isValidSrc = Boolean(
     src &&
     src.trim() !== '' &&
-    !src.includes('1794151183673') &&
-    !src.includes('unsplash')
+    !src.includes('1794151183673')
   );
 
   return (
@@ -74,7 +74,7 @@ export const Avatar: React.FC<AvatarProps> = ({
       {/* If explicit image URL is provided, render image; otherwise clean initial / icon */}
       {isValidSrc ? (
         <img
-          src={src}
+          src={getMediaUrl(src)}
           alt={cleanName}
           className="w-full h-full object-cover rounded-full ring-1 ring-black/5 dark:ring-white/10"
           onError={(e) => {
@@ -82,8 +82,8 @@ export const Avatar: React.FC<AvatarProps> = ({
           }}
         />
       ) : isSaved ? (
-        <div className="w-full h-full rounded-full bg-gradient-to-br from-[#4A3E3D] via-[#654321] to-[#3B2F2F] flex items-center justify-center text-white shadow-sm ring-1 ring-black/10">
-          <Bookmark className="w-1/2 h-1/2 stroke-[2.2] fill-white/20" />
+        <div className="w-full h-full rounded-full bg-gradient-to-tr from-[#3390EC] via-[#2F84D9] to-[#2475C6] flex items-center justify-center text-white shadow-sm ring-1 ring-black/10 select-none">
+          <Bookmark className="w-1/2 h-1/2 stroke-[2.2] fill-white" />
         </div>
       ) : isOfficial ? (
         <div className="w-full h-full rounded-full bg-gradient-to-tr from-cyan-600 via-teal-600 to-emerald-600 flex items-center justify-center text-white shadow-sm ring-1 ring-black/10">
@@ -100,7 +100,7 @@ export const Avatar: React.FC<AvatarProps> = ({
       {/* Online green indicator */}
       {isOnline && !badge && (
         <span
-          className={`absolute rounded-full bg-[#10B981] border-white dark:border-[#0E1715] ${badgeSizes[size]} ring-1 ring-[#10B981]/50 shadow-sm`}
+          className={`absolute rounded-full bg-[#00C73E] border-white dark:border-[#212121] ${badgeSizes[size]} shadow-xs`}
           title="Online"
         />
       )}

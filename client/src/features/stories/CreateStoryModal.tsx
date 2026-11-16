@@ -17,6 +17,7 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
   const { showToast } = useToast();
 
   const [caption, setCaption] = useState('');
+  const [privacy, setPrivacy] = useState<'everyone' | 'contacts' | 'close_friends'>('everyone');
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
   const [selectedBg, setSelectedBg] = useState('linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)');
@@ -185,6 +186,43 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({
               placeholder="Hikoya sarlavhasi / matni..."
               className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-[#1A2E26] border border-zinc-200 dark:border-[#233830] text-sm text-zinc-900 dark:text-white placeholder-zinc-400 outline-none focus:border-indigo-500"
             />
+
+            {/* Privacy Audience Selector: Telegram Style */}
+            <div className="flex items-center gap-1.5 p-1 bg-zinc-100 dark:bg-[#1A2E26] rounded-2xl border border-zinc-200/80 dark:border-[#233830]">
+              <button
+                type="button"
+                onClick={() => setPrivacy('everyone')}
+                className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  privacy === 'everyone'
+                    ? 'bg-[#2563EB] text-white shadow-xs'
+                    : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900'
+                }`}
+              >
+                🌍 Hamma
+              </button>
+              <button
+                type="button"
+                onClick={() => setPrivacy('contacts')}
+                className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  privacy === 'contacts'
+                    ? 'bg-[#2563EB] text-white shadow-xs'
+                    : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900'
+                }`}
+              >
+                👥 Kontaktlar
+              </button>
+              <button
+                type="button"
+                onClick={() => setPrivacy('close_friends')}
+                className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  privacy === 'close_friends'
+                    ? 'bg-[#10B981] text-white shadow-xs'
+                    : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900'
+                }`}
+              >
+                ⭐️ Yaqinlar
+              </button>
+            </div>
 
             <input
               ref={fileInputRef}

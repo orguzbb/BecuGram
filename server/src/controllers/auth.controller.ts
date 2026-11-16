@@ -363,6 +363,7 @@ export async function verifyAuth(req: Request, res: Response): Promise<void> {
         appearanceSettings: user.appearanceSettings,
       },
       accessToken,
+      refreshToken,
       isNewUser: isNewUser || !isProfileComplete,
       isProfileComplete,
     },

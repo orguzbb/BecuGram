@@ -9,6 +9,29 @@ export function errorHandler(
 ): void {
   logger.error('Unhandled API Error:', err);
 
+  // Multer File Upload Errors
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    res.status(413).json({
+      success: false,
+      error: {
+        code: 'FILE_TOO_LARGE',
+        message: 'File size exceeds maximum allowed limit.',
+      },
+    });
+    return;
+  }
+
+  if (err.message && err.message.includes('Forbidden file type')) {
+    res.status(400).json({
+      success: false,
+      error: {
+        code: 'FORBIDDEN_FILE_TYPE',
+        message: err.message,
+      },
+    });
+    return;
+  }
+
   const statusCode = err.status || err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, X, Check, Share2, Bookmark } from 'lucide-react';
 import { Avatar } from './Avatar';
 import { useChatStore } from '../stores/chatStore';
@@ -19,6 +19,16 @@ export const ForwardMessageModal: React.FC<ForwardMessageModalProps> = ({
   const { conversations } = useChatStore();
   const { user } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const filteredConversations = conversations.filter((c) => {
     if (!searchQuery.trim()) return true;

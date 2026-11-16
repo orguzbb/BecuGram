@@ -7,7 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "vitest run",
+    "test": "vitest run --fileParallelism=false",
     "seed": "tsx src/utils/seed.ts"
   },
   "dependencies": {
@@ -38,6 +38,7 @@
     "@types/node-telegram-bot-api": "^0.64.7",
     "supertest": "^7.0.0",
     "@types/supertest": "^6.0.2",
+    "socket.io-client": "^4.8.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "vitest": "^3.0.5"

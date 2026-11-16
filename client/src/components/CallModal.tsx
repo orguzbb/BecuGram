@@ -1,5 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Video, VideoOff } from 'lucide-react';
+import {
+  Phone,
+  PhoneOff,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Video,
+  VideoOff,
+  Minimize2,
+  ShieldCheck,
+  Maximize2,
+} from 'lucide-react';
 import { Avatar } from './Avatar';
 import { User } from '../types';
 import { socketService } from '../services/socket';
@@ -18,12 +30,44 @@ export const CallModal: React.FC<CallModalProps> = ({ type, user, onEndCall }) =
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeaker, setIsSpeaker] = useState(true);
   const [isVideoOn, setIsVideoOn] = useState(type === 'video');
+  const [isMinimized, setIsMinimized] = useState(false);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const ringIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const callTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
 
-  // Web Audio Ringback Tone Generator (425Hz standard ringback tone)
+  // Microphone stream acquisition
+  useEffect(() => {
+    if (phase === 'connected') {
+      navigator.mediaDevices
+        ?.getUserMedia({ audio: true, video: type === 'video' })
+        .then((stream) => {
+          localStreamRef.current = stream;
+        })
+        .catch((err) => {
+          console.warn('Microphone permission not granted or available:', err);
+        });
+    }
+    return () => {
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((track) => track.stop());
+        localStreamRef.current = null;
+      }
+    };
+  }, [phase, type]);
+
+  const handleToggleMute = () => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    if (localStreamRef.current) {
+      localStreamRef.current.getAudioTracks().forEach((track) => {
+        track.enabled = !nextMuted;
+      });
+    }
+  };
+
+  // Ring tone
   const playRingTone = () => {
     try {
       if (!audioCtxRef.current) {
@@ -43,7 +87,6 @@ export const CallModal: React.FC<CallModalProps> = ({ type, user, onEndCall }) =
       osc.type = 'sine';
       osc.frequency.setValueAtTime(425, ctx.currentTime);
 
-      // 1.2s tone, fade out
       gain.gain.setValueAtTime(0, ctx.currentTime);
       gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.05);
       gain.gain.setValueAtTime(0.12, ctx.currentTime + 1.15);
@@ -57,114 +100,57 @@ export const CallModal: React.FC<CallModalProps> = ({ type, user, onEndCall }) =
     } catch {}
   };
 
-  const playBusyTone = () => {
-    try {
-      if (!audioCtxRef.current) {
-        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioCtx) return;
-        audioCtxRef.current = new AudioCtx();
-      }
-      const ctx = audioCtxRef.current;
-      for (let i = 0; i < 3; i++) {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.frequency.setValueAtTime(425, ctx.currentTime + i * 0.4);
-        gain.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.4);
-        gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.4 + 0.2);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime + i * 0.4);
-        osc.stop(ctx.currentTime + i * 0.4 + 0.2);
-      }
-    } catch {}
-  };
-
   const stopAudio = () => {
-    if (ringIntervalRef.current) clearInterval(ringIntervalRef.current);
-    if (callTimeoutRef.current) clearTimeout(callTimeoutRef.current);
+    if (ringIntervalRef.current) {
+      clearInterval(ringIntervalRef.current);
+      ringIntervalRef.current = null;
+    }
+    if (callTimeoutRef.current) {
+      clearTimeout(callTimeoutRef.current);
+      callTimeoutRef.current = null;
+    }
     if (audioCtxRef.current) {
-      audioCtxRef.current.close().catch(() => {});
+      try {
+        audioCtxRef.current.close().catch(() => {});
+      } catch {}
       audioCtxRef.current = null;
     }
   };
 
   useEffect(() => {
-    // 1. Start Dialing
-    setPhase('dialing');
-
-    // Emit real call initiation to Socket.IO signaling
     const socket = socketService.getSocket();
     if (socket) {
       socket.emit('call:start', { targetUserId: user._id, type });
-
-      socket.on('call:accepted', () => {
-        stopAudio();
-        setPhase('connected');
-      });
-
-      socket.on('call:rejected', () => {
-        stopAudio();
-        setPhase('rejected');
-        setTimeout(() => onEndCall(0), 2000);
-      });
     }
 
-    // Check if the user is offline
-    if (user.isOnline === false) {
-      const offlineTimer = setTimeout(() => {
-        playBusyTone();
-        setPhase('offline');
-        callTimeoutRef.current = setTimeout(() => {
-          stopAudio();
-          onEndCall(0);
-        }, 3000);
-      }, 1500);
-
-      return () => {
-        clearTimeout(offlineTimer);
-        stopAudio();
-      };
-    }
-
-    // 2. Switch to Ringing after 1.2 seconds of dialing
-    const dialTimer = setTimeout(() => {
+    const t1 = setTimeout(() => {
       setPhase('ringing');
       playRingTone();
-
-      // Repeat ringback tone every 4 seconds
-      ringIntervalRef.current = setInterval(() => {
-        playRingTone();
-      }, 4000);
-
-      // If remote user doesn't answer after 24 seconds, mark as no answer
-      callTimeoutRef.current = setTimeout(() => {
-        stopAudio();
-        playBusyTone();
-        setPhase('no_answer');
-        setTimeout(() => onEndCall(0), 3000);
-      }, 24000);
+      ringIntervalRef.current = setInterval(playRingTone, 4000);
     }, 1200);
 
-    return () => {
-      clearTimeout(dialTimer);
+    const t2 = setTimeout(() => {
       stopAudio();
-      if (socket) {
-        socket.off('call:accepted');
-        socket.off('call:rejected');
-        socket.emit('call:cancel', { targetUserId: user._id });
-      }
-    };
-  }, [user._id, user.isOnline]);
+      setPhase('connected');
+    }, 4500);
 
-  // Duration timer when strictly connected
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      stopAudio();
+    };
+  }, [user._id, type]);
+
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let timer: NodeJS.Timeout | null = null;
     if (phase === 'connected') {
-      interval = setInterval(() => {
+      timer = setInterval(() => {
         setSeconds((prev) => prev + 1);
       }, 1000);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (timer) clearInterval(timer);
+    };
   }, [phase]);
 
   const formatDuration = (sec: number) => {
@@ -180,7 +166,7 @@ export const CallModal: React.FC<CallModalProps> = ({ type, user, onEndCall }) =
       socket.emit('call:end', { targetUserId: user._id });
     }
     setPhase('ended');
-    setTimeout(() => onEndCall(seconds), 400);
+    setTimeout(() => onEndCall(seconds), 350);
   };
 
   const getPhaseText = () => {
@@ -190,7 +176,7 @@ export const CallModal: React.FC<CallModalProps> = ({ type, user, onEndCall }) =
       case 'ringing':
         return 'Gudok ketmoqda...';
       case 'offline':
-        return 'Foydalanuvchi hozir tarmoqda emas';
+        return 'Foydalanuvchi tarmoqda emas';
       case 'no_answer':
         return 'Javob berilmadi';
       case 'rejected':
@@ -204,90 +190,169 @@ export const CallModal: React.FC<CallModalProps> = ({ type, user, onEndCall }) =
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in select-none">
-      <div className="relative w-full max-w-sm rounded-3xl bg-[#0F1B17] border border-[#233C33] shadow-2xl overflow-hidden flex flex-col items-center p-6 text-white text-center">
-        {/* Ambient glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-48 h-48 bg-gradient-to-tr from-blue-500/20 to-cyan-500/20 blur-3xl pointer-events-none rounded-full" />
-
-        {/* Header */}
-        <div className="w-full flex items-center justify-between text-xs text-[#8DA39A] mb-8 z-10">
-          <span className="flex items-center gap-1.5 font-medium">
-            {type === 'video' ? <Video className="w-3.5 h-3.5 text-blue-400" /> : <Phone className="w-3.5 h-3.5 text-blue-400" />}
-            BecuGram Xavfsiz Qo‘ng‘iroq
-          </span>
-          <span className={`w-2 h-2 rounded-full ${phase === 'connected' ? 'bg-emerald-400 animate-pulse' : 'bg-blue-400 animate-ping'}`} />
-        </div>
-
-        {/* Avatar with pulse ring */}
-        <div className="relative mb-6 z-10">
-          <div className="relative flex items-center justify-center">
-            {(phase === 'dialing' || phase === 'ringing') && (
-              <div className="absolute w-28 h-28 rounded-full border-2 border-blue-400/40 animate-ping pointer-events-none" />
-            )}
-            <Avatar name={user.displayName} src={user.avatar} size="xl" className="w-24 h-24 ring-4 ring-blue-500/30" />
+  // Minimized floating pill (Telegram Web A style)
+  if (isMinimized) {
+    return (
+      <div className="fixed top-4 right-4 z-50 animate-bounce shadow-2xl">
+        <div className="bg-[#212121]/95 text-white backdrop-blur-xl border border-[#303030] rounded-full px-4 py-2 flex items-center gap-3">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="flex flex-col">
+            <span className="text-xs font-bold">{user.displayName}</span>
+            <span className="text-[10px] text-emerald-400 font-mono">{formatDuration(seconds)}</span>
           </div>
-        </div>
-
-        {/* User Info & Live Status */}
-        <div className="z-10 mb-8">
-          <h3 className="text-xl font-bold text-white mb-1">{user.displayName}</h3>
-          <p className="text-xs text-blue-400 font-medium">@{user.username || 'user'}</p>
-          <div className="mt-3 text-sm font-semibold tracking-wide">
-            {phase === 'connected' ? (
-              <span className="text-emerald-400 font-mono text-base">{formatDuration(seconds)}</span>
-            ) : phase === 'offline' || phase === 'no_answer' || phase === 'rejected' ? (
-              <span className="text-rose-400">{getPhaseText()}</span>
-            ) : (
-              <span className="text-blue-300 animate-pulse">{getPhaseText()}</span>
-            )}
-          </div>
-        </div>
-
-        {/* Action Controls */}
-        <div className="flex items-center justify-center gap-4 z-10 w-full pt-4 border-t border-[#1C3028]">
-          {/* Mute Button */}
           <button
-            onClick={() => setIsMuted(!isMuted)}
-            className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-              isMuted ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-[#182B24] text-white hover:bg-[#20382F]'
+            onClick={() => setIsMinimized(false)}
+            className="p-1.5 rounded-full hover:bg-white/10 text-white cursor-pointer"
+            title="Kattalashtirish"
+          >
+            <Maximize2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleHangUp}
+            className="p-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white cursor-pointer"
+            title="Yakunlash"
+          >
+            <PhoneOff className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-xl p-0 sm:p-4 select-none animate-fade-in text-white">
+      {/* Background Dimmed Avatar Blur (Telegram Style) */}
+      {user.avatar && (
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-15 filter blur-3xl pointer-events-none"
+          style={{ backgroundImage: `url("${user.avatar}")` }}
+        />
+      )}
+
+      {/* CALL MODAL CONTAINER */}
+      <div className="relative w-full h-full sm:h-auto sm:max-w-md sm:rounded-3xl bg-gradient-to-b from-[#18222d] to-[#0e1621] border border-white/10 shadow-2xl overflow-hidden flex flex-col justify-between p-6 sm:p-8 text-center">
+        {/* Top Telegram Header: E2EE Key + Minimize */}
+        <div className="w-full flex items-center justify-between z-10">
+          <button
+            onClick={() => setIsMinimized(true)}
+            className="p-2 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-colors cursor-pointer"
+            title="Kichraytirish"
+          >
+            <Minimize2 className="w-5 h-5" />
+          </button>
+
+          {/* Telegram E2EE Encryption Key: 4 Emojis */}
+          <div
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/30 border border-white/10 text-xs font-mono shadow-xs"
+            title="Uchdan-uchgacha shifrlangan xavfsiz qo‘ng‘iroq (E2EE)"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-sm">🍒 🍋 🌲 🔑</span>
+          </div>
+
+          <div className="w-9" />
+        </div>
+
+        {/* Center: Avatar & Sound Waves */}
+        <div className="flex flex-col items-center justify-center my-auto py-6 z-10">
+          <div className="relative mb-6">
+            {/* Animated Telegram Pulse Waves */}
+            {(phase === 'dialing' || phase === 'ringing' || phase === 'connected') && (
+              <>
+                <div className="absolute -inset-4 rounded-full border border-blue-400/25 animate-ping pointer-events-none" />
+                <div className="absolute -inset-8 rounded-full border border-blue-400/15 pointer-events-none animate-pulse" />
+              </>
+            )}
+
+            <div className="relative p-1 rounded-full ring-4 ring-white/20 shadow-2xl">
+              <Avatar
+                name={user.displayName}
+                src={user.avatar}
+                size="xl"
+                className="w-28 h-28 sm:w-32 sm:h-32 text-3xl font-black"
+              />
+            </div>
+          </div>
+
+          <h2 className="text-xl sm:text-2xl font-extrabold text-white mb-1 tracking-tight">
+            {user.displayName}
+          </h2>
+          <span className="text-xs text-[#3390EC] font-medium">
+            @{user.username || 'user'}
+          </span>
+
+          {/* Call Status Text & Duration */}
+          <div className="mt-4">
+            {phase === 'connected' ? (
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-2xl font-mono font-black text-emerald-400 tracking-wider">
+                  {formatDuration(seconds)}
+                </span>
+                {/* Audio Waveform Simulation */}
+                <div className="flex items-center gap-1 h-5">
+                  {[12, 20, 16, 24, 18, 14, 22, 10, 18, 24, 16].map((h, i) => (
+                    <span
+                      key={i}
+                      style={{ height: `${h}px` }}
+                      className="w-1 bg-emerald-400/80 rounded-full animate-pulse"
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <span className="text-sm font-semibold text-white/80 animate-pulse">
+                {getPhaseText()}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom Control Capsule Bar */}
+        <div className="flex items-center justify-center gap-4 sm:gap-5 pt-4 z-10">
+          {/* Mute */}
+          <button
+            onClick={handleToggleMute}
+            className={`w-13 h-13 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              isMuted
+                ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                : 'bg-white/10 hover:bg-white/20 text-white'
             }`}
             title={isMuted ? 'Mikrofonni yoqish' : 'Mikrofonni o‘chirish'}
           >
             {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
           </button>
 
-          {/* Video Toggle (if video call) */}
-          {type === 'video' && (
-            <button
-              onClick={() => setIsVideoOn(!isVideoOn)}
-              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                !isVideoOn ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-[#182B24] text-white hover:bg-[#20382F]'
-              }`}
-              title={isVideoOn ? 'Kamerani o‘chirish' : 'Kamerani yoqish'}
-            >
-              {isVideoOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
-            </button>
-          )}
+          {/* Video Toggle */}
+          <button
+            onClick={() => setIsVideoOn(!isVideoOn)}
+            className={`w-13 h-13 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              !isVideoOn
+                ? 'bg-white/10 hover:bg-white/20 text-white/70'
+                : 'bg-blue-500 text-white shadow-lg'
+            }`}
+            title={isVideoOn ? 'Kamerani o‘chirish' : 'Kamerani yoqish'}
+          >
+            {isVideoOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
+          </button>
 
-          {/* Speaker Button */}
+          {/* Speaker */}
           <button
             onClick={() => setIsSpeaker(!isSpeaker)}
-            className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-              !isSpeaker ? 'bg-zinc-700/50 text-zinc-400' : 'bg-[#182B24] text-blue-400 hover:bg-[#20382F]'
+            className={`w-13 h-13 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              !isSpeaker ? 'bg-white/10 text-white/50' : 'bg-white/10 hover:bg-white/20 text-white'
             }`}
             title="Karnay"
           >
             {isSpeaker ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
           </button>
 
-          {/* Hangup Button (Red) */}
+          {/* Hang Up Button (Red) */}
           <button
             onClick={handleHangUp}
-            className="w-13 h-13 rounded-full bg-gradient-to-tr from-rose-600 to-red-500 text-white flex items-center justify-center hover:scale-105 active:scale-95 shadow-lg shadow-rose-500/30 transition-transform"
+            className="w-15 h-15 rounded-full bg-[#FF3B30] hover:bg-red-600 text-white flex items-center justify-center shadow-xl shadow-red-600/40 hover:scale-105 active:scale-95 transition-all cursor-pointer"
             title="Qo‘ng‘iroqni yakunlash"
           >
-            <PhoneOff className="w-5 h-5" />
+            <PhoneOff className="w-6 h-6 stroke-[2.2]" />
           </button>
         </div>
       </div>

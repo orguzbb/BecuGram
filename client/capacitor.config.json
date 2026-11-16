@@ -1,0 +1,26 @@
+{
+  "appId": "com.becugram.app",
+  "appName": "BecuGram",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1000,
+      "launchAutoHide": true,
+      "backgroundColor": "#0B1311",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "backgroundColor": "#0B1311",
+      "style": "DARK"
+    }
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  }
+}

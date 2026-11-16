@@ -13,6 +13,7 @@ import {
   Link2,
   X,
   Ban,
+  Bookmark,
 } from 'lucide-react';
 import { Avatar } from '../../components/Avatar';
 import { CallModal } from '../../components/CallModal';
@@ -44,6 +45,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [activeCall, setActiveCall] = useState<'audio' | 'video' | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isLoadingMedia, setIsLoadingMedia] = useState(false);
+
+  const isSavedMessages =
+    user.username === 'saved' ||
+    user.displayName === 'Saqlanganlar' ||
+    user.displayName?.toLowerCase().includes('saqlangan') ||
+    user.username?.toLowerCase().includes('saved') ||
+    user._id.startsWith('conv_saved_') ||
+    user._id.startsWith('user_saved_') ||
+    Boolean(conversationId?.startsWith('conv_saved_'));
 
   const handleToggleBlock = async () => {
     try {
@@ -171,7 +181,13 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   }, [user._id, conversationId]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200 select-none">
+    <div className="fixed inset-0 z-50 flex justify-end animate-in fade-in duration-200 select-none">
+      {/* Backdrop overlay */}
+      <div
+        className="fixed inset-0 bg-black/40 backdrop-blur-[1px]"
+        onClick={onClose}
+      />
+
       {activeCall && (
         <CallModal
           type={activeCall}
@@ -180,21 +196,26 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         />
       )}
 
-      <div className="w-full sm:max-w-md h-full sm:h-[90vh] bg-white dark:bg-[#0E1715] sm:border border-zinc-200 dark:border-[#1E302A] sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden text-zinc-900 dark:text-[#EDF4F1]">
-        {/* Top Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-[#1C2C27] bg-zinc-50 dark:bg-[#12201B]">
+      {/* Right Drawer Panel (Telegram Web A Profile Drawer) */}
+      <div className="relative w-full sm:w-[380px] md:w-[420px] h-full bg-white dark:bg-[#212121] border-l border-[#DADCE0] dark:border-[#303030] flex flex-col shadow-2xl overflow-hidden text-zinc-900 dark:text-white z-10 animate-in slide-in-from-right duration-200">
+        {/* Telegram Web A Profile Header */}
+        <div className="h-14 flex items-center justify-between px-4 bg-white dark:bg-[#212121] text-zinc-900 dark:text-white border-b border-[#DADCE0] dark:border-[#303030] shrink-0">
           <button
             onClick={onClose}
-            className="p-1 text-zinc-500 hover:text-zinc-900 dark:text-[#8DA39A] dark:hover:text-white rounded-lg transition-colors"
+            className="w-10 h-10 rounded-full hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] text-[#707579] dark:text-[#AAAAAA] flex items-center justify-center transition-colors cursor-pointer"
+            title="Orqaga"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 stroke-[2]" />
           </button>
-          <span className="text-sm font-semibold text-zinc-900 dark:text-white">Profil</span>
+          <span className="text-[16px] font-medium text-zinc-900 dark:text-white truncate px-2">
+            {isSavedMessages ? 'Saqlangan xabarlar' : "Foydalanuvchi ma'lumoti"}
+          </span>
           <button
             onClick={onClose}
-            className="p-1 text-zinc-500 hover:text-zinc-900 dark:text-[#8DA39A] dark:hover:text-white rounded-lg transition-colors"
+            className="w-10 h-10 rounded-full hover:bg-[#F4F4F5] dark:hover:bg-[#2C2C2C] text-[#707579] dark:text-[#AAAAAA] flex items-center justify-center transition-colors cursor-pointer"
+            title="Yopish"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 stroke-[2]" />
           </button>
         </div>
 
@@ -202,80 +223,97 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         <div className="flex-1 overflow-y-auto">
           {/* Centered Profile Hero */}
           <div className="flex flex-col items-center pt-6 pb-4 px-6 text-center">
-            <Avatar
-              name={user.displayName}
-              src={user.avatar}
-              size="2xl"
-              className="ring-4 ring-blue-500/20 dark:ring-blue-400/20 shadow-xl mb-3"
-            />
+            {isSavedMessages ? (
+              <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#2563EB] to-[#60A5FA] text-white flex items-center justify-center shadow-2xl ring-4 ring-blue-500/20 mb-3 select-none">
+                <Bookmark className="w-12 h-12 fill-current" />
+              </div>
+            ) : (
+              <Avatar
+                name={user.displayName}
+                src={user.avatar}
+                size="2xl"
+                className="ring-4 ring-blue-500/20 dark:ring-blue-400/20 shadow-xl mb-3"
+              />
+            )}
 
             <h2 className="text-xl font-bold text-zinc-900 dark:text-white leading-snug flex items-center gap-1.5 justify-center">
-              {user.displayName}
-              {user.isVerified && (
-                <span className="w-4 h-4 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] font-black" title="Tasdiqlangan">
+              {isSavedMessages ? 'Saqlangan xabarlar' : user.displayName}
+              {user.premiumBadge && !isSavedMessages && (
+                <span className="text-xl animate-bounce" title="BecuGram Premium Status">
+                  {user.premiumBadge}
+                </span>
+              )}
+              {(user.isVerified || isSavedMessages) && (
+                <span className="w-4 h-4 rounded-full bg-[#3390EC] dark:bg-[#8774E1] text-white flex items-center justify-center text-[10px] font-black" title="Tasdiqlangan">
                   ✓
                 </span>
               )}
             </h2>
-            <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">@{user.username || 'user'}</p>
-            {user.phoneNumber && (
-              <p className="text-xs text-zinc-500 dark:text-[#8DA39A] mt-0.5">
+            <p className="text-sm text-[#3390EC] dark:text-[#8774E1] font-medium">
+              {isSavedMessages ? 'Shaxsiy bulutli xotira' : `@${user.username || 'user'}`}
+            </p>
+            {user.phoneNumber && !isSavedMessages && (
+              <p className="text-xs text-[#707579] dark:text-[#AAAAAA] mt-0.5">
                 {formatPhoneDisplay(user.phoneNumber)}
               </p>
             )}
 
             {/* Quick Action Buttons (Chat, Call, Video, Mute) */}
-            <div className="flex items-center justify-center gap-3.5 my-5 w-full">
+            <div className="flex items-center justify-center gap-4 my-5 w-full">
               <button
                 onClick={() => {
                   onClose();
                   if (onStartChat) onStartChat(user._id);
                 }}
-                className="w-12 h-12 rounded-2xl bg-zinc-100 hover:bg-zinc-200 dark:bg-[#142620] dark:hover:bg-[#1B352C] border border-zinc-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center transition-all shadow-xs"
+                className="w-12 h-12 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-[#2C2C2C] dark:hover:bg-[#383838] text-[#707579] dark:text-[#AAAAAA] hover:text-[#3390EC] dark:hover:text-[#8774E1] flex items-center justify-center transition-all shadow-sm cursor-pointer"
                 title="Suhbat ochish"
               >
                 <MessageSquare className="w-5 h-5" />
               </button>
 
-              <button
-                onClick={() => setActiveCall('audio')}
-                className="w-12 h-12 rounded-2xl bg-zinc-100 hover:bg-zinc-200 dark:bg-[#142620] dark:hover:bg-[#1B352C] border border-zinc-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center transition-all shadow-xs"
-                title="Ovozli qo'ng'iroq"
-              >
-                <Phone className="w-5 h-5" />
-              </button>
+              {!isSavedMessages && (
+                <>
+                  <button
+                    onClick={() => setActiveCall('audio')}
+                    className="w-12 h-12 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-[#2C2C2C] dark:hover:bg-[#383838] text-[#707579] dark:text-[#AAAAAA] hover:text-[#3390EC] dark:hover:text-[#8774E1] flex items-center justify-center transition-all shadow-sm cursor-pointer"
+                    title="Ovozli qo'ng'iroq"
+                  >
+                    <Phone className="w-5 h-5" />
+                  </button>
 
-              <button
-                onClick={() => setActiveCall('video')}
-                className="w-12 h-12 rounded-2xl bg-zinc-100 hover:bg-zinc-200 dark:bg-[#142620] dark:hover:bg-[#1B352C] border border-zinc-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center transition-all shadow-xs"
-                title="Video qo'ng'iroq"
-              >
-                <Video className="w-5 h-5" />
-              </button>
+                  <button
+                    onClick={() => setActiveCall('video')}
+                    className="w-12 h-12 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-[#2C2C2C] dark:hover:bg-[#383838] text-[#707579] dark:text-[#AAAAAA] hover:text-[#3390EC] dark:hover:text-[#8774E1] flex items-center justify-center transition-all shadow-sm cursor-pointer"
+                    title="Video qo'ng'iroq"
+                  >
+                    <Video className="w-5 h-5" />
+                  </button>
+                </>
+              )}
 
-              <button
-                onClick={() => {
-                  setIsMuted(!isMuted);
-                  showToast(isMuted ? 'Ovoz yoqildi' : 'Xabarnomalar ovozi o‘chirildi', 'info');
-                }}
-                className={`w-12 h-12 rounded-2xl border border-zinc-200 dark:border-zinc-700/60 flex items-center justify-center transition-all shadow-xs ${
-                  isMuted ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400' : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-[#142620] dark:hover:bg-[#1B352C] text-zinc-500 dark:text-[#8DA39A]'
-                }`}
-                title="Ovozni o‘chirish"
-              >
-                {isMuted ? <BellOff className="w-5 h-5" /> : <Bell className="w-5 h-5" />}
-              </button>
+              {!isSavedMessages && (
+                <button
+                  onClick={() => {
+                    setIsMuted(!isMuted);
+                    showToast(isMuted ? 'Ovoz yoqildi' : 'Xabarnomalar ovozi o‘chirildi', 'info');
+                  }}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-sm cursor-pointer ${
+                    isMuted ? 'bg-rose-500/20 text-rose-500' : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-[#2C2C2C] dark:hover:bg-[#383838] text-[#707579] dark:text-[#AAAAAA]'
+                  }`}
+                  title="Ovozni o‘chirish"
+                >
+                  {isMuted ? <BellOff className="w-5 h-5" /> : <Bell className="w-5 h-5" />}
+                </button>
+              )}
             </div>
 
             {/* Real Bio Card */}
-            <div className="w-full p-3.5 rounded-2xl bg-zinc-50 dark:bg-[#14231E] border border-zinc-200 dark:border-[#20362E] text-left">
-              <span className="text-xs text-zinc-800 dark:text-[#EDF4F1] leading-relaxed block">
-                <span className="text-zinc-500 dark:text-[#8DA39A] font-semibold mr-1.5">Bio:</span>
-                {user.bio ? (
-                  user.bio
-                ) : (
-                  <span className="text-zinc-400 dark:text-zinc-500 italic">Ma‘lumot kiritilmagan</span>
-                )}
+            <div className="w-full p-3.5 rounded-2xl bg-[#F4F4F5] dark:bg-[#181818] border border-[#DADCE0] dark:border-[#303030] text-left">
+              <span className="text-xs text-zinc-800 dark:text-[#E4ECF2] leading-relaxed block">
+                <span className="text-[#3390EC] dark:text-[#8774E1] font-semibold mr-1.5">Tavsif:</span>
+                {isSavedMessages
+                  ? "Shaxsiy xabarlar, rasmlar, videolar va eslatmalarni saqlash uchun bulutli joy. Bu yerdagi barcha ma'lumotlar barcha qurilmalaringizda sinxronlanadi."
+                  : user.bio || <span className="text-zinc-400 dark:text-zinc-500 italic">Ma‘lumot kiritilmagan</span>}
               </span>
             </div>
           </div>
@@ -460,20 +498,22 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </div>
           </div>
 
-          {/* Block / Unblock User Action */}
-          <div className="p-4 border-t border-zinc-200 dark:border-[#1C2C27] bg-zinc-50/50 dark:bg-[#0E1715]/50">
-            <button
-              onClick={handleToggleBlock}
-              className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-98 shadow-xs ${
-                isBlocked
-                  ? 'bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200'
-                  : 'bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 border border-red-200/60 dark:border-red-900/40'
-              }`}
-            >
-              <Ban className="w-4 h-4" />
-              <span>{isBlocked ? 'Foydalanuvchini blokdan chiqarish' : 'Foydalanuvchini bloklash'}</span>
-            </button>
-          </div>
+          {/* Block / Unblock User Action (Strictly for real users, not Saved Messages) */}
+          {!isSavedMessages && (
+            <div className="p-4 border-t border-zinc-200 dark:border-[#1C2C27] bg-zinc-50/50 dark:bg-[#0E1715]/50">
+              <button
+                onClick={handleToggleBlock}
+                className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-98 shadow-xs ${
+                  isBlocked
+                    ? 'bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200'
+                    : 'bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 border border-red-200/60 dark:border-red-900/40'
+                }`}
+              >
+                <Ban className="w-4 h-4" />
+                <span>{isBlocked ? 'Foydalanuvchini blokdan chiqarish' : 'Foydalanuvchini bloklash'}</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

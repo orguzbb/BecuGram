@@ -4,23 +4,28 @@ import { Play, Pause } from 'lucide-react';
 interface VoicePlayerProps {
   url?: string;
   duration?: number;
+  waveform?: number[];
   isMe?: boolean;
 }
 
 export const VoicePlayer: React.FC<VoicePlayerProps> = ({
   url,
-  duration = 45,
+  duration: propDuration = 45,
+  waveform,
   isMe = false,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(propDuration);
   const [playbackSpeed, setPlaybackSpeed] = useState<1 | 1.5 | 2>(1);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Generate synthetic waveform heights for visual effect
-  const barHeights = [
+  // Default synthetic waveform heights if not provided
+  const defaultBarHeights = [
     25, 40, 60, 30, 85, 70, 45, 90, 65, 40, 80, 50, 95, 75, 40, 60, 85, 30, 70, 50, 90, 60, 40, 75, 55, 35
   ];
+
+  const barHeights = waveform && waveform.length > 0 ? waveform : defaultBarHeights;
 
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -88,6 +93,11 @@ export const VoicePlayer: React.FC<VoicePlayerProps> = ({
         <audio
           ref={audioRef}
           src={url}
+          onLoadedMetadata={() => {
+            if (audioRef.current && audioRef.current.duration && !isNaN(audioRef.current.duration)) {
+              setDuration(Math.round(audioRef.current.duration));
+            }
+          }}
           onEnded={() => {
             setIsPlaying(false);
             setCurrentTime(0);
@@ -104,10 +114,10 @@ export const VoicePlayer: React.FC<VoicePlayerProps> = ({
       <button
         type="button"
         onClick={togglePlay}
-        className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-transform active:scale-95 shadow-sm ${
+        className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-90 hover:scale-105 shadow-sm cursor-pointer ${
           isMe
-            ? 'bg-white text-blue-600'
-            : 'bg-[#2563EB] text-white shadow-blue-500/20'
+            ? 'bg-[#3f8c00] dark:bg-white text-white dark:text-[#766AC8]'
+            : 'bg-[#3390EC] dark:bg-[#8774E1] text-white'
         }`}
       >
         {isPlaying ? (
@@ -131,11 +141,11 @@ export const VoicePlayer: React.FC<VoicePlayerProps> = ({
                 className={`w-1 rounded-full transition-all duration-150 hover:opacity-100 ${
                   isPlayed
                     ? isMe
-                      ? 'bg-white'
-                      : 'bg-[#2563EB]'
+                      ? 'bg-[#3f8c00] dark:bg-white'
+                      : 'bg-[#3390EC] dark:bg-[#8774E1]'
                     : isMe
-                    ? 'bg-white/40'
-                    : 'bg-zinc-400 dark:bg-zinc-600'
+                    ? 'bg-[#3f8c00]/30 dark:bg-white/35'
+                    : 'bg-[#C4C9CC] dark:bg-[#5B5B5A]'
                 } ${isPlaying && Math.abs(i / barHeights.length - progressRatio) < 0.08 ? 'scale-y-125' : ''}`}
               />
             );
@@ -152,7 +162,7 @@ export const VoicePlayer: React.FC<VoicePlayerProps> = ({
               onClick={handleToggleSpeed}
               className={`px-1.5 py-0.5 rounded text-[9px] font-bold tracking-tight transition-all active:scale-90 ${
                 isMe
-                  ? 'bg-white/20 text-white hover:bg-white/30'
+                  ? 'bg-black/10 dark:bg-white/20 text-[#2C5E28] dark:text-white hover:bg-black/15'
                   : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-700'
               }`}
               title="Ovoz tezligini o'zgartirish"

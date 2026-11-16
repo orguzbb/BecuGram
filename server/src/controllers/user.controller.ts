@@ -97,8 +97,28 @@ export async function updateMe(req: AuthenticatedRequest, res: Response): Promis
 
   // Fallback to memory/JSON persistence
   const memoryUser = getMemoryDefaultUser(userId, req.user?.username, req.user?.phoneNumber);
+  if (username) {
+    const cleanUsername = username.toLowerCase().trim().replace(/^@/, '');
+    const check = validateUsername(cleanUsername);
+    if (!check.isValid) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_USERNAME', message: check.error || 'Noto‘g‘ri foydalanuvchi nomi' },
+      });
+      return;
+    }
+    const allUsers = getAllStoredUsers();
+    const existing = allUsers.find((u) => u.username?.toLowerCase() === cleanUsername && u._id !== userId);
+    if (existing) {
+      res.status(409).json({
+        success: false,
+        error: { code: 'USERNAME_TAKEN', message: 'Ushbu foydalanuvchi nomi band. Boshqa nom tanlang.' },
+      });
+      return;
+    }
+    memoryUser.username = cleanUsername;
+  }
   if (displayName) memoryUser.displayName = displayName.trim();
-  if (username) memoryUser.username = username.toLowerCase().trim();
   if (bio !== undefined) memoryUser.bio = bio.trim();
   if (avatar !== undefined) memoryUser.avatar = avatar;
 

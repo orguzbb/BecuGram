@@ -23,9 +23,16 @@ import {
   Bell,
   Settings as SettingsIcon,
   LogOut,
+  Plus,
+  Trash2,
+  FolderPlus,
+  Film,
+  Zap,
+  Upload,
 } from 'lucide-react';
 import { Avatar } from '../../components/Avatar';
 import { BecuLogo } from '../../components/BecuLogo';
+import { LottieAnimation } from '../../components/LottieAnimation';
 import { api } from '../../services/api';
 import { useToast } from '../../components/Toast';
 import { useAuthStore } from '../../stores/authStore';
@@ -37,13 +44,34 @@ interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
   const { user: currentAdmin } = useAuthStore();
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'users' | 'chats' | 'ui' | 'broadcast' | 'sms'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'chats' | 'gifs' | 'stickers' | 'ui' | 'broadcast' | 'sms'>('users');
   const [isLoading, setIsLoading] = useState(true);
 
   // Stats & Lists
   const [stats, setStats] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [conversations, setConversations] = useState<any[]>([]);
+
+  // GIFs State
+  const [gifs, setGifs] = useState<any[]>([]);
+  const [newGifTitle, setNewGifTitle] = useState('');
+  const [newGifCategory, setNewGifCategory] = useState('Trending');
+  const [newGifUrl, setNewGifUrl] = useState('');
+  const [isAddingGif, setIsAddingGif] = useState(false);
+
+  // Stickers State
+  const [stickerPacks, setStickerPacks] = useState<any[]>([]);
+  const [targetPackId, setTargetPackId] = useState<string>('');
+  const [newPackTitle, setNewPackTitle] = useState('');
+  const [newPackAuthor, setNewPackAuthor] = useState('');
+  const [newPackIsPremium, setNewPackIsPremium] = useState(false);
+  const [isAddingPack, setIsAddingPack] = useState(false);
+
+  const [newStickerName, setNewStickerName] = useState('');
+  const [newStickerEmoji, setNewStickerEmoji] = useState('⭐️');
+  const [newStickerJsonText, setNewStickerJsonText] = useState('');
+  const [lottiePreviewData, setLottiePreviewData] = useState<any | null>(null);
+  const [isAddingSticker, setIsAddingSticker] = useState(false);
 
   // Search filter
   const [globalSearch, setGlobalSearch] = useState('');
@@ -74,15 +102,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [statsRes, usersRes, chatsRes, settingsRes] = await Promise.all([
+      const [statsRes, usersRes, chatsRes, settingsRes, gifsRes, stickersRes] = await Promise.all([
         api.getAdminStats().catch(() => null),
         api.getAdminUsers().catch(() => []),
         api.getAdminConversations().catch(() => []),
         api.getGlobalSettings().catch(() => null),
+        api.getGifs().catch(() => []),
+        api.getStickers().catch(() => []),
       ]);
       setStats(statsRes);
       setUsers(Array.isArray(usersRes) ? usersRes : []);
       setConversations(Array.isArray(chatsRes) ? chatsRes : []);
+      setGifs(Array.isArray(gifsRes) ? gifsRes : []);
+      setStickerPacks(Array.isArray(stickersRes) ? stickersRes : []);
+      if (Array.isArray(stickersRes) && stickersRes.length > 0 && !targetPackId) {
+        setTargetPackId(stickersRes[0].id);
+      }
       if (settingsRes) {
         if (settingsRes.accentColor) setAccentColor(settingsRes.accentColor);
         if (settingsRes.announcementBanner) {
@@ -100,6 +135,152 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
   useEffect(() => {
     loadData();
   }, []);
+
+  // GIF actions
+  const handleAddGif = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newGifTitle.trim() || !newGifUrl.trim()) {
+      showToast('Sarlavha va GIF URL kiritilishi shart', 'error');
+      return;
+    }
+    setIsAddingGif(true);
+    try {
+      await api.createGif({
+        title: newGifTitle.trim(),
+        category: newGifCategory,
+        url: newGifUrl.trim(),
+      });
+      showToast('GIF muvaffaqiyatli qo‘shildi! ✨', 'success');
+      setNewGifTitle('');
+      setNewGifUrl('');
+      const updated = await api.getGifs();
+      setGifs(updated);
+    } catch (err: any) {
+      showToast(err.message || 'GIF qo‘shishda xatolik', 'error');
+    } finally {
+      setIsAddingGif(false);
+    }
+  };
+
+  const handleDeleteGif = async (id: string) => {
+    try {
+      await api.deleteGif(id);
+      setGifs((prev) => prev.filter((g) => g.id !== id));
+      showToast('GIF o‘chirildi', 'info');
+    } catch (err: any) {
+      showToast(err.message || 'Xatolik', 'error');
+    }
+  };
+
+  // Sticker Pack actions
+  const handleAddStickerPack = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPackTitle.trim()) {
+      showToast('To‘plam nomi kiritilishi shart', 'error');
+      return;
+    }
+    setIsAddingPack(true);
+    try {
+      const res = await api.createStickerPack({
+        title: newPackTitle.trim(),
+        author: newPackAuthor.trim() || currentAdmin?.displayName || 'Admin',
+        isPremium: newPackIsPremium,
+      });
+      showToast('Stiker to‘plami yaratildi! 🎉', 'success');
+      setNewPackTitle('');
+      setNewPackAuthor('');
+      const updated = await api.getStickers();
+      setStickerPacks(updated);
+      if (res.data?.id) setTargetPackId(res.data.id);
+    } catch (err: any) {
+      showToast(err.message || 'Xatolik', 'error');
+    } finally {
+      setIsAddingPack(false);
+    }
+  };
+
+  // Lottie Sticker actions
+  const handleJsonUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const text = reader.result as string;
+        setNewStickerJsonText(text);
+        const parsed = JSON.parse(text);
+        setLottiePreviewData(parsed);
+        showToast('Lottie JSON muvaffaqiyatli o‘qildi va tekshirildi! ✨', 'success');
+      } catch (err) {
+        showToast('Fayl haqiqiy JSON formatida emas', 'error');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleJsonTextChange = (val: string) => {
+    setNewStickerJsonText(val);
+    try {
+      const parsed = JSON.parse(val);
+      setLottiePreviewData(parsed);
+    } catch {
+      // not ready yet
+    }
+  };
+
+  const handleAddSticker = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!targetPackId) {
+      showToast('Avval stiker to‘plamini tanlang', 'error');
+      return;
+    }
+    if (!newStickerName.trim()) {
+      showToast('Stiker nomini kiriting', 'error');
+      return;
+    }
+    if (!newStickerJsonText.trim()) {
+      showToast('Lottie JSON ma‘lumotini kiriting yoki fayl yuklang', 'error');
+      return;
+    }
+
+    let parsed = null;
+    try {
+      parsed = JSON.parse(newStickerJsonText);
+    } catch {
+      parsed = newStickerJsonText.trim();
+    }
+
+    setIsAddingSticker(true);
+    try {
+      await api.createSticker({
+        packId: targetPackId,
+        name: newStickerName.trim(),
+        emoji: newStickerEmoji.trim() || '⭐️',
+        lottieJson: parsed,
+      });
+      showToast('Lottie stiker to‘plamga qo‘shildi! ⭐️', 'success');
+      setNewStickerName('');
+      setNewStickerJsonText('');
+      setLottiePreviewData(null);
+      const updated = await api.getStickers();
+      setStickerPacks(updated);
+    } catch (err: any) {
+      showToast(err.message || 'Stiker qo‘shishda xatolik', 'error');
+    } finally {
+      setIsAddingSticker(false);
+    }
+  };
+
+  const handleDeleteSticker = async (id: string) => {
+    try {
+      await api.deleteSticker(id);
+      const updated = await api.getStickers();
+      setStickerPacks(updated);
+      showToast('Stiker o‘chirildi', 'info');
+    } catch (err: any) {
+      showToast(err.message || 'Xatolik', 'error');
+    }
+  };
 
   const handleToggleVerified = async (targetUser: any) => {
     const nextVerified = !targetUser.isVerified;
@@ -238,9 +419,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     { id: 'amber', label: 'Amber', hex: '#F59E0B', bg: 'bg-[#F59E0B]' },
   ];
 
+  const totalStickersCount = stickerPacks.reduce((acc, p) => acc + (p.stickers?.length || 0), 0);
+
   const navItems = [
     { id: 'users' as const, label: 'Users', icon: Users, count: users.length },
     { id: 'chats' as const, label: 'Live Chats', icon: MessageSquare, count: conversations.length },
+    { id: 'gifs' as const, label: 'GIFlar', icon: Sparkles, count: gifs.length },
+    { id: 'stickers' as const, label: 'Lottie Stikerlar', icon: Zap, count: totalStickersCount },
     { id: 'ui' as const, label: 'UI Customizer', icon: Sliders },
     { id: 'broadcast' as const, label: 'Broadcast', icon: Megaphone },
     { id: 'sms' as const, label: 'SMS Gateway', icon: Smartphone },
@@ -810,6 +995,361 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       );
                     })
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB: GIFS MANAGEMENT */}
+            {activeTab === 'gifs' && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Form: Add New GIF */}
+                <div className="bg-white dark:bg-[#111827] rounded-2xl border border-zinc-200/80 dark:border-zinc-800 p-5 space-y-4 shadow-xs">
+                  <div>
+                    <h3 className="font-bold text-base text-zinc-900 dark:text-white flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#2563EB]" />
+                      <span>Yangi GIF qo‘shish</span>
+                    </h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                      Foydalanuvchilar chatda yuborishi mumkin bo‘lgan yangi animatsiyali GIF qo‘shing
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleAddGif} className="space-y-3.5">
+                    <div>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">
+                        GIF Sarlavhasi / Tavsifi
+                      </label>
+                      <input
+                        type="text"
+                        value={newGifTitle}
+                        onChange={(e) => setNewGifTitle(e.target.value)}
+                        placeholder="Masalan: Raqs tushayotgan mushukcha 🐱"
+                        className="w-full px-3.5 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:border-[#2563EB]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">
+                        Kategoriya
+                      </label>
+                      <select
+                        value={newGifCategory}
+                        onChange={(e) => setNewGifCategory(e.target.value)}
+                        className="w-full px-3.5 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:border-[#2563EB]"
+                      >
+                        <option value="Trending">Trending 🔥</option>
+                        <option value="Reactions">Reaksiyalar 👍</option>
+                        <option value="Funny">Kulgi 😂</option>
+                        <option value="Love">Sevgi ❤️</option>
+                        <option value="Celebration">Bayram 🎉</option>
+                        <option value="Memes">Memlar 🎭</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">
+                        GIF URL manzili
+                      </label>
+                      <input
+                        type="url"
+                        value={newGifUrl}
+                        onChange={(e) => setNewGifUrl(e.target.value)}
+                        placeholder="https://media.giphy.com/.../giphy.gif"
+                        className="w-full px-3.5 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:border-[#2563EB]"
+                      />
+                    </div>
+
+                    {/* Live Preview */}
+                    {newGifUrl && (
+                      <div className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 flex flex-col items-center">
+                        <span className="text-[10px] text-zinc-400 mb-1">Oldindan ko‘rish:</span>
+                        <img
+                          src={newGifUrl}
+                          alt="Preview"
+                          className="max-h-32 rounded-lg object-contain"
+                          onError={(e) => ((e.target as any).style.display = 'none')}
+                        />
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isAddingGif}
+                      className="w-full py-2.5 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>{isAddingGif ? 'Qo‘shilmoqda...' : 'GIF qo‘shish'}</span>
+                    </button>
+                  </form>
+                </div>
+
+                {/* GIFs Grid List */}
+                <div className="lg:col-span-2 bg-white dark:bg-[#111827] rounded-2xl border border-zinc-200/80 dark:border-zinc-800 p-5 space-y-4 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-base text-zinc-900 dark:text-white">
+                        Mavjud GIFlar ({gifs.length})
+                      </h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Foydalanuvchilar chatlarida mavjud bo‘lgan barcha GIF kutubxonasi
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[600px] overflow-y-auto pr-1">
+                    {gifs.map((g) => (
+                      <div
+                        key={g.id}
+                        className="group relative rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 flex flex-col"
+                      >
+                        <div className="h-28 bg-black/5 flex items-center justify-center overflow-hidden">
+                          <img
+                            src={g.url}
+                            alt={g.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            loading="lazy"
+                          />
+                        </div>
+                        <div className="p-2 flex items-center justify-between">
+                          <div className="min-w-0">
+                            <span className="text-[11px] font-bold text-zinc-900 dark:text-white truncate block">
+                              {g.title}
+                            </span>
+                            <span className="text-[10px] text-zinc-400">
+                              {g.category}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteGif(g.id)}
+                            className="p-1 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                            title="O‘chirish"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB: LOTTIE STICKERS MANAGEMENT (JSON-BASED) */}
+            {activeTab === 'stickers' && (
+              <div className="space-y-6">
+                {/* 1. Create New Sticker Pack Bar */}
+                <div className="bg-white dark:bg-[#111827] rounded-2xl border border-zinc-200/80 dark:border-zinc-800 p-5 shadow-xs">
+                  <h3 className="font-bold text-base text-zinc-900 dark:text-white flex items-center gap-2 mb-3">
+                    <FolderPlus className="w-4 h-4 text-[#2563EB]" />
+                    <span>Yangi Stiker To‘plami (Sticker Pack) Yaratish</span>
+                  </h3>
+                  <form onSubmit={handleAddStickerPack} className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="text"
+                      value={newPackTitle}
+                      onChange={(e) => setNewPackTitle(e.target.value)}
+                      placeholder="To‘plam nomi (Masalan: Telegram Dux Lottie)"
+                      className="flex-1 px-3.5 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:border-[#2563EB]"
+                    />
+                    <input
+                      type="text"
+                      value={newPackAuthor}
+                      onChange={(e) => setNewPackAuthor(e.target.value)}
+                      placeholder="Muallif (Masalan: Becu Studio)"
+                      className="w-full sm:w-48 px-3.5 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:border-[#2563EB]"
+                    />
+                    <label className="flex items-center gap-1.5 text-xs font-semibold px-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={newPackIsPremium}
+                        onChange={(e) => setNewPackIsPremium(e.target.checked)}
+                        className="w-4 h-4 accent-[#2563EB]"
+                      />
+                      <span>Faqat Premium ⭐️</span>
+                    </label>
+                    <button
+                      type="submit"
+                      disabled={isAddingPack}
+                      className="px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>{isAddingPack ? 'Yaratilmoqda...' : 'To‘plam qo‘shish'}</span>
+                    </button>
+                  </form>
+                </div>
+
+                {/* 2. Add Sticker via JSON and View Packs */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Left: Add Lottie JSON form */}
+                  <div className="bg-white dark:bg-[#111827] rounded-2xl border border-zinc-200/80 dark:border-zinc-800 p-5 space-y-4 shadow-xs">
+                    <div>
+                      <h3 className="font-bold text-base text-zinc-900 dark:text-white flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-amber-500" />
+                        <span>Lottie Stiker Qo‘shish (JSON)</span>
+                      </h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                        Telegram stikerlari kabi Lottie JSON orqali jonli animatsiyali stiker yuklang
+                      </p>
+                    </div>
+
+                    <form onSubmit={handleAddSticker} className="space-y-3.5">
+                      <div>
+                        <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">
+                          Qaysi to‘plamga qo‘shilsin?
+                        </label>
+                        <select
+                          value={targetPackId}
+                          onChange={(e) => setTargetPackId(e.target.value)}
+                          className="w-full px-3.5 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:border-[#2563EB]"
+                        >
+                          {stickerPacks.map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.title} {p.isPremium ? '(Premium)' : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="col-span-2">
+                          <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">
+                            Stiker nomi
+                          </label>
+                          <input
+                            type="text"
+                            value={newStickerName}
+                            onChange={(e) => setNewStickerName(e.target.value)}
+                            placeholder="Salomlashish"
+                            className="w-full px-3.5 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs text-zinc-900 dark:text-white outline-none focus:border-[#2563EB]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block mb-1">
+                            Emoji
+                          </label>
+                          <input
+                            type="text"
+                            value={newStickerEmoji}
+                            onChange={(e) => setNewStickerEmoji(e.target.value)}
+                            placeholder="👋"
+                            className="w-full px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs text-center text-zinc-900 dark:text-white outline-none focus:border-[#2563EB]"
+                          />
+                        </div>
+                      </div>
+
+                      {/* File upload or raw JSON */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                            Lottie JSON ma‘lumoti
+                          </label>
+                          <label className="text-[11px] font-semibold text-[#2563EB] hover:underline flex items-center gap-1 cursor-pointer">
+                            <Upload className="w-3 h-3" />
+                            <span>.json fayl yuklash</span>
+                            <input
+                              type="file"
+                              accept=".json,application/json"
+                              className="hidden"
+                              onChange={handleJsonUpload}
+                            />
+                          </label>
+                        </div>
+                        <textarea
+                          rows={4}
+                          value={newStickerJsonText}
+                          onChange={(e) => handleJsonTextChange(e.target.value)}
+                          placeholder='{"v": "5.5.7", "fr": 60, "ip": 0, "op": 120, "w": 512, "h": 512, ...} yoki /reactions/001.json'
+                          className="w-full px-3 py-2 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[11px] font-mono text-zinc-900 dark:text-white outline-none focus:border-[#2563EB] resize-none"
+                        />
+                      </div>
+
+                      {/* Live Animated Preview */}
+                      {lottiePreviewData && (
+                        <div className="p-3 rounded-xl bg-zinc-100 dark:bg-zinc-800/50 flex flex-col items-center justify-center">
+                          <span className="text-[10px] text-zinc-400 mb-1">Jonli Lottie Animatsiyasi:</span>
+                          <LottieAnimation animationData={lottiePreviewData} size={64} loop={true} />
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={isAddingSticker}
+                        className="w-full py-2.5 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>{isAddingSticker ? 'Yuklanmoqda...' : 'Lottie Stikerni saqlash'}</span>
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* Right: Existing Sticker Packs & Stickers list */}
+                  <div className="lg:col-span-2 bg-white dark:bg-[#111827] rounded-2xl border border-zinc-200/80 dark:border-zinc-800 p-5 space-y-4 shadow-xs">
+                    <div>
+                      <h3 className="font-bold text-base text-zinc-900 dark:text-white">
+                        Mavjud Lottie Stiker To‘plamlari ({stickerPacks.length})
+                      </h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        To‘plamlar va ularga tegishli animatsiyali stikerlar
+                      </p>
+                    </div>
+
+                    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
+                      {stickerPacks.map((pack) => (
+                        <div
+                          key={pack.id}
+                          className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 space-y-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-sm text-zinc-900 dark:text-white">
+                                {pack.title}
+                              </span>
+                              {pack.isPremium && (
+                                <span className="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-500 text-[10px] font-bold">
+                                  Premium ⭐️
+                                </span>
+                              )}
+                              <span className="text-xs text-zinc-400">
+                                ({pack.stickers?.length || 0} ta stiker)
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-zinc-400">
+                              Muallif: {pack.author}
+                            </span>
+                          </div>
+
+                          {/* Stickers inside pack */}
+                          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 pt-1">
+                            {(pack.stickers || []).map((st: any) => (
+                              <div
+                                key={st.id}
+                                className="group relative p-2 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/60 flex flex-col items-center justify-center gap-1 shadow-xs"
+                              >
+                                {typeof st.lottieJson === 'string' && st.lottieJson.startsWith('/') ? (
+                                  <LottieAnimation src={st.lottieJson} size={40} loop={true} />
+                                ) : typeof st.lottieJson === 'object' ? (
+                                  <LottieAnimation animationData={st.lottieJson} size={40} loop={true} />
+                                ) : (
+                                  <span className="text-2xl">{st.emoji}</span>
+                                )}
+                                <span className="text-[10px] text-zinc-600 dark:text-zinc-300 truncate max-w-full">
+                                  {st.name}
+                                </span>
+
+                                <button
+                                  onClick={() => handleDeleteSticker(st.id)}
+                                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                                  title="O‘chirish"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

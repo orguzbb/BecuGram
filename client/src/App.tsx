@@ -1,39 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useAuthStore } from './stores/authStore';
 import { AuthScreen } from './features/authentication/AuthScreen';
 import { AppLayout } from './layouts/AppLayout';
 import { ToastProvider } from './components/Toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { LottieAnimation } from './components/LottieAnimation';
 
 const queryClient = new QueryClient();
 
 export const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading, isInitialized, initAuth } = useAuthStore();
-  const [minLoading, setMinLoading] = useState(true);
 
   useEffect(() => {
     initAuth();
   }, [initAuth]);
 
-  // Loading screen 6 seconds per user request
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMinLoading(false);
-    }, 6000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!isInitialized || isLoading || minLoading) {
+  if (!isInitialized || isLoading) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#070D0B] text-white select-none transition-opacity duration-500">
-        <div className="relative mb-4 flex items-center justify-center">
-          <LottieAnimation src="/animations/loading.json" size={170} loop={true} autoplay={true} />
-        </div>
-        <h1 className="text-2xl font-black tracking-tight text-white/95">BecuGram</h1>
-        <div className="flex items-center gap-2 mt-2">
-          <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
-          <p className="text-xs text-[#8DA39A] tracking-wider font-semibold">
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-white dark:bg-[#212121] text-zinc-900 dark:text-white select-none transition-colors duration-200">
+        <div className="flex flex-col items-center gap-4 animate-fade-in">
+          {/* Telegram Web A Style Circular Spinner */}
+          <div className="w-12 h-12 rounded-full border-[3px] border-[#3390EC]/20 dark:border-[#8774E1]/20 border-t-[#3390EC] dark:border-t-[#8774E1] animate-spin" />
+          <h1 className="text-xl font-bold tracking-tight text-zinc-800 dark:text-white/90">
+            BecuGram
+          </h1>
+          <p className="text-xs text-[#707579] dark:text-[#AAAAAA] font-medium">
             Yuklanmoqda...
           </p>
         </div>
@@ -55,4 +45,3 @@ export const App: React.FC = () => {
 };
 
 export default App;
-

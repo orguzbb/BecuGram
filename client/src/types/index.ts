@@ -28,6 +28,12 @@ export interface User {
     accentColor: string;
     fontSize: 'small' | 'medium' | 'large';
   };
+  isPremium?: boolean;
+  premiumBadge?: string;
+  profilePattern?: string;
+  profileBackground?: string;
+  profileColor?: string;
+  profileGradient?: string;
 }
 
 export interface MessageReaction {
@@ -41,16 +47,34 @@ export interface MessageMedia {
   size?: number;
   mimeType?: string;
   duration?: number;
+  width?: number;
+  height?: number;
+  thumbnailUrl?: string;
+  waveform?: number[];
+  type?: string;
 }
 
 export interface Message {
   _id: string;
   conversationId: string;
   senderId: User | string;
-  type: 'text' | 'image' | 'video' | 'audio' | 'voice' | 'document' | 'system' | 'sticker';
+  type:
+    | 'text'
+    | 'image'
+    | 'video'
+    | 'audio'
+    | 'voice'
+    | 'round_video'
+    | 'video_note'
+    | 'document'
+    | 'file'
+    | 'sticker'
+    | 'gif'
+    | 'system';
   content: string;
   media?: MessageMedia;
   replyTo?: Message;
+  clientTempId?: string;
   forwardedFrom?: {
     _id?: string;
     displayName: string;
@@ -60,6 +84,7 @@ export interface Message {
   deliveredTo?: string[];
   readBy?: string[];
   isRead?: boolean;
+  status?: 'pending' | 'sent' | 'delivered' | 'read' | 'error';
   isPinned?: boolean;
   isEdited?: boolean;
   editedAt?: string;
@@ -93,6 +118,7 @@ export interface Conversation {
   isMuted?: boolean;
   unreadCount: number;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Contact {
@@ -115,6 +141,17 @@ export interface AuthChallengeResponse {
 export interface AuthVerifyResponse {
   user: User;
   accessToken: string;
+  refreshToken?: string;
   isNewUser: boolean;
+}
+
+export interface ChatFolder {
+  id: string;
+  name: string;
+  emoji?: string;
+  iconName?: string;
+  filter: 'all' | 'personal' | 'groups' | 'channels' | 'unread' | 'custom';
+  chatIds?: string[];
+  includeTypes?: ('direct' | 'group' | 'channel')[];
 }
 

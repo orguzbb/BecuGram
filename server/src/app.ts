@@ -65,12 +65,30 @@ export function createApp(): Express {
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   app.use(cookieParser());
 
-  // Static files for media uploads
+  // Static files for media uploads with Range request support for audio/video streaming, strict security headers & long-term caching
   const uploadsDir = path.resolve(process.cwd(), env.STORAGE_LOCAL_PATH);
-  app.use('/uploads', express.static(uploadsDir));
+  app.use(
+    '/uploads',
+    express.static(uploadsDir, {
+      maxAge: '30d',
+      setHeaders: (res, filePath) => {
+        res.setHeader('Accept-Ranges', 'bytes');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader(
+          'Content-Security-Policy',
+          "default-src 'none'; media-src 'self' data: blob:; img-src 'self' data: blob:; style-src 'unsafe-inline'"
+        );
+        // Force attachment download for documents to prevent HTML/SVG script execution in browser origin
+        if (filePath.includes(path.sep + 'documents' + path.sep) || filePath.includes('/documents/')) {
+          res.setHeader('Content-Disposition', 'attachment');
+        }
+      },
+    })
+  );
 
-  // Mount API Router
+  // Mount API Router (support both /api and /api/v1)
   app.use('/api', apiRouter);
+  app.use('/api/v1', apiRouter);
 
   // Serve static files for frontend production build
   const clientDist = path.resolve(process.cwd(), 'client', 'dist');

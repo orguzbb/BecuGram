@@ -1,5 +1,295 @@
 [
   {
+    "_id": "test_chat_1794734278109",
+    "type": "direct",
+    "participants": [
+      "test_user_alice",
+      "test_user_bob"
+    ],
+    "partner": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "isOnline": true,
+      "isVerified": false
+    },
+    "unreadCount": 0,
+    "createdAt": "2026-11-15T09:17:58.114Z",
+    "lastMessage": {
+      "_id": "msg_1794734278308_s0u5r",
+      "conversationId": "test_chat_1794734278109",
+      "senderId": {
+        "_id": "test_user_bob",
+        "displayName": "Bob",
+        "username": "bob",
+        "avatar": ""
+      },
+      "type": "text",
+      "content": "Bob sent a message to receive reactions",
+      "reactions": [],
+      "readBy": [
+        "test_user_bob"
+      ],
+      "createdAt": "2026-11-15T09:17:58.308Z"
+    },
+    "lastMessageAt": "2026-11-15T09:17:58.308Z"
+  },
+  {
+    "_id": "socket_chat_1794734276723",
+    "type": "direct",
+    "participants": [
+      "socket_user_alice",
+      "socket_user_bob"
+    ],
+    "partner": {
+      "_id": "socket_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "isOnline": true,
+      "isVerified": false
+    },
+    "unreadCount": 0,
+    "createdAt": "2026-11-15T09:17:56.729Z",
+    "lastMessage": {
+      "_id": "msg_1794734276906_1j1rt",
+      "conversationId": "socket_chat_1794734276723",
+      "senderId": {
+        "_id": "socket_user_alice",
+        "displayName": "Foydalanuvchi",
+        "username": "user",
+        "avatar": ""
+      },
+      "type": "text",
+      "content": "Multi-device sync check",
+      "reactions": [],
+      "readBy": [
+        "socket_user_alice"
+      ],
+      "createdAt": "2026-11-15T09:17:56.906Z"
+    },
+    "lastMessageAt": "2026-11-15T09:17:56.906Z"
+  },
+  {
+    "_id": "chat_actions_aeve_1794734275231",
+    "type": "direct",
+    "participants": [
+      "test_phase3_alice",
+      "test_phase3_eve"
+    ],
+    "partner": {
+      "_id": "test_phase3_eve",
+      "displayName": "Eve Intruder",
+      "username": "eve_p3",
+      "isOnline": true,
+      "isVerified": false
+    },
+    "unreadCount": 0,
+    "createdAt": "2026-11-15T09:17:55.241Z",
+    "lastMessage": {
+      "_id": "msg_1794734275319_0h52h",
+      "conversationId": "chat_actions_aeve_1794734275231",
+      "senderId": {
+        "_id": "test_phase3_alice",
+        "displayName": "Becu User",
+        "username": "user"
+      },
+      "type": "text",
+      "content": "Ushbu muhim xabarni boshqalarga ham uzatish kerak",
+      "forwardedFrom": {
+        "_id": "test_phase3_bob",
+        "displayName": "Bob P3",
+        "username": "bob_p3"
+      },
+      "clientTempId": "da2b144c-8e53-48b9-a927-d7a25f907c23",
+      "reactions": [],
+      "readBy": [
+        "test_phase3_alice"
+      ],
+      "createdAt": "2026-11-15T09:17:55.319Z"
+    },
+    "lastMessageAt": "2026-11-15T09:17:55.319Z"
+  },
+  {
+    "_id": "chat_actions_ab_1794734275231",
+    "type": "direct",
+    "participants": [
+      "test_phase3_alice",
+      "test_phase3_bob"
+    ],
+    "partner": {
+      "_id": "test_phase3_bob",
+      "displayName": "Bob P3",
+      "username": "bob_p3",
+      "isOnline": true,
+      "isVerified": false
+    },
+    "unreadCount": 0,
+    "createdAt": "2026-11-15T09:17:55.238Z",
+    "lastMessage": {
+      "_id": "msg_1794734275477_8qlqh",
+      "conversationId": "chat_actions_ab_1794734275231",
+      "senderId": {
+        "_id": "test_phase3_alice",
+        "displayName": "Alice P3",
+        "username": "alice_p3",
+        "avatar": ""
+      },
+      "type": "text",
+      "content": "Eslatma: Ertaga soat 10:00 da onlayn miting!",
+      "reactions": [],
+      "readBy": [
+        "test_phase3_alice"
+      ],
+      "createdAt": "2026-11-15T09:17:55.477Z"
+    },
+    "lastMessageAt": "2026-11-15T09:17:55.477Z"
+  },
+  {
+    "_id": "socket_chat_1794734266569",
+    "type": "direct",
+    "participants": [
+      "socket_user_alice",
+      "socket_user_bob"
+    ],
+    "partner": {
+      "_id": "socket_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "isOnline": true,
+      "isVerified": false
+    },
+    "unreadCount": 0,
+    "createdAt": "2026-11-15T09:17:46.576Z",
+    "lastMessage": {
+      "_id": "msg_1794734266859_67bd1",
+      "conversationId": "socket_chat_1794734266569",
+      "senderId": {
+        "_id": "socket_user_alice",
+        "displayName": "Foydalanuvchi",
+        "username": "user",
+        "avatar": ""
+      },
+      "type": "text",
+      "content": "Multi-device sync check",
+      "reactions": [],
+      "readBy": [
+        "socket_user_alice"
+      ],
+      "createdAt": "2026-11-15T09:17:46.859Z"
+    },
+    "lastMessageAt": "2026-11-15T09:17:46.859Z"
+  },
+  {
+    "_id": "chat_actions_aeve_1794734249478",
+    "type": "direct",
+    "participants": [
+      "test_phase3_alice",
+      "test_phase3_eve"
+    ],
+    "partner": {
+      "_id": "test_phase3_eve",
+      "displayName": "Eve Intruder",
+      "username": "eve_p3",
+      "isOnline": true,
+      "isVerified": false
+    },
+    "unreadCount": 0,
+    "createdAt": "2026-11-15T09:17:29.498Z",
+    "lastMessage": {
+      "_id": "msg_1794734249659_1h5ni",
+      "conversationId": "chat_actions_aeve_1794734249478",
+      "senderId": {
+        "_id": "test_phase3_alice",
+        "displayName": "Becu User",
+        "username": "user"
+      },
+      "type": "text",
+      "content": "Ushbu muhim xabarni boshqalarga ham uzatish kerak",
+      "forwardedFrom": {
+        "_id": "test_phase3_bob",
+        "displayName": "Bob P3",
+        "username": "bob_p3"
+      },
+      "clientTempId": "324fcf05-3cd1-4fc6-b794-83f465b1cb6f",
+      "reactions": [],
+      "readBy": [
+        "test_phase3_alice"
+      ],
+      "createdAt": "2026-11-15T09:17:29.659Z"
+    },
+    "lastMessageAt": "2026-11-15T09:17:29.659Z"
+  },
+  {
+    "_id": "chat_actions_ab_1794734249476",
+    "type": "direct",
+    "participants": [
+      "test_phase3_alice",
+      "test_phase3_bob"
+    ],
+    "partner": {
+      "_id": "test_phase3_bob",
+      "displayName": "Bob P3",
+      "username": "bob_p3",
+      "isOnline": true,
+      "isVerified": false
+    },
+    "unreadCount": 0,
+    "createdAt": "2026-11-15T09:17:29.495Z",
+    "lastMessage": {
+      "_id": "msg_1794734250059_zh855",
+      "conversationId": "chat_actions_ab_1794734249476",
+      "senderId": {
+        "_id": "test_phase3_alice",
+        "displayName": "Alice P3",
+        "username": "alice_p3",
+        "avatar": ""
+      },
+      "type": "text",
+      "content": "Eslatma: Ertaga soat 10:00 da onlayn miting!",
+      "reactions": [],
+      "readBy": [
+        "test_phase3_alice"
+      ],
+      "createdAt": "2026-11-15T09:17:30.059Z"
+    },
+    "lastMessageAt": "2026-11-15T09:17:30.059Z"
+  },
+  {
+    "_id": "test_chat_1794734239422",
+    "type": "direct",
+    "participants": [
+      "test_user_alice",
+      "test_user_bob"
+    ],
+    "partner": {
+      "_id": "test_user_bob",
+      "displayName": "Bob",
+      "username": "bob",
+      "isOnline": true,
+      "isVerified": false
+    },
+    "unreadCount": 0,
+    "createdAt": "2026-11-15T09:17:19.432Z",
+    "lastMessage": {
+      "_id": "msg_1794734239672_17uj3",
+      "conversationId": "test_chat_1794734239422",
+      "senderId": {
+        "_id": "test_user_bob",
+        "displayName": "Bob",
+        "username": "bob",
+        "avatar": ""
+      },
+      "type": "text",
+      "content": "Bob sent a message to receive reactions",
+      "reactions": [],
+      "readBy": [
+        "test_user_bob"
+      ],
+      "createdAt": "2026-11-15T09:17:19.672Z"
+    },
+    "lastMessageAt": "2026-11-15T09:17:19.672Z"
+  },
+  {
     "_id": "conv_saved_6af089ec2b0128a9b6e1cff8",
     "type": "direct",
     "participants": [

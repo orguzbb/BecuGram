@@ -30,7 +30,7 @@ const envSchema = z.object({
   
   STORAGE_PROVIDER: z.enum(['local', 's3']).default('local'),
   STORAGE_LOCAL_PATH: z.string().default('./uploads'),
-  MAX_FILE_SIZE_MB: z.string().default('25').transform(Number),
+  MAX_FILE_SIZE_MB: z.string().default('50').transform(Number),
   
   RATE_LIMIT_WINDOW_MS: z.string().default('900000').transform(Number),
   RATE_LIMIT_MAX: z.string().default('300').transform(Number),

@@ -1,6 +1,18 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export type MessageType = 'text' | 'image' | 'video' | 'audio' | 'voice' | 'document' | 'system';
+export type MessageType =
+  | 'text'
+  | 'image'
+  | 'video'
+  | 'audio'
+  | 'voice'
+  | 'round_video'
+  | 'video_note'
+  | 'document'
+  | 'file'
+  | 'sticker'
+  | 'gif'
+  | 'system';
 
 export interface IMessageReaction {
   userId: mongoose.Types.ObjectId;
@@ -13,6 +25,16 @@ export interface IMessageMedia {
   size?: number;
   mimeType?: string;
   duration?: number;
+  width?: number;
+  height?: number;
+  thumbnailUrl?: string;
+  waveform?: number[];
+}
+
+export interface IMessageForwardedFrom {
+  displayName: string;
+  username?: string;
+  userId?: mongoose.Types.ObjectId;
 }
 
 export interface IMessage extends Document {
@@ -22,9 +44,13 @@ export interface IMessage extends Document {
   content: string;
   media?: IMessageMedia;
   replyTo?: mongoose.Types.ObjectId;
+  clientTempId?: string;
+  forwardedFrom?: IMessageForwardedFrom;
   reactions: IMessageReaction[];
   deliveredTo: mongoose.Types.ObjectId[];
   readBy: mongoose.Types.ObjectId[];
+  deletedFor: mongoose.Types.ObjectId[];
+  isPinned: boolean;
   isEdited: boolean;
   editedAt?: Date;
   isDeleted: boolean;
@@ -49,7 +75,20 @@ const MessageSchema = new Schema<IMessage>(
     },
     type: {
       type: String,
-      enum: ['text', 'image', 'video', 'audio', 'voice', 'document', 'system'],
+      enum: [
+        'text',
+        'image',
+        'video',
+        'audio',
+        'voice',
+        'round_video',
+        'video_note',
+        'document',
+        'file',
+        'sticker',
+        'gif',
+        'system',
+      ],
       default: 'text',
       required: true,
     },
@@ -64,10 +103,24 @@ const MessageSchema = new Schema<IMessage>(
       size: Number,
       mimeType: String,
       duration: Number,
+      width: Number,
+      height: Number,
+      thumbnailUrl: String,
+      waveform: [Number],
     },
     replyTo: {
       type: Schema.Types.ObjectId,
       ref: 'Message',
+    },
+    clientTempId: {
+      type: String,
+      trim: true,
+      sparse: true,
+    },
+    forwardedFrom: {
+      displayName: String,
+      username: String,
+      userId: { type: Schema.Types.ObjectId, ref: 'User' },
     },
     reactions: [
       {
@@ -87,6 +140,16 @@ const MessageSchema = new Schema<IMessage>(
         ref: 'User',
       },
     ],
+    deletedFor: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    isPinned: {
+      type: Boolean,
+      default: false,
+    },
     isEdited: {
       type: Boolean,
       default: false,
@@ -105,6 +168,8 @@ const MessageSchema = new Schema<IMessage>(
 
 // Compound index for fast cursor pagination: { conversationId: 1, createdAt: -1 }
 MessageSchema.index({ conversationId: 1, createdAt: -1 });
+// Compound index for client deduplication: { conversationId: 1, clientTempId: 1 } (sparse)
+MessageSchema.index({ conversationId: 1, clientTempId: 1 }, { sparse: true });
 
 export const Message = mongoose.model<IMessage>('Message', MessageSchema);
 

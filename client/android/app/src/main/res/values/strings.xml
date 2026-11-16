@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BecuGram</string>
+    <string name="title_activity_main">BecuGram</string>
+    <string name="package_name">com.becugram.app</string>
+    <string name="custom_url_scheme">com.becugram.app</string>
+</resources>

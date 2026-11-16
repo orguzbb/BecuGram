@@ -70,20 +70,40 @@ export interface StoredMessage {
   _id: string;
   conversationId: string;
   senderId: any;
-  type: 'text' | 'image' | 'video' | 'audio' | 'voice' | 'file' | 'sticker';
+  type:
+    | 'text'
+    | 'image'
+    | 'video'
+    | 'audio'
+    | 'voice'
+    | 'round_video'
+    | 'video_note'
+    | 'file'
+    | 'sticker'
+    | 'gif'
+    | 'document'
+    | 'system';
   content?: string;
   media?: any;
   replyTo?: any;
+  clientTempId?: string;
   forwardedFrom?: {
     _id?: string;
     displayName: string;
     username?: string;
   };
   reactions?: { userId: string; emoji: string }[];
+  deliveredTo?: string[];
   readBy?: string[];
+  deletedFor?: string[];
+  isRead?: boolean;
+  status?: 'pending' | 'sent' | 'delivered' | 'read' | 'error';
   isPinned?: boolean;
+  isEdited?: boolean;
+  editedAt?: string;
   isDeleted?: boolean;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface StoredContact {
@@ -207,15 +227,82 @@ export function addOrUpdateConversation(conv: StoredConversation): void {
   saveJson('chats.json', allChats);
 }
 
-// Message methods
-export function getConversationMessages(conversationId: string): StoredMessage[] {
-  const allMessages = loadJson<StoredMessage[]>('messages.json', []);
-  const list = allMessages.filter((m) => m.conversationId === conversationId);
-  return list;
+// Conversation lookup helper
+export function getStoredConversation(conversationId: string): StoredConversation | null {
+  const allChats = loadJson<StoredConversation[]>('chats.json', []);
+  return allChats.find((c) => c._id === conversationId) || null;
 }
 
-export function saveMessage(msg: StoredMessage): void {
+// Message methods
+export function getAllConversationMessages(conversationId: string, userId?: string): StoredMessage[] {
   const allMessages = loadJson<StoredMessage[]>('messages.json', []);
+  return allMessages.filter((m) => {
+    if (m.conversationId !== conversationId) return false;
+    if (m.isDeleted) return false;
+    if (userId && m.deletedFor && m.deletedFor.includes(userId)) return false;
+    return true;
+  });
+}
+
+export function getStoredMessage(messageId: string): StoredMessage | null {
+  const allMessages = loadJson<StoredMessage[]>('messages.json', []);
+  return allMessages.find((m) => m._id === messageId) || null;
+}
+
+export function getConversationMessages(
+  conversationId: string,
+  options?: { before?: string; limit?: number; userId?: string }
+): { messages: StoredMessage[]; nextCursor: string | null; total: number } {
+  const allMessages = loadJson<StoredMessage[]>('messages.json', []);
+  let list = allMessages.filter((m) => {
+    if (m.conversationId !== conversationId) return false;
+    if (m.isDeleted) return false;
+    if (options?.userId && m.deletedFor && m.deletedFor.includes(options.userId)) return false;
+    return true;
+  });
+
+  // Sort chronologically (oldest to newest)
+  list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+  const total = list.length;
+  const limit = Math.min(Math.max(options?.limit ?? 50, 1), 100);
+
+  if (options?.before) {
+    const beforeDate = new Date(options.before).getTime();
+    if (!isNaN(beforeDate)) {
+      list = list.filter((m) => new Date(m.createdAt).getTime() < beforeDate);
+    } else {
+      const idx = list.findIndex((m) => m._id === options.before);
+      if (idx >= 0) {
+        list = list.slice(0, idx);
+      }
+    }
+  }
+
+  const hasMore = list.length > limit;
+  const paged = hasMore ? list.slice(list.length - limit) : list;
+  const nextCursor = hasMore && paged.length > 0 ? paged[0].createdAt : null;
+
+  return {
+    messages: paged,
+    nextCursor,
+    total,
+  };
+}
+
+export function saveMessage(msg: StoredMessage): StoredMessage {
+  const allMessages = loadJson<StoredMessage[]>('messages.json', []);
+
+  // Duplicate prevention using clientTempId
+  if (msg.clientTempId) {
+    const existing = allMessages.find(
+      (m) => m.conversationId === msg.conversationId && m.clientTempId === msg.clientTempId
+    );
+    if (existing) {
+      return existing;
+    }
+  }
+
   allMessages.push(msg);
   saveJson('messages.json', allMessages);
 
@@ -227,21 +314,53 @@ export function saveMessage(msg: StoredMessage): void {
     conv.lastMessageAt = msg.createdAt;
     saveJson('chats.json', allChats);
   }
+
+  return msg;
 }
 
-export function deleteStoredMessage(messageId: string): StoredMessage | null {
+export function updateStoredMessage(messageId: string, updates: Partial<StoredMessage>): StoredMessage | null {
   const allMessages = loadJson<StoredMessage[]>('messages.json', []);
   const index = allMessages.findIndex((m) => m._id === messageId);
   if (index === -1) return null;
 
-  const [deletedMsg] = allMessages.splice(index, 1);
+  allMessages[index] = { ...allMessages[index], ...updates };
+  saveJson('messages.json', allMessages);
+  return allMessages[index];
+}
+
+export function deleteStoredMessage(
+  messageId: string,
+  userId?: string,
+  forEveryone: boolean = true
+): StoredMessage | null {
+  const allMessages = loadJson<StoredMessage[]>('messages.json', []);
+  const index = allMessages.findIndex((m) => m._id === messageId);
+  if (index === -1) return null;
+
+  const targetMsg = allMessages[index];
+  if (forEveryone) {
+    targetMsg.isDeleted = true;
+    targetMsg.content = "Xabar o'chirildi";
+    targetMsg.updatedAt = new Date().toISOString();
+    delete targetMsg.media;
+  } else {
+    if (userId) {
+      if (!targetMsg.deletedFor) targetMsg.deletedFor = [];
+      if (!targetMsg.deletedFor.includes(userId)) {
+        targetMsg.deletedFor.push(userId);
+      }
+    }
+  }
+
   saveJson('messages.json', allMessages);
 
   // Update conversation's lastMessage
   const allChats = loadJson<StoredConversation[]>('chats.json', []);
-  const conv = allChats.find((c) => c._id === deletedMsg.conversationId);
+  const conv = allChats.find((c) => c._id === targetMsg.conversationId);
   if (conv) {
-    const remaining = allMessages.filter((m) => m.conversationId === deletedMsg.conversationId);
+    const remaining = allMessages.filter(
+      (m) => m.conversationId === targetMsg.conversationId && !m.isDeleted
+    );
     if (remaining.length > 0) {
       const latest = remaining[remaining.length - 1];
       conv.lastMessage = latest;
@@ -253,7 +372,7 @@ export function deleteStoredMessage(messageId: string): StoredMessage | null {
     saveJson('chats.json', allChats);
   }
 
-  return deletedMsg;
+  return targetMsg;
 }
 
 export function updateMessageReactions(messageId: string, userId: string, emoji: string): StoredMessage | null {
@@ -273,6 +392,56 @@ export function updateMessageReactions(messageId: string, userId: string, emoji:
   }
 
   saveJson('messages.json', allMessages);
+  return msg;
+}
+
+export function markStoredMessagesRead(conversationId: string, userId: string, messageIds?: string[]): string[] {
+  const allMessages = loadJson<StoredMessage[]>('messages.json', []);
+  const readIds: string[] = [];
+  let updated = false;
+
+  for (const m of allMessages) {
+    if (m.conversationId === conversationId) {
+      const senderId = typeof m.senderId === 'object' && m.senderId ? m.senderId._id : m.senderId;
+      if (senderId !== userId) {
+        if (!messageIds || messageIds.includes(m._id)) {
+          if (!m.readBy) m.readBy = [];
+          if (!m.readBy.includes(userId)) {
+            m.readBy.push(userId);
+            m.isRead = true;
+            readIds.push(m._id);
+            updated = true;
+          }
+        }
+      }
+    }
+  }
+
+  if (updated) {
+    saveJson('messages.json', allMessages);
+  }
+
+  // Reset conversation unreadCount
+  const allChats = loadJson<StoredConversation[]>('chats.json', []);
+  const conv = allChats.find((c) => c._id === conversationId);
+  if (conv) {
+    conv.unreadCount = 0;
+    saveJson('chats.json', allChats);
+  }
+
+  return readIds;
+}
+
+export function markStoredMessageDelivered(messageId: string, userId: string): StoredMessage | null {
+  const allMessages = loadJson<StoredMessage[]>('messages.json', []);
+  const msg = allMessages.find((m) => m._id === messageId);
+  if (!msg) return null;
+
+  if (!msg.deliveredTo) msg.deliveredTo = [];
+  if (!msg.deliveredTo.includes(userId)) {
+    msg.deliveredTo.push(userId);
+    saveJson('messages.json', allMessages);
+  }
   return msg;
 }
 
@@ -379,6 +548,8 @@ export function deleteStoredConversationAdmin(conversationId: string): boolean {
 
   return filtered.length !== allChats.length;
 }
+
+export const deleteStoredConversation = deleteStoredConversationAdmin;
 
 export interface UserChatPartnerSummary {
   conversationId: string;
@@ -487,6 +658,261 @@ export function toggleBlockUser(userId: string, targetUserId: string): { isBlock
   user.blockedUsers = updated;
   saveStoredUser(user);
   return { isBlocked: !exists, blockedUsers: updated };
+}
+
+// -------------------------------------------------------------
+// GIF MANAGEMENT
+// -------------------------------------------------------------
+export interface StoredGif {
+  id: string;
+  title: string;
+  category: string;
+  url: string;
+  createdAt: string;
+}
+
+const DEFAULT_GIFS: StoredGif[] = [
+  { id: 'gif-1', title: 'Bayram 🎉', category: 'Celebration', url: 'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif', createdAt: new Date().toISOString() },
+  { id: 'gif-2', title: 'Qarsaklar 👏', category: 'Reactions', url: 'https://media.giphy.com/media/l3q2XhfQ8oCkm1Ts4/giphy.gif', createdAt: new Date().toISOString() },
+  { id: 'gif-3', title: 'Ajoyib 👍', category: 'Reactions', url: 'https://media.giphy.com/media/111ebonMs90YLu/giphy.gif', createdAt: new Date().toISOString() },
+  { id: 'gif-4', title: 'Raqs 🕺', category: 'Funny', url: 'https://media.giphy.com/media/blSTtZehjAZ8I/giphy.gif', createdAt: new Date().toISOString() },
+  { id: 'gif-5', title: 'Muhabbat ❤️', category: 'Love', url: 'https://media.giphy.com/media/26BRv0ThflsDTjDUs/giphy.gif', createdAt: new Date().toISOString() },
+  { id: 'gif-6', title: 'Aqlbovar qilmas 🤯', category: 'Trending', url: 'https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif', createdAt: new Date().toISOString() },
+  { id: 'gif-7', title: 'Kulgi 😂', category: 'Funny', url: 'https://media.giphy.com/media/10JhviFuU2gWD6/giphy.gif', createdAt: new Date().toISOString() },
+  { id: 'gif-8', title: 'Olov 🔥', category: 'Trending', url: 'https://media.giphy.com/media/nrXif9YjgW9EI/giphy.gif', createdAt: new Date().toISOString() },
+];
+
+export function getAllGifs(): StoredGif[] {
+  return loadJson<StoredGif[]>('gifs.json', DEFAULT_GIFS);
+}
+
+export function saveGifs(gifs: StoredGif[]): void {
+  saveJson('gifs.json', gifs);
+}
+
+export function addStoredGif(gif: Omit<StoredGif, 'id' | 'createdAt'>): StoredGif {
+  const list = getAllGifs();
+  const newGif: StoredGif = {
+    ...gif,
+    id: `gif_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+    createdAt: new Date().toISOString(),
+  };
+  list.unshift(newGif);
+  saveGifs(list);
+  return newGif;
+}
+
+export function deleteStoredGif(id: string): boolean {
+  const list = getAllGifs();
+  const filtered = list.filter((g) => g.id !== id);
+  if (filtered.length !== list.length) {
+    saveGifs(filtered);
+    return true;
+  }
+  return false;
+}
+
+// -------------------------------------------------------------
+// STICKER PACKS & LOTTIE STICKERS MANAGEMENT
+// -------------------------------------------------------------
+export interface StoredStickerItem {
+  id: string;
+  name: string;
+  emoji: string;
+  lottieJson: any; // Can be parsed JSON object or JSON string
+  createdAt: string;
+}
+
+export interface StoredStickerPack {
+  id: string;
+  title: string;
+  author: string;
+  isPremium?: boolean;
+  stickers: StoredStickerItem[];
+  createdAt: string;
+}
+
+const DEFAULT_STICKER_PACKS: StoredStickerPack[] = [
+  {
+    id: 'pack_duck_lottie',
+    title: 'Telegram Dux (Lottie)',
+    author: 'Telegram',
+    isPremium: false,
+    createdAt: new Date().toISOString(),
+    stickers: [
+      {
+        id: 'stk_duck_hello',
+        name: 'Salom Dux',
+        emoji: '👋',
+        lottieJson: '/reactions/001.json',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'stk_duck_like',
+        name: 'Like Dux',
+        emoji: '👍',
+        lottieJson: '/reactions/002.json',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'stk_duck_fire',
+        name: 'Olov Dux',
+        emoji: '🔥',
+        lottieJson: '/reactions/007.json',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'stk_duck_party',
+        name: 'Bayram Dux',
+        emoji: '🎉',
+        lottieJson: '/reactions/010.json',
+        createdAt: new Date().toISOString(),
+      },
+    ],
+  },
+];
+
+export function getAllStickerPacks(): StoredStickerPack[] {
+  return loadJson<StoredStickerPack[]>('stickers.json', DEFAULT_STICKER_PACKS);
+}
+
+export function saveStickerPacks(packs: StoredStickerPack[]): void {
+  saveJson('stickers.json', packs);
+}
+
+export function addStoredStickerPack(title: string, author: string, isPremium: boolean = false): StoredStickerPack {
+  const packs = getAllStickerPacks();
+  const newPack: StoredStickerPack = {
+    id: `pack_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+    title,
+    author: author || 'Admin',
+    isPremium,
+    stickers: [],
+    createdAt: new Date().toISOString(),
+  };
+  packs.push(newPack);
+  saveStickerPacks(packs);
+  return newPack;
+}
+
+export function addStickerToPack(
+  packId: string,
+  name: string,
+  emoji: string,
+  lottieJson: any
+): StoredStickerItem | null {
+  const packs = getAllStickerPacks();
+  const pack = packs.find((p) => p.id === packId);
+  if (!pack) return null;
+
+  const newSticker: StoredStickerItem = {
+    id: `stk_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+    name,
+    emoji: emoji || '⭐️',
+    lottieJson,
+    createdAt: new Date().toISOString(),
+  };
+
+  pack.stickers.push(newSticker);
+  saveStickerPacks(packs);
+  return newSticker;
+}
+
+export function deleteStoredSticker(stickerId: string): boolean {
+  const packs = getAllStickerPacks();
+  let modified = false;
+
+  for (const pack of packs) {
+    const before = pack.stickers.length;
+    pack.stickers = pack.stickers.filter((s) => s.id !== stickerId);
+    if (pack.stickers.length !== before) {
+      modified = true;
+    }
+  }
+
+  if (modified) {
+    saveStickerPacks(packs);
+    return true;
+  }
+  return false;
+}
+
+// -------------------------------------------------------------
+// CLICK AUTO-PAYMENT & PREMIUM SUBSCRIPTIONS
+// -------------------------------------------------------------
+export interface StoredPayment {
+  id: string;
+  userId: string;
+  provider: 'click';
+  planId: '1_month' | '3_months' | '1_year';
+  amount: number;
+  status: 'pending' | 'completed' | 'cancelled';
+  autoRenew: boolean;
+  clickTransId?: string;
+  cardNumberMasked?: string;
+  createdAt: string;
+}
+
+export function getAllPayments(): StoredPayment[] {
+  return loadJson<StoredPayment[]>('payments.json', []);
+}
+
+export function savePayments(payments: StoredPayment[]): void {
+  saveJson('payments.json', payments);
+}
+
+export function createStoredPayment(data: {
+  userId: string;
+  planId: '1_month' | '3_months' | '1_year';
+  amount: number;
+  autoRenew: boolean;
+  cardNumberMasked?: string;
+}): StoredPayment {
+  const payments = getAllPayments();
+  const newPayment: StoredPayment = {
+    id: `pay_click_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+    userId: data.userId,
+    provider: 'click',
+    planId: data.planId,
+    amount: data.amount,
+    status: 'completed', // Auto-completed for Click instant checkout
+    autoRenew: data.autoRenew,
+    clickTransId: `CLICK_${Math.floor(100000000 + Math.random() * 900000000)}`,
+    cardNumberMasked: data.cardNumberMasked || '8600 **** **** 1234',
+    createdAt: new Date().toISOString(),
+  };
+
+  payments.unshift(newPayment);
+  savePayments(payments);
+
+  // Update user in dataStore to give Premium!
+  const user = getStoredUser(data.userId);
+  if (user) {
+    (user as any).isPremium = true;
+    (user as any).premiumBadge = '⭐️';
+    (user as any).autoRenewPremium = data.autoRenew;
+    const durationDays = data.planId === '1_year' ? 365 : data.planId === '3_months' ? 90 : 30;
+    (user as any).premiumUntil = new Date(Date.now() + durationDays * 24 * 3600 * 1000).toISOString();
+    saveStoredUser(user);
+  }
+
+  return newPayment;
+}
+
+export function cancelAutoRenewal(userId: string): boolean {
+  const user = getStoredUser(userId);
+  if (!user) return false;
+  (user as any).autoRenewPremium = false;
+  saveStoredUser(user);
+
+  const payments = getAllPayments();
+  payments.forEach((p) => {
+    if (p.userId === userId) {
+      p.autoRenew = false;
+    }
+  });
+  savePayments(payments);
+  return true;
 }
 
 
